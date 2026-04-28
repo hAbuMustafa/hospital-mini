@@ -83,7 +83,7 @@ function sheetRowToObject(row: (string | number)[], type: "patient" | "drug") {
     columnList = drugsColumns;
   }
 
-  const result: { [key: string]: string | number | null } = {};
+  const result: { [key: string]: string | number | Date } = {};
 
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "") {
@@ -100,11 +100,11 @@ function sheetRowToObject(row: (string | number)[], type: "patient" | "drug") {
 }
 
 function parseDate(dateString: string) {
-  if (!/^\d{,2}\/\d{,2}\/\d{4}$/.test(dateString)) return null;
+  if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString.trim())) return null;
 
   const [m, d, y] = dateString.split("/").map(Number);
 
-  const date = new Date(y, m, d);
+  const date = new Date(y, m - 1, d);
 
-  return date.getTime();
+  return date;
 }
