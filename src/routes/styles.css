@@ -1,0 +1,64 @@
+:root {
+  color-scheme: light dark;
+
+  --main-bg-light: #fff;
+  --main-bg-dark: #1a202c;
+
+  --main-text-light: black;
+  --main-text-dark: hsl(120, 20%, 80%);
+
+  --main-bg-color: light-dark(var(--main-bg-light), var(--main-bg-dark));
+  --main-text-color: light-dark(var(--main-text-light), var(--main-text-dark));
+  --main-accent-color: light-dark(
+    hsl(from royalblue h 100% 65%),
+    hsl(from royalblue h 100% 55%)
+  );
+  --main-unselected-accent-color: lightslategray;
+
+  --main-border: 1px solid light-dark(#333, #ccc);
+}
+
+* {
+  font-family: serif;
+}
+
+body {
+  background-color: var(--main-bg-color);
+  color: var(--main-text-color);
+}
+
+@media print {
+  @page {
+    margin: 5mm;
+  }
+}
+
+@position-try --below-left {
+  inset: unset;
+  inset-block-start: calc(anchor(bottom) + 0.25rem);
+  inset-inline-start: anchor(right);
+}
+
+@position-try --below-right {
+  inset: unset;
+  inset-block-start: calc(anchor(bottom) + 0.25rem);
+  inset-inline-end: anchor(left);
+}
+
+@position-try --top-right {
+  inset: unset;
+  inset-block-start: anchor(top);
+  inset-inline-end: calc(anchor(right) + 0.5rem);
+}
+
+@position-try --top-left {
+  inset: unset;
+  inset-block-start: anchor(top);
+  inset-inline-start: calc(anchor(left) + 0.5rem);
+}
+
+@position-try --bottom-center {
+  inset: unset;
+  inset-block-start: calc(anchor(bottom) + 0.25rem);
+  justify-self: anchor-center;
+}
