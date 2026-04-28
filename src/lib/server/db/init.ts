@@ -83,13 +83,28 @@ function sheetRowToObject(row: (string | number)[], type: "patient" | "drug") {
     columnList = drugsColumns;
   }
 
-  const result: { [key: string]: string | number } = {};
+  const result: { [key: string]: string | number | null } = {};
 
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "") {
-      result[columnList[i]] = row[i];
+      const fieldName = columnList[i];
+      if (fieldName.includes("date")) {
+        result[fieldName] = parseDate(row[i] as string);
+      } else {
+        result[fieldName] = row[i];
+      }
     }
   }
 
   return result;
+}
+
+function parseDate(dateString: string) {
+  if (!/^\d{,2}\/\d{,2}\/\d{4}$/.test(dateString)) return null;
+
+  const [m, d, y] = dateString.split("/").map(Number);
+
+  const date = new Date(y, m, d);
+
+  return date.getTime();
 }
