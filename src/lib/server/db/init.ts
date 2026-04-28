@@ -14,7 +14,7 @@ export async function initialize() {
   );
   const fetchedDrugs = await getSheetRange(drugs_spreadsheetId, "الأدوية!A:P");
 
-  if (!fetchedPatients || !fetchedDrugs) {
+  if (!fetchedPatients.values || !fetchedDrugs.values) {
     console.error("Database initialitzation Error. No data could be fetched.");
     process.exit(1);
   }
@@ -83,7 +83,7 @@ function sheetRowToObject(row: (string | number)[], type: "patient" | "drug") {
     columnList = drugsColumns;
   }
 
-  const result = {};
+  const result: { [key: string]: string | number } = {};
 
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "") {
