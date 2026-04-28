@@ -25,14 +25,14 @@ export const patients = sqliteTable("patients", {
   id_type: text(),
   id_number: text(),
   diagnosis: text(),
-  admission_date: text(),
-  discharge_date: text(),
+  admission_date: int({ mode: "timestamp" }),
+  discharge_date: int({ mode: "timestamp" }),
   discharge_reason: text(),
   ward_recent: text(),
   ward_on_admission: text(),
   admission_notes: text(),
   ininininini: text(), // placeholder for seeding of form submitted "is insured"
   gender: int(),
-  birthdate: text(),
+  birthdate: int({ mode: "timestamp" }),
   insured: int(),
 });
