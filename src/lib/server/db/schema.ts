@@ -32,7 +32,7 @@ export const patients = sqliteTable("patients", {
   ward_on_admission: text(),
   admission_notes: text(),
   ininininini: text(), // placeholder for seeding of form submitted "is insured"
-  gender: int({ mode: boolean }),
+  gender: int({ mode: "boolean" }),
   birthdate: int({ mode: "timestamp" }),
-  insured: int({ mode: boolean }),
+  insured: int({ mode: "boolean" }),
 });
