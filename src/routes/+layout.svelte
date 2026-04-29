@@ -9,11 +9,7 @@
 
 <nav>
   <a href="/">
-    <img
-      src="./favicon.png"
-      alt="مستشفى 23 يوليو للأمراض الصدرية"
-      width="120"
-    />
+    <img src="/favicon.png" alt="مستشفى 23 يوليو للأمراض الصدرية" width="120" />
   </a>
 </nav>
 
