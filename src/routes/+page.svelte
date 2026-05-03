@@ -1,13 +1,10 @@
 <script lang="ts">
+  import { formatDate } from '$lib/utils.js';
+
   let { data } = $props();
 
   let dateFrom = $derived(data.dateFrom);
   let dateTo = $derived(data.dateTo);
-
-  function formatDate(date: Date | null) {
-    if (!date) return "";
-    return `${date.getFullYear()}/${`${date.getMonth() + 1}`.padStart(2, "0")}/${`${date.getDate()}`.padStart(2, "0")}`;
-  }
 </script>
 
 <h1>نظام إصدار الفواتير</h1>
