@@ -48,19 +48,19 @@ export const patientDischarges = sqliteTable("patientDischarges", {
 });
 
 export const recentWards_view = sqliteView("recentWards_view", {
+  id: int(),
   patient_id: text(),
+  timestamp: int({ mode: "timestamp" }),
   to_ward: text(),
 }).as(
   sql`
 SELECT
+  MAX(id) as id,
   patient_id,
+  timestamp,
   to_ward
 FROM patientTransfers
-WHERE id IN (
-  SELECT MAX(id)
-  FROM patientTransfers
-  GROUP BY patient_id
-)
+GROUP BY patient_id
 `,
 );
 
