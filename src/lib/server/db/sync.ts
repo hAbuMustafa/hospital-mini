@@ -49,12 +49,15 @@ export async function syncPatients() {
 
       await tx.insert(patientAdmissions).values(seedableAdmissions);
 
-      await tx
+      const [newCount] = await tx
         .update(status)
-        .set({ value: fetchedPatientAdmissions.values.length })
-        .where(eq(status.item, "admissions"));
+        .set({ value: latestAdmissionCount + fetchedPatientAdmissions.values.length })
+        .where(eq(status.item, "admissions"))
+        .returning();
 
-      console.log(`♻️✔️ Synced ${fetchedPatientAdmissions.values.length} Admissions`);
+      console.log(
+        `♻️✔️ Synced ${fetchedPatientAdmissions.values.length} Admissions. Current count is ${newCount.value}`,
+      );
     }
   });
 
@@ -66,12 +69,15 @@ export async function syncPatients() {
 
       await tx.insert(patientTransfers).values(seedableTransfers);
 
-      await tx
+      const [newCount] = await tx
         .update(status)
-        .set({ value: fetchedPatientTransfers.values.length })
-        .where(eq(status.item, "transfers"));
+        .set({ value: latestTransferCount + fetchedPatientTransfers.values.length })
+        .where(eq(status.item, "transfers"))
+        .returning();
 
-      console.log(`♻️✔️ Synced ${fetchedPatientTransfers.values.length} Transfers`);
+      console.log(
+        `♻️✔️ Synced ${fetchedPatientTransfers.values.length} Transfers. Current count is ${newCount.value}`,
+      );
     }
   });
 
@@ -83,12 +89,15 @@ export async function syncPatients() {
 
       await tx.insert(patientDischarges).values(seedableDischarges);
 
-      await tx
+      const [newCount] = await tx
         .update(status)
-        .set({ value: fetchedPatientDischarges.values.length })
-        .where(eq(status.item, "discharges"));
+        .set({ value: latestDischargeCount + fetchedPatientDischarges.values.length })
+        .where(eq(status.item, "discharges"))
+        .returning();
 
-      console.log(`♻️✔️ Synced ${fetchedPatientDischarges.values.length} Discharges`);
+      console.log(
+        `♻️✔️ Synced ${fetchedPatientDischarges.values.length} Discharges. Current count is ${newCount.value}`,
+      );
     }
   });
 }
