@@ -26,7 +26,6 @@ export const patientAdmissions = sqliteTable("patientAdmissions", {
   id_number: text(),
   diagnosis: text(),
   admission_date: int({ mode: "timestamp" }),
-  discharge_reason: text(),
   ward_on_admission: text(),
   admission_notes: text(),
   gender: int({ mode: "boolean" }),
