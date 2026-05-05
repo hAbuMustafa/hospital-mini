@@ -72,7 +72,8 @@ export function sheetRowToObject(row: (string | number)[], type: SeedType) {
     if (row[i] !== "") {
       const fieldName = columnList[i];
       if (fieldName.includes("date") || fieldName.includes("time")) {
-        result[fieldName] = parseDate(row[i] as string);
+        const parsedDate = parseDate(row[i] as string);
+        if (parsedDate) result[fieldName] = parsedDate;
       } else {
         result[fieldName] = row[i];
       }
