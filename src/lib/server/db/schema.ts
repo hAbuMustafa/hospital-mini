@@ -10,7 +10,7 @@ export const drugs = sqliteTable("drugs", {
   record_4_page: int(),
   stock_amount: int(),
   query_in_UPA_sheet: text(),
-  occurences_in_UPA_sheet: int(),
+  occurrences_in_UPA_sheet: int(),
   category: text(),
   id: int().primaryKey(),
   record_2_page: int(),
