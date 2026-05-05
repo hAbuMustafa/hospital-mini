@@ -41,6 +41,7 @@ export async function initialize() {
   await db.delete(patientAdmissions);
   await db.delete(patientTransfers);
   await db.delete(patientDischarges);
+  await db.delete(status);
 
   // 3. PARSE new data
   const seedableDrugs = fetchedDrugs.values
