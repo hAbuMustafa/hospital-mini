@@ -1,4 +1,5 @@
-import { sqliteTable, text, real, int } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { sqliteTable, text, real, int, sqliteView } from "drizzle-orm/sqlite-core";
 
 export const drugs = sqliteTable("drugs", {
   name_ar: text(),
@@ -45,6 +46,61 @@ export const patientDischarges = sqliteTable("patientDischarges", {
   timestamp: int({ mode: "timestamp" }),
   reason: text(),
 });
+
+export const recentWards_view = sqliteView("recentWards_view", {
+  patient_id: text(),
+  to_ward: text(),
+}).as(
+  sql`
+SELECT
+  patient_id,
+  to_ward
+FROM patientTransfers
+WHERE id IN (
+  SELECT MAX(id)
+  FROM patientTransfers
+  GROUP BY patient_id;
+);   
+`,
+);
+
+export const patients_view = sqliteView("patients_view", {
+  id: text().primaryKey(),
+  name: text(),
+  id_type: text(),
+  id_number: text(),
+  diagnosis: text(),
+  admission_date: int({ mode: "timestamp" }),
+  discharge_date: int({ mode: "timestamp" }),
+  discharge_reason: text(),
+  ward_on_admission: text(),
+  ward_recent: text(),
+  admission_notes: text(),
+  gender: int({ mode: "boolean" }),
+  birthdate: int({ mode: "timestamp" }),
+  insured: int({ mode: "boolean" }),
+}).as(
+  sql`
+SELECT 
+  a.id,
+  a.name,
+  a.id_type,
+  a.id_number,
+  a.diagnosis,
+  a.admission_date,
+  d.timestamp as discharge_date,
+  d.reason as discharge_reason,
+  a.ward_on_admission,
+  t.to_ward as ward_recent,
+  a.admission_notes,
+  a.gender,
+  a.birthdate,
+  a.insured
+FROM patientAdmissions a
+LEFT JOIN patientDischarges d ON a.id = d.patient_id
+LEFT JOIN recentWards_view t ON a.id = t.patient_id;
+`,
+);
 
 export const status = sqliteTable("status", {
   id: int().primaryKey({ autoIncrement: true }),
