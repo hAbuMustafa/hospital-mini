@@ -5,6 +5,7 @@ import {
   patientAdmissions,
   patientDischarges,
   patientTransfers,
+  status,
 } from "$lib/server/db/schema";
 import { getSheetRange } from "$lib/server/gcp/sheets";
 
@@ -63,6 +64,12 @@ export async function initialize() {
   await db.insert(patientAdmissions).values(seedableAdmissions);
   await db.insert(patientTransfers).values(seedableTransfers);
   await db.insert(patientDischarges).values(seedableDischarges);
+
+  await db.insert(status).values([
+    { item: "admissions", value: fetchedPatientAdmissions.values.length },
+    { item: "transfers", value: fetchedPatientTransfers.values.length },
+    { item: "discharges", value: fetchedPatientDischarges.values.length },
+  ]);
 }
 
 const drugsColumns = [
