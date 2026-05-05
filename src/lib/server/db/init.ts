@@ -1,41 +1,68 @@
-import {
-  drugs_spreadsheetId,
-  patients_spreadsheetId,
-} from "$env/static/private";
+import { drugs_spreadsheetId, patients_spreadsheetId } from "$env/static/private";
 import { db } from "$lib/server/db";
-import { drugs, patients } from "$lib/server/db/schema";
+import {
+  drugs,
+  patientAdmissions,
+  patientDischarges,
+  patientTransfers,
+} from "$lib/server/db/schema";
 import { getSheetRange } from "$lib/server/gcp/sheets";
 
 export async function initialize() {
   // 1. FETCH
-  const fetchedPatients = await getSheetRange(
+  const fetchedPatientAdmissions = await getSheetRange(
     patients_spreadsheetId,
     "Admissions!C:Q",
   );
+  const fetchedPatientTransfers = await getSheetRange(
+    patients_spreadsheetId,
+    "Transfers!B:E",
+  );
+  const fetchedPatientDischarges = await getSheetRange(
+    patients_spreadsheetId,
+    "Discharges!B:E",
+  );
+
   const fetchedDrugs = await getSheetRange(drugs_spreadsheetId, "الأدوية!A:P");
 
-  if (!fetchedPatients.values || !fetchedDrugs.values) {
-    console.error("Database initialitzation Error. No data could be fetched.");
+  if (
+    !fetchedPatientAdmissions.values ||
+    !fetchedPatientTransfers.values ||
+    !fetchedPatientDischarges.values ||
+    !fetchedDrugs.values
+  ) {
+    console.error("Database initialization Error. No data could be fetched.");
     process.exit(1);
   }
 
   // 2. TRUNCATE Old data
   await db.delete(drugs);
-  await db.delete(patients);
+  await db.delete(patientAdmissions);
+  await db.delete(patientTransfers);
+  await db.delete(patientDischarges);
 
-  // 3. INSERT New data
-  const seedableDrugs = fetchedDrugs.values.slice(1);
-  const seedablePatients = fetchedPatients.values.slice(1);
+  // 3. PARSE new data
+  const seedableDrugs = fetchedDrugs.values
+    .slice(1)
+    .map((item) => sheetRowToObject(item, "drug"));
 
-  for (let i = 0; i < seedableDrugs.length; i++) {
-    await db.insert(drugs).values(sheetRowToObject(seedableDrugs[i], "drug"));
-  }
+  const seedableAdmissions = fetchedPatientAdmissions.values
+    .slice(1)
+    .map((item) => sheetRowToObject(item, "admission"));
 
-  for (let i = 0; i < seedablePatients.length; i++) {
-    await db
-      .insert(patients)
-      .values(sheetRowToObject(seedablePatients[i], "patient"));
-  }
+  const seedableDischarges = fetchedPatientDischarges.values
+    .slice(1)
+    .map((item) => sheetRowToObject(item, "discharge"));
+
+  const seedableTransfers = fetchedPatientTransfers.values
+    .slice(1)
+    .map((item) => sheetRowToObject(item, "transfer"));
+
+  // 4. INSERT New data
+  await db.insert(drugs).values(seedableDrugs);
+  await db.insert(patientAdmissions).values(seedableAdmissions);
+  await db.insert(patientTransfers).values(seedableTransfers);
+  await db.insert(patientDischarges).values(seedableDischarges);
 }
 
 const drugsColumns = [
@@ -48,7 +75,7 @@ const drugsColumns = [
   "record_4_page",
   "stock_amount",
   "query_in_UPA_sheet",
-  "occurences_in_UPA_sheet",
+  "occurrences_in_UPA_sheet",
   "category",
   "id",
   "record_2_page",
@@ -57,7 +84,7 @@ const drugsColumns = [
   "tradename",
 ] as const;
 
-const patientsColumns = [
+const AdmissionsColumns = [
   "id",
   "name",
   "id_type",
@@ -75,12 +102,35 @@ const patientsColumns = [
   "insured",
 ] as const;
 
-function sheetRowToObject(row: (string | number)[], type: "patient" | "drug") {
-  let columnList: typeof drugsColumns | typeof patientsColumns;
-  if (type === "patient") {
-    columnList = patientsColumns;
-  } else {
-    columnList = drugsColumns;
+const TransfersColumns = ["patient_id", "patient_name", "timestamp", "to_ward"] as const;
+
+const DischargesColumns = ["patient_id", "patient_name", "timestamp", "reason"] as const;
+
+type ColumnList =
+  | typeof drugsColumns
+  | typeof AdmissionsColumns
+  | typeof TransfersColumns
+  | typeof DischargesColumns;
+
+type SeedType = "admission" | "transfer" | "discharge" | "drug";
+
+function sheetRowToObject(row: (string | number)[], type: SeedType) {
+  let columnList: ColumnList;
+
+  switch (type) {
+    case "admission":
+      columnList = AdmissionsColumns;
+      break;
+    case "transfer":
+      columnList = TransfersColumns;
+      break;
+    case "discharge":
+      columnList = DischargesColumns;
+      break;
+
+    default:
+      columnList = drugsColumns;
+      break;
   }
 
   const result: { [key: string]: string | number | Date } = {};
