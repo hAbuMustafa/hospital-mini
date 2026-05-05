@@ -51,7 +51,9 @@ export async function initialize() {
 
   const seedableAdmissions = fetchedPatientAdmissions.values
     .slice(1)
-    .map((item) => sheetRowToObject(item, "admission"));
+    .map((item) =>
+      sheetRowToObject(item, "admission"),
+    ) as unknown as typeof patientAdmissions.$inferInsert;
 
   const seedableDischarges = fetchedPatientDischarges.values
     .slice(1)

@@ -45,7 +45,7 @@ export async function syncPatients() {
     if (fetchedPatientAdmissions.values) {
       const seedableAdmissions = fetchedPatientAdmissions.values.map((item) =>
         sheetRowToObject(item, "admission"),
-      );
+      ) as unknown as typeof patientAdmissions.$inferInsert;
 
       await tx.insert(patientAdmissions).values(seedableAdmissions);
 
