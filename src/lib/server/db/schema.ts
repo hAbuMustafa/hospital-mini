@@ -59,8 +59,8 @@ FROM patientTransfers
 WHERE id IN (
   SELECT MAX(id)
   FROM patientTransfers
-  GROUP BY patient_id;
-);   
+  GROUP BY patient_id
+)
 `,
 );
 
@@ -98,7 +98,7 @@ SELECT
   a.insured
 FROM patientAdmissions a
 LEFT JOIN patientDischarges d ON a.id = d.patient_id
-LEFT JOIN recentWards_view t ON a.id = t.patient_id;
+LEFT JOIN recentWards_view t ON a.id = t.patient_id
 `,
 );
 
