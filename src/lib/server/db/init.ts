@@ -145,7 +145,7 @@ function sheetRowToObject(row: (string | number)[], type: SeedType) {
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "") {
       const fieldName = columnList[i];
-      if (fieldName.includes("date")) {
+      if (fieldName.includes("date") || fieldName.includes("time")) {
         result[fieldName] = parseDate(row[i] as string);
       } else {
         result[fieldName] = row[i];
