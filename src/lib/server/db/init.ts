@@ -33,7 +33,7 @@ export async function initialize() {
     !fetchedPatientDischarges.values ||
     !fetchedDrugs.values
   ) {
-    console.error("Database initialization Error. No data could be fetched.");
+    console.error("⚠️⏬ Database initialization Error. No data could be fetched.");
     process.exit(1);
   }
 
