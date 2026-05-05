@@ -19,20 +19,36 @@ export const drugs = sqliteTable("drugs", {
   tradename: text(),
 });
 
-export const patients = sqliteTable("patients", {
+export const patientAdmissions = sqliteTable("patientAdmissions", {
   id: text().primaryKey(),
   name: text(),
   id_type: text(),
   id_number: text(),
   diagnosis: text(),
   admission_date: int({ mode: "timestamp" }),
-  discharge_date: int({ mode: "timestamp" }),
   discharge_reason: text(),
-  ward_recent: text(),
   ward_on_admission: text(),
   admission_notes: text(),
-  ininininini: text(), // placeholder for seeding of form submitted "is insured"
   gender: int({ mode: "boolean" }),
   birthdate: int({ mode: "timestamp" }),
   insured: int({ mode: "boolean" }),
+});
+
+export const patientTransfers = sqliteTable("patientTransfers", {
+  id: int().primaryKey({ autoIncrement: true }),
+  patient_id: text(),
+  timestamp: int({ mode: "timestamp" }),
+  to_ward: text(),
+});
+
+export const patientDischarges = sqliteTable("patientDischarges", {
+  patient_id: text(),
+  timestamp: int({ mode: "timestamp" }),
+  reason: text(),
+});
+
+export const status = sqliteTable("status", {
+  id: int().primaryKey({ autoIncrement: true }),
+  item: text(),
+  value: int(),
 });
