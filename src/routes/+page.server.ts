@@ -1,6 +1,6 @@
 import { db } from "$lib/server/db";
-import { patientAdmissions } from "$lib/server/db/schema";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { patients_view } from "$lib/server/db/schema";
+import { and, gte, lte } from "drizzle-orm";
 
 export async function load({ url }) {
   const today = new Date();
@@ -26,14 +26,14 @@ export async function load({ url }) {
 
   const fetchedPatients = await db
     .select()
-    .from(patientAdmissions)
+    .from(patients_view)
     .where(
       and(
-        gte(patientAdmissions.discharge_date, dateFrom),
-        lte(patientAdmissions.discharge_date, dateTo),
+        gte(patients_view.discharge_date, dateFrom),
+        lte(patients_view.discharge_date, dateTo),
       ),
     )
-    .orderBy(patientAdmissions.admission_date);
+    .orderBy(patients_view.admission_date);
 
   return {
     patients: fetchedPatients,
