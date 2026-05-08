@@ -1,4 +1,13 @@
 {
   "cSpell.words": ["ininininini"],
-  "prettier.singleQuote": false
+  "prettier.singleQuote": false,
+  "sqltools.connections": [
+    {
+      "previewLimit": 100,
+      "driver": "SQLite",
+      "name": "localHospitalConn",
+      "group": "HospitalMini",
+      "database": "./local.db"
+    }
+  ]
 }
