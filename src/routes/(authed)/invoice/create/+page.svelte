@@ -61,7 +61,11 @@
         </td>
         <td>{patient.name}</td>
         <td>{formatDate(patient.admission_date)}</td>
-        <td>{formatDate(patient.discharge_date)}</td>
+        <td>
+          {#if patient.discharge_date}
+            {formatDate(patient.discharge_date)}
+          {/if}
+        </td>
         <td>
           <a href="/invoice/create/{patient.id}" class="btn">فاتورة</a>
         </td>
