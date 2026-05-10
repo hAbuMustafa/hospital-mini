@@ -47,7 +47,7 @@ type ColumnList =
 
 type SeedType = "admission" | "transfer" | "discharge" | "drug";
 
-export function sheetRowToObject(row: (string | number)[], type: SeedType) {
+export function sheetRowToObject(row: string[], type: SeedType) {
   let columnList: ColumnList;
 
   switch (type) {
@@ -74,6 +74,9 @@ export function sheetRowToObject(row: (string | number)[], type: SeedType) {
       if (fieldName.includes("date") || fieldName.includes("time")) {
         const parsedDate = parseDate(row[i] as string);
         if (parsedDate) result[fieldName] = parsedDate;
+      } else if (/^\d$/.test(row[i])) {
+        // parse booleans
+        result[fieldName] = Number(row[i]);
       } else {
         result[fieldName] = row[i];
       }
