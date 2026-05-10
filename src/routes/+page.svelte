@@ -44,13 +44,13 @@
     {#each data.patients as patient, i (patient.id)}
       <tr class="patient-card">
         <td>
-          <a href="/invoice/list/{patient.id}">{patient.id}</a>
+          <a href="/invoice/list/{patient.id}" class="btn">{patient.id}</a>
         </td>
         <td>{patient.name}</td>
         <td>{formatDate(patient.admission_date)}</td>
         <td>{formatDate(patient.discharge_date)}</td>
         <td>
-          <a href="/invoice/create/{patient.id}">فاتورة</a>
+          <a href="/invoice/create/{patient.id}" class="btn">فاتورة</a>
         </td>
       </tr>
     {/each}
@@ -85,14 +85,4 @@
     padding: 0.5rem;
   }
 
-  a {
-    color: unset;
-    text-decoration: unset;
-    padding: 0.25rem;
-    border: var(--main-border);
-    border-radius: 4px;
-
-    font-weight: bolder;
-    background-color: var(--main-accent-color);
-  }
 </style>

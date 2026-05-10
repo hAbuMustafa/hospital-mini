@@ -27,6 +27,18 @@ body {
   color: var(--main-text-color);
 }
 
+a.btn,
+button.btn {
+  color: unset;
+  text-decoration: unset;
+  padding: 0.25rem;
+  border: var(--main-border);
+  border-radius: 4px;
+
+  font-weight: bolder;
+  background-color: var(--main-accent-color);
+}
+
 @media print {
   @page {
     margin: 5mm;
