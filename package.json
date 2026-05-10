@@ -38,5 +38,5 @@
     "google-auth-library": "^10.6.2",
     "googleapis": "^171.4.0"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@11.0.9"
 }
