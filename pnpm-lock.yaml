@@ -11,6 +11,9 @@ importers:
       '@libsql/client':
         specifier: ^0.17.3
         version: 0.17.3
+      dayjs:
+        specifier: ^1.11.20
+        version: 1.11.20
       google-auth-library:
         specifier: ^10.6.2
         version: 10.6.2
@@ -885,6 +888,9 @@ packages:
   data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
     engines: {node: '>= 12'}
+
+  dayjs@1.11.20:
+    resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -2130,6 +2136,8 @@ snapshots:
   cookie@0.6.0: {}
 
   data-uri-to-buffer@4.0.1: {}
+
+  dayjs@1.11.20: {}
 
   debug@4.4.3:
     dependencies:
