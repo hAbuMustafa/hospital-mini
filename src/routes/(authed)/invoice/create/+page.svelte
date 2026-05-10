@@ -20,7 +20,7 @@
   let isSameDay = $derived(data.dateFrom === data.dateTo);
 </script>
 
-<h1>نظام إصدار الفواتير</h1>
+<h1>إصدار فاتورة</h1>
 <h2>
   مرضى الداخلي الخروج {isSameDay
     ? `يوم ${data.dateFrom.split("-").reverse().join("-")}`
