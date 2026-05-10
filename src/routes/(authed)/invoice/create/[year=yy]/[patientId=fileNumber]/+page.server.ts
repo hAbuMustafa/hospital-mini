@@ -1,5 +1,5 @@
 import { db } from "$lib/server/db/";
-import { patientAdmissions } from "$lib/server/db/schema.js";
+import { patientAdmissions, patients_view } from "$lib/server/db/schema.js";
 import { eq } from "drizzle-orm";
 
 export async function load({ params }) {
@@ -7,8 +7,8 @@ export async function load({ params }) {
 
   const [patient] = await db
     .select()
-    .from(patientAdmissions)
-    .where(eq(patientAdmissions.id, patientId));
+    .from(patients_view)
+    .where(eq(patients_view.id, patientId));
 
   return {
     patient,
