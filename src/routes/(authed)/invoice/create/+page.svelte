@@ -23,8 +23,8 @@
 <h1>نظام إصدار الفواتير</h1>
 <h2>
   مرضى الداخلي الخروج {isSameDay
-    ? `يوم ${data.dateFrom}`
-    : `في الفترة من ${data.dateFrom} إلى ${data.dateTo}`}
+    ? `يوم ${data.dateFrom.split("-").reverse().join("-")}`
+    : `في الفترة من ${data.dateFrom.split("-").reverse().join("-")} إلى ${data.dateTo.split("-").reverse().join("-")}`}
 </h2>
 <div class="date-controls">
   <a href="?f={yesterday}&t={yesterday}" class="btn">&Lt;</a>
