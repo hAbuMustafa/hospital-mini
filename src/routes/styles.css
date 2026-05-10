@@ -27,6 +27,11 @@ body {
   color: var(--main-text-color);
 }
 
+h1,
+h2 {
+  text-align: center;
+}
+
 a.btn,
 button.btn {
   color: unset;
