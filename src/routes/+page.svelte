@@ -1,12 +1,23 @@
 <script lang="ts">
-  import { formatDate } from '$lib/utils.js';
+  import { formatDate } from "$lib/utils.js";
 
   let { data } = $props();
 
   let dateFrom = $derived(data.dateFrom);
   let dateTo = $derived(data.dateTo);
 
-  let isSameDay = $derived(data.dateFrom === data.dateTo)
+  let [yesterday, tomorrow] = $derived.by(() => {
+    const fDate = new Date(data.dateFrom);
+    fDate.setDate(fDate.getDate() - 1);
+    const ystr = formatDate(fDate, "yyyy-MM-dd");
+
+    fDate.setDate(fDate.getDate() + 2);
+    const tmrw = formatDate(fDate, "yyyy-MM-dd");
+
+    return [ystr, tmrw];
+  });
+
+  let isSameDay = $derived(data.dateFrom === data.dateTo);
 </script>
 
 <h1>نظام إصدار الفواتير</h1>
@@ -16,6 +27,7 @@
     : `في الفترة من ${data.dateFrom} إلى ${data.dateTo}`}
 </h2>
 <div class="date-controls">
+  <a href="/?f={yesterday}&t={yesterday}" class="btn">&Lt;</a>
   <form action="/" method="GET">
     <label>
       من:
@@ -28,6 +40,7 @@
     </label>
     <button type="submit">تأكيد</button>
   </form>
+  <a href="/?f={tomorrow}&t={tomorrow}" class="btn">&Gt;</a>
 </div>
 
 <table>
@@ -84,5 +97,4 @@
   td {
     padding: 0.5rem;
   }
-
 </style>
