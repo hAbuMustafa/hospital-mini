@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-  <title>نظان إصدار الفواتير | مستشفى 23 يوليو للأمراض الصدرية</title>
+  <title>مستشفى 23 يوليو للأمراض الصدرية</title>
 </svelte:head>
 
 <nav>
