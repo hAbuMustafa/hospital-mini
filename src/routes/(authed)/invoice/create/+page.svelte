@@ -27,8 +27,8 @@
     : `في الفترة من ${data.dateFrom} إلى ${data.dateTo}`}
 </h2>
 <div class="date-controls">
-  <a href="/?f={yesterday}&t={yesterday}" class="btn">&Lt;</a>
-  <form action="/" method="GET">
+  <a href="?f={yesterday}&t={yesterday}" class="btn">&Lt;</a>
+  <form method="GET">
     <label>
       من:
       <input type="date" name="f" bind:value={dateFrom} max={dateTo} />
@@ -40,7 +40,7 @@
     </label>
     <button type="submit">تأكيد</button>
   </form>
-  <a href="/?f={tomorrow}&t={tomorrow}" class="btn">&Gt;</a>
+  <a href="?f={tomorrow}&t={tomorrow}" class="btn">&Gt;</a>
 </div>
 
 <table>
