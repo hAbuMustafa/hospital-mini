@@ -1,6 +1,6 @@
 import { json } from "@sveltejs/kit";
 import { seed_pw } from "$env/static/private";
-import { initialize } from "$lib/server/db/init.js";
+import { initialize } from "$lib/server/db/init";
 
 export async function GET({ url }) {
   const pw = url.searchParams.get("pw");
