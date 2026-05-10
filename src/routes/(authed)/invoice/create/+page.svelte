@@ -9,12 +9,12 @@
   let [yesterday, tomorrow] = $derived.by(() => {
     const fDate = new Date(data.dateFrom);
     fDate.setDate(fDate.getDate() - 1);
-    const ystr = formatDate(fDate, "yyyy-MM-dd");
+    const yDay = formatDate(fDate, "yyyy-MM-dd");
 
     fDate.setDate(fDate.getDate() + 2);
-    const tmrw = formatDate(fDate, "yyyy-MM-dd");
+    const nxDay = formatDate(fDate, "yyyy-MM-dd");
 
-    return [ystr, tmrw];
+    return [yDay, nxDay];
   });
 
   let isSameDay = $derived(data.dateFrom === data.dateTo);
