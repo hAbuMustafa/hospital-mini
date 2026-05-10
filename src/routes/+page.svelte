@@ -75,6 +75,7 @@
     display: flex;
     gap: 1rem;
     justify-content: space-around;
+    align-items: center;
   }
 
   form {
