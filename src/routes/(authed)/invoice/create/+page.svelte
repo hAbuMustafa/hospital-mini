@@ -87,6 +87,10 @@
     margin-block-start: 1rem;
   }
 
+  thead {
+    background-color: hsl(from var(--main-bg-color) h s 30%);
+  }
+
   table,
   tr,
   th,
