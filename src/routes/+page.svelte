@@ -5,11 +5,13 @@
 
   let dateFrom = $derived(data.dateFrom);
   let dateTo = $derived(data.dateTo);
+
+  let isSameDay = $derived(data.dateFrom === data.dateTo)
 </script>
 
 <h1>نظام إصدار الفواتير</h1>
 <h2>
-  مرضى الداخلي الخروج {data.dateFrom === data.dateTo
+  مرضى الداخلي الخروج {isSameDay
     ? `يوم ${data.dateFrom}`
     : `في الفترة من ${data.dateFrom} إلى ${data.dateTo}`}
 </h2>
