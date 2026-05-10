@@ -1,30 +1,72 @@
 <script lang="ts">
+  import { formatDate, getDuration, getTermed, getToday } from "$lib/date/utils";
+
   let { data } = $props();
   const { patient } = $derived(data);
+
+  const today = getToday();
+
+  const fromDate = $derived(patient.admission_date);
+  const toDate = $derived(patient.discharge_date);
+
+  const pricingDuration = $derived(
+    getTermed(getDuration(fromDate, toDate || today), "يوم", "أيام"),
+  );
 </script>
 
 <header>
   <h1>فاتورة أدوية</h1>
-  <div class="patient-data">
-    <dl>
-      <dt>اسم المريض:</dt>
-      <dd>{patient.name}</dd>
+  <table>
+    <tbody>
+      <tr>
+        <th>رقم القيد:</th>
+        <td>{patient.id}</td>
 
-      <dt>القسم:</dt>
-      <dd>{patient.ward_recent}</dd>
+        <th>مدة الإقامة:</th>
+        <td>
+          {pricingDuration}
+        </td>
+      </tr>
+      <tr>
+        <th>اسم المريض:</th>
+        <td>{patient.name}</td>
 
-      <dt>التشخيص:</dt>
-      <dd>{patient.diagnosis}</dd>
+        <th>{patient.id_type}:</th>
+        <td>{patient.id_number}</td>
+      </tr>
+      <tr>
+        <th>القسم:</th>
+        <td>{patient.ward_recent}</td>
 
-      <dt>{patient.id_type}:</dt>
-      <dd>{patient.id_number}</dd>
+        <th>تاريخ الدخول:</th>
+        <td>{formatDate(patient.admission_date)}</td>
+      </tr>
+      <tr>
+        <th>التشخيص:</th>
+        <td>{patient.diagnosis}</td>
 
-      <dt>تاريخ الدخول:</dt>
-      <dd></dd>
+        <th>تاريخ الخروج:</th>
+        <td>
+          {#if patient.discharge_date}
+            {formatDate(patient.discharge_date)}
+          {/if}
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-      <dt>تاريخ الخروج:</dt>
-      <dd></dd>
-    </dl>
-  </div>
   <h2>سداد فاتورة</h2>
 </header>
+
+<style>
+  table {
+    th {
+      text-align: end;
+    }
+
+    td {
+      text-align: center;
+      padding-inline: 3vw;
+    }
+  }
+</style>
