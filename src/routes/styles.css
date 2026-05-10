@@ -13,6 +13,7 @@
     hsl(from royalblue h 100% 65%),
     hsl(from royalblue h 100% 55%)
   );
+  --main-table-header-bg-color: hsl(from var(--main-bg-color) h s 30%);
   --main-unselected-accent-color: lightslategray;
 
   --main-border: 1px solid light-dark(#333, #ccc);

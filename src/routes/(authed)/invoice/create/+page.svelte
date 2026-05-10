@@ -92,7 +92,7 @@
   }
 
   thead {
-    background-color: hsl(from var(--main-bg-color) h s 30%);
+    background-color: var(--main-table-header-bg-color);
   }
 
   table,
