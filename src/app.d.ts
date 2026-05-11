@@ -11,12 +11,14 @@ declare global {
     // interface Platform {}
   }
 
+  type DrugT = typeof drugs.$inferSelect;
+
   type StaleData = {
     ward: string;
     narcotics: (typeof narcoticsDispensed.$inferSelect)[];
   };
 
-  type InvoiceDrugT = typeof drugs.$inferSelect & {
+  type InvoiceDrugT = DrugT & {
     amount: number;
     total: () => number;
   };
