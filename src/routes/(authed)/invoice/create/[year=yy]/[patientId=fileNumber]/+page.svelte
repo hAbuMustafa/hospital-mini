@@ -123,6 +123,7 @@
   }
 
   .pricing-range {
+    margin-block-start: 1rem;
     &:not(.show-in-print) {
       @media print {
         display: none;
