@@ -45,6 +45,20 @@ export function parseDate(
   return null;
 }
 
+export function setToEndOfDay(date: Date) {
+  date.setHours(23);
+  date.setMinutes(59);
+  date.setSeconds(59);
+  date.setMilliseconds(999);
+}
+
+export function setToStartOfDay(date: Date) {
+  date.setHours(0);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+}
+
 export function getTermed(number: number, term: string, termPlural: string) {
   return `${number < 3 ? "" : number + " "}${
     number === 1
@@ -59,10 +73,6 @@ export function getTermed(number: number, term: string, termPlural: string) {
 
 export function getToday() {
   const today = new Date();
-  today.setHours(23);
-  today.setMinutes(59);
-  today.setSeconds(59);
-  today.setMilliseconds(999);
 
   return today;
 }

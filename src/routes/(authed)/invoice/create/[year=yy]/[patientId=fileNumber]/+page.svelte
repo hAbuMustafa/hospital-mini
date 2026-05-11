@@ -1,7 +1,14 @@
 <script lang="ts">
-  import { formatDate, getDuration, getTermed, getToday } from "$lib/date/utils";
+  import {
+    formatDate,
+    getDuration,
+    getTermed,
+    getToday,
+    setToEndOfDay,
+  } from "$lib/date/utils";
 
   const today = getToday();
+  setToEndOfDay(today);
 
   let { data } = $props();
 

@@ -1,4 +1,4 @@
-import { formatDate } from "$lib/date/utils.js";
+import { formatDate, setToEndOfDay, setToStartOfDay } from "$lib/date/utils.js";
 import { db } from "$lib/server/db";
 import { patients_view } from "$lib/server/db/schema";
 import { and, gte, lte } from "drizzle-orm";
@@ -15,15 +15,9 @@ export async function load({ url }) {
 
   const dateFrom = new Date(dischargesFrom);
   const dateTo = new Date(dischargesTo);
-  dateFrom.setHours(0);
-  dateFrom.setMinutes(0);
-  dateFrom.setSeconds(0);
-  dateFrom.setMilliseconds(0);
+  setToStartOfDay(dateFrom);
 
-  dateTo.setHours(23);
-  dateTo.setMinutes(59);
-  dateTo.setSeconds(59);
-  dateTo.setMilliseconds(999);
+  setToEndOfDay(dateTo);
 
   const fetchedPatients = await db
     .select()
