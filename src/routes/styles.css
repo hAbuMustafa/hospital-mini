@@ -90,7 +90,7 @@ input:user-invalid {
 
 .hide-in-print {
   @media print {
-    display: none;
+    display: none !important;
   }
 }
 
