@@ -45,6 +45,13 @@ button.btn {
   background-color: var(--main-accent-color);
 }
 
+input:user-invalid {
+  background-color: salmon;
+  color: black;
+  font-weight: bolder;
+  animation: shake 0.1s infinite;
+}
+
 @media print {
   @page {
     margin: 5mm;
@@ -79,4 +86,22 @@ button.btn {
   inset: unset;
   inset-block-start: calc(anchor(bottom) + 0.25rem);
   justify-self: anchor-center;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(0) rotate(0deg);
+  }
+  25% {
+    transform: translate(1px) rotate(1deg);
+  }
+  50% {
+    transform: translate(0) rotate(0deg);
+  }
+  75% {
+    transform: translate(-1px) rotate(-1deg);
+  }
+  100% {
+    transform: translate(0) rotate(0deg);
+  }
 }
