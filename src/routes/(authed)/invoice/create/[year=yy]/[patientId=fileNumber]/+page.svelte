@@ -11,15 +11,20 @@
     patient.discharge_date ? formatDate(patient.discharge_date) : "",
   );
 
-  let fromDate = $derived(stringifiedAdmissionDate);
-  let toDate = $derived(stringifiedDischargeDate);
+  let fromDateString = $derived(stringifiedAdmissionDate);
+  let toDateString = $derived(stringifiedDischargeDate);
 
   let periodSameAsStay = $derived(
-    fromDate === stringifiedAdmissionDate && toDate === stringifiedDischargeDate,
+    fromDateString === stringifiedAdmissionDate &&
+      toDateString === stringifiedDischargeDate,
   );
 
   const pricingDuration = $derived(
-    getTermed(getDuration(fromDate, toDate || today), "يوم", "أيام"),
+    getTermed(
+      getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
+      "يوم",
+      "أيام",
+    ),
   );
 </script>
 
@@ -77,21 +82,21 @@
           <td>
             <input
               type="date"
-              bind:value={fromDate}
+              bind:value={fromDateString}
               min={stringifiedAdmissionDate}
               max={stringifiedDischargeDate}
             />
-            <span class="selected-date">{fromDate.replaceAll("-", "/")}</span>
+            <span class="selected-date">{fromDateString.replaceAll("-", "/")}</span>
           </td>
           <th>إلى:</th>
           <td>
             <input
               type="date"
-              bind:value={toDate}
-              min={stringifiedAdmissionDate}
+              bind:value={toDateString}
+              min={fromDateString}
               max={stringifiedDischargeDate}
             />
-            <span class="selected-date">{toDate.replaceAll("-", "/")}</span>
+            <span class="selected-date">{toDateString.replaceAll("-", "/")}</span>
           </td>
         </tr>
       </tbody>
