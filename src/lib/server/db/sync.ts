@@ -26,7 +26,7 @@ export async function syncPatients() {
   const latestTransferCount = latestRows.find((r) => r.item === "transfers")?.value;
   const latestDischargeCount = latestRows.find((r) => r.item === "discharges")?.value;
   const latestNarcoticsDispensedCount = latestRows.find(
-    (r) => r.item === "discharges",
+    (r) => r.item === "narcotics_dispensed",
   )?.value;
 
   if (
