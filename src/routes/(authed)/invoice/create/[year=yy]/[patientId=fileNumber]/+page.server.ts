@@ -1,5 +1,5 @@
 import { db } from "$lib/server/db/";
-import { patientAdmissions, patients_view } from "$lib/server/db/schema.js";
+import { patients_view } from "$lib/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function load({ params }) {
