@@ -51,7 +51,7 @@ export const narcoticsDispensed = sqliteTable("narcoticsDispensed", {
   id: int().primaryKey({ autoIncrement: true }),
   timestamp: int({ mode: "timestamp" }),
   patient_id: text(),
-  item: text(),
+  item_id: int(),
   amount: int(),
 });
 

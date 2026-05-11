@@ -45,7 +45,7 @@ const NarcoticDispenseColumns = [
   "timestamp",
   "patient_id",
   "patient_name",
-  "item",
+  "item_id",
   "amount",
 ] as const;
 
@@ -96,6 +96,8 @@ export function sheetRowToObject(row: string[], type: SeedType) {
       } else if (/^\d$/.test(row[i])) {
         // parse booleans
         result[fieldName] = Number(row[i]);
+      } else if (fieldName === "item_id" && type === "narcotic_dispense") {
+        result[fieldName] = getNarcoticId(row[i]);
       } else {
         result[fieldName] = row[i];
       }
@@ -113,5 +115,5 @@ narcotics.set("فينتانيل 0.05 ملجم أمبول", 119);
 narcotics.set("ميدازولام 15 ملجم أمبول", 229);
 
 function getNarcoticId(item: string) {
-  return narcotics.get(item);
+  return narcotics.get(item) ?? 0;
 }
