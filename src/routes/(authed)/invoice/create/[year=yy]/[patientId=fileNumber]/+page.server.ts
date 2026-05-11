@@ -11,7 +11,7 @@ export async function load({ params, fetch }) {
     .from(patients_view)
     .where(eq(patients_view.id, patientId));
 
-  const staleData = await fetch(
+  const staleData: StaleData = await fetch(
     `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(patient.admission_date)}&t=${formatDate(patient.discharge_date ?? new Date())}`,
   ).then((d) => d.json());
 
