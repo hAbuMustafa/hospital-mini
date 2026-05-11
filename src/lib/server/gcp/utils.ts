@@ -1,3 +1,5 @@
+import { parseDate } from "$lib/date/utils";
+
 const drugsColumns = [
   "name_ar",
   "unit",
@@ -39,13 +41,22 @@ const TransfersColumns = ["patient_id", "patient_name", "timestamp", "to_ward"] 
 
 const DischargesColumns = ["patient_id", "patient_name", "timestamp", "reason"] as const;
 
+const NarcoticDispenseColumns = [
+  "timestamp",
+  "patient_id",
+  "patient_name",
+  "item",
+  "amount",
+] as const;
+
 type ColumnList =
   | typeof drugsColumns
   | typeof AdmissionsColumns
   | typeof TransfersColumns
-  | typeof DischargesColumns;
+  | typeof DischargesColumns
+  | typeof NarcoticDispenseColumns;
 
-type SeedType = "admission" | "transfer" | "discharge" | "drug";
+type SeedType = "admission" | "transfer" | "discharge" | "drug" | "narcotic_dispense";
 
 export function sheetRowToObject(row: string[], type: SeedType) {
   let columnList: ColumnList;
@@ -60,9 +71,11 @@ export function sheetRowToObject(row: string[], type: SeedType) {
     case "discharge":
       columnList = DischargesColumns;
       break;
-
-    default:
+    case "drug":
       columnList = drugsColumns;
+      break;
+    case "narcotic_dispense":
+      columnList = NarcoticDispenseColumns;
       break;
   }
 
@@ -71,9 +84,15 @@ export function sheetRowToObject(row: string[], type: SeedType) {
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "") {
       const fieldName = columnList[i];
-      if (fieldName.includes("date") || fieldName.includes("time")) {
-        const parsedDate = parseDate(row[i] as string);
+      if (
+        fieldName.includes("date") ||
+        (fieldName.includes("time") && type !== "narcotic_dispense")
+      ) {
+        const parsedDate = parseDate(row[i]);
         if (parsedDate) result[fieldName] = parsedDate;
+      } else if (fieldName.includes("time") && type !== "narcotic_dispense") {
+        const parsedDatetime = parseDate(row[i], "M/D/YYY h:mm:ss");
+        if (parsedDatetime) result[fieldName] = parsedDatetime;
       } else if (/^\d$/.test(row[i])) {
         // parse booleans
         result[fieldName] = Number(row[i]);
@@ -84,14 +103,4 @@ export function sheetRowToObject(row: string[], type: SeedType) {
   }
 
   return result;
-}
-
-function parseDate(dateString: string) {
-  if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString.trim())) return null;
-
-  const [m, d, y] = dateString.split("/").map(Number);
-
-  const date = new Date(y, m - 1, d);
-
-  return date;
 }
