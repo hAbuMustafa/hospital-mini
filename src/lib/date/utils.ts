@@ -26,6 +26,25 @@ export function getDuration(
   return dayjs(end).diff(dayjs(start), unit);
 }
 
+/**
+ *
+ * @param dateString The input string containing date/time
+ * @param dateStringFormat The input string format (NOT the desired output format, it outputs a `Date` type)
+ * @param strict If true the function will return `null` if the input string ({@link dateString}) shape didn't match {@link dateStringFormat}
+ */
+export function parseDate(
+  dateString: string,
+  dateStringFormat = "MM/DD/YYYY",
+  strict = true,
+) {
+  const date = dayjs(dateString, dateStringFormat, strict);
+
+  if (date.isValid()) {
+    return date.toDate();
+  }
+  return null;
+}
+
 export function getTermed(number: number, term: string, termPlural: string) {
   return `${number < 3 ? "" : number + " "}${
     number === 1
