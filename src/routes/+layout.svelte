@@ -12,7 +12,7 @@
     <img src="/favicon.png" alt="مستشفى 23 يوليو للأمراض الصدرية" width="120" />
   </a>
 
-  <ul>
+  <ul class="hide-in-print">
     <li><a href="/invoice/create">إصدار فاتورة</a></li>
     <li><a href="/patients">المرضى</a></li>
   </ul>
