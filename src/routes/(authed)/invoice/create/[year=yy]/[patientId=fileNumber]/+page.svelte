@@ -50,6 +50,7 @@
       </tr>
       <tr>
         <th>القسم:</th>
+        <!-- todo: should be tied to pricing period-->
         <td>{patient.ward_recent ?? patient.ward_on_admission}</td>
 
         <th>تاريخ الدخول:</th>
