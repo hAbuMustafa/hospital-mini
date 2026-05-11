@@ -69,9 +69,8 @@
       </tr>
     </tbody>
   </table>
-  <details open={true}>
-    <summary>فترة تسعير</summary>
-    <table class="pricing-range">
+  <div class="pricing-range" class:show-in-print={!periodSameAsStay}>
+    <table>
       <thead>
         <tr>
           <th colspan="4">فترة التسعير</th>
@@ -102,7 +101,7 @@
         </tr>
       </tbody>
     </table>
-  </details>
+  </div>
   <h2>سداد فاتورة</h2>
 </header>
 
@@ -124,36 +123,44 @@
   }
 
   .pricing-range {
-    width: 100%;
-    border-collapse: collapse;
-
-    &,
-    th,
-    td {
-      border: var(--main-border);
-    }
-
-    thead {
-      background-color: var(--main-table-header-bg-color);
-    }
-
-    input[type="date"] {
-      width: 80%;
-      text-align: center;
-      font-size: inherit;
-    }
-
-    span.selected-date {
-      display: none;
-    }
-
-    @media print {
-      input[type="date"] {
+    &:not(.show-in-print) {
+      @media print {
         display: none;
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      &,
+      th,
+      td {
+        border: var(--main-border);
+      }
+
+      thead {
+        background-color: var(--main-table-header-bg-color);
+      }
+
+      input[type="date"] {
+        width: 80%;
+        text-align: center;
+        font-size: inherit;
       }
 
       span.selected-date {
-        display: inline-block;
+        display: none;
+      }
+
+      @media print {
+        input[type="date"] {
+          display: none;
+        }
+
+        span.selected-date {
+          display: inline-block;
+        }
       }
     }
   }
