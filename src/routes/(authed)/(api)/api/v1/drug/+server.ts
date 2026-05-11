@@ -14,7 +14,14 @@ export async function GET({ url }) {
   const matches = await db
     .select()
     .from(drugs)
-    .where(or(like(drugs.name_ar, fuzzyQuery), like(drugs.tradename_ar, fuzzyQuery)));
+    .where(
+      or(
+        like(drugs.name_ar, fuzzyQuery),
+        like(drugs.name, fuzzyQuery),
+        like(drugs.tradename_ar, fuzzyQuery),
+        like(drugs.tradename, fuzzyQuery),
+      ),
+    );
 
   return json(matches);
 }
