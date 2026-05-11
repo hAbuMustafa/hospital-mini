@@ -47,6 +47,14 @@ export const patientDischarges = sqliteTable("patientDischarges", {
   reason: text(),
 });
 
+export const narcoticsDispensed = sqliteTable("narcoticsDispensed", {
+  id: int().primaryKey({ autoIncrement: true }),
+  timestamp: int({ mode: "timestamp" }),
+  patient_id: text(),
+  item: text(),
+  amount: int(),
+});
+
 export const recentWards_view = sqliteView("recentWards_view", {
   id: int(),
   patient_id: text(),
