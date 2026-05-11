@@ -9,7 +9,6 @@ export async function load({ url }) {
   yesterday.setDate(today.getDate() - 1);
 
   const yesterdayString = formatDate(yesterday);
-  console.log(yesterdayString);
 
   const dischargesFrom = url.searchParams.get("f") ?? yesterdayString;
   const dischargesTo = url.searchParams.get("t") ?? yesterdayString;
