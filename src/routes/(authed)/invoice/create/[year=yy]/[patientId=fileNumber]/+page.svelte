@@ -69,7 +69,7 @@
       </tr>
     </tbody>
   </table>
-  <div class="pricing-range" class:show-in-print={!periodSameAsStay}>
+  <div class="pricing-range" class:hide-in-print={periodSameAsStay}>
     <table>
       <thead>
         <tr>
@@ -124,11 +124,6 @@
 
   .pricing-range {
     margin-block-start: 1rem;
-    &:not(.show-in-print) {
-      @media print {
-        display: none;
-      }
-    }
 
     table {
       width: 100%;
