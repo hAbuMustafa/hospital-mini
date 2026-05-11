@@ -1,16 +1,21 @@
 <script lang="ts">
   import { formatDate, getDuration, getTermed, getToday } from "$lib/date/utils";
 
-  let { data } = $props();
-  const { patient } = $derived(data);
-
   const today = getToday();
 
-  let fromDate = $derived(formatDate(patient.admission_date, "yyyy-MM-dd"));
-  let toDate = $derived(formatDate(patient.discharge_date, "yyyy-MM-dd"));
+  let { data } = $props();
+
+  const { patient } = $derived(data);
+  const stringifiedAdmissionDate = $derived(formatDate(patient.admission_date));
+  const stringifiedDischargeDate = $derived(
+    patient.discharge_date ? formatDate(patient.discharge_date) : "",
+  );
+
+  let fromDate = $derived(stringifiedAdmissionDate);
+  let toDate = $derived(stringifiedDischargeDate);
 
   let periodSameAsStay = $derived(
-    fromDate === patient.admission_date && toDate === patient.discharge_date,
+    fromDate === stringifiedAdmissionDate && toDate === stringifiedDischargeDate,
   );
 
   const pricingDuration = $derived(
@@ -40,10 +45,10 @@
       </tr>
       <tr>
         <th>القسم:</th>
-        <td>{patient.ward_recent}</td>
+        <td>{patient.ward_recent ?? patient.ward_on_admission}</td>
 
         <th>تاريخ الدخول:</th>
-        <td>{formatDate(patient.admission_date)}</td>
+        <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
       </tr>
       <tr>
         <th>التشخيص:</th>
@@ -52,7 +57,7 @@
         <th>تاريخ الخروج:</th>
         <td>
           {#if patient.discharge_date}
-            {formatDate(patient.discharge_date)}
+            {formatDate(patient.discharge_date, "YYYY/MM/DD")}
           {/if}
         </td>
       </tr>
@@ -61,7 +66,6 @@
   <details open={true}>
     <summary>فترة تسعير</summary>
     <table class="pricing-range">
-      <!-- bug: dates aren't synced -->
       <thead>
         <tr>
           <th colspan="4">فترة التسعير</th>
@@ -71,11 +75,23 @@
         <tr>
           <th>من:</th>
           <td>
-            <input type="date" bind:value={fromDate} />
+            <input
+              type="date"
+              bind:value={fromDate}
+              min={stringifiedAdmissionDate}
+              max={stringifiedDischargeDate}
+            />
+            <span class="selected-date">{fromDate.replaceAll("-", "/")}</span>
           </td>
           <th>إلى:</th>
           <td>
-            <input type="date" bind:value={toDate} />
+            <input
+              type="date"
+              bind:value={toDate}
+              min={stringifiedAdmissionDate}
+              max={stringifiedDischargeDate}
+            />
+            <span class="selected-date">{toDate.replaceAll("-", "/")}</span>
           </td>
         </tr>
       </tbody>
@@ -118,6 +134,21 @@
     input[type="date"] {
       width: 80%;
       text-align: center;
+      font-size: inherit;
+    }
+
+    span.selected-date {
+      display: none;
+    }
+
+    @media print {
+      input[type="date"] {
+        display: none;
+      }
+
+      span.selected-date {
+        display: inline-block;
+      }
     }
   }
 </style>
