@@ -1,8 +1,13 @@
-import { drugs_spreadsheetId, patients_spreadsheetId } from "$env/static/private";
+import {
+  drugs_spreadsheetId,
+  narcotics_spreadsheetId,
+  patients_spreadsheetId,
+} from "$env/static/private";
 import { db } from "$lib/server/db";
 import { getSheetRange } from "$lib/server/gcp/sheets";
 import {
   drugs,
+  narcoticsDispensed,
   patientAdmissions,
   patientDischarges,
   patientTransfers,
@@ -20,8 +25,16 @@ export async function syncPatients() {
   const latestAdmissionCount = latestRows.find((r) => r.item === "admissions")?.value;
   const latestTransferCount = latestRows.find((r) => r.item === "transfers")?.value;
   const latestDischargeCount = latestRows.find((r) => r.item === "discharges")?.value;
+  const latestNarcoticsDispensedCount = latestRows.find(
+    (r) => r.item === "discharges",
+  )?.value;
 
-  if (!latestAdmissionCount || !latestTransferCount || !latestDischargeCount) {
+  if (
+    !latestAdmissionCount ||
+    !latestTransferCount ||
+    !latestDischargeCount ||
+    !latestNarcoticsDispensedCount
+  ) {
     console.error("⚠️ DATABASE is out of sync. Probably not initialized.");
     return;
   }
@@ -38,6 +51,10 @@ export async function syncPatients() {
   const fetchedPatientDischarges = await getSheetRange(
     patients_spreadsheetId,
     `Discharges!B${latestDischargeCount + 1}:E`,
+  );
+  const fetchedNarcoticsDispensed = await getSheetRange(
+    narcotics_spreadsheetId,
+    `Dispensed!A${latestNarcoticsDispensedCount + 1}:E`,
   );
 
   // 3. PARSE AND INSERT new data
@@ -97,6 +114,28 @@ export async function syncPatients() {
 
       console.log(
         `♻️✔️ Synced ${fetchedPatientDischarges.values.length} Discharges. Current count is ${newCount.value}`,
+      );
+    }
+  });
+
+  await db.transaction(async (tx) => {
+    if (fetchedNarcoticsDispensed.values) {
+      const seedableNarcoticsDispensed = fetchedNarcoticsDispensed.values.map((item) =>
+        sheetRowToObject(item, "narcotic_dispense"),
+      );
+
+      await tx.insert(narcoticsDispensed).values(seedableNarcoticsDispensed);
+
+      const [newCount] = await tx
+        .update(status)
+        .set({
+          value: latestNarcoticsDispensedCount + fetchedNarcoticsDispensed.values.length,
+        })
+        .where(eq(status.item, "narcotics_dispensed"))
+        .returning();
+
+      console.log(
+        `♻️✔️ Synced ${fetchedNarcoticsDispensed.values.length} narcotic dispenses. Current count is ${newCount.value}`,
       );
     }
   });
