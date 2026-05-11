@@ -1,3 +1,4 @@
+import { formatDate } from "$lib/date/utils.js";
 import { db } from "$lib/server/db";
 import { patients_view } from "$lib/server/db/schema";
 import { and, gte, lte } from "drizzle-orm";
@@ -7,7 +8,8 @@ export async function load({ url }) {
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
-  const yesterdayString = `${yesterday.getFullYear()}-${yesterday.getMonth() + 1}-${yesterday.getDate()}`;
+  const yesterdayString = formatDate(yesterday);
+  console.log(yesterdayString);
 
   const dischargesFrom = url.searchParams.get("f") ?? yesterdayString;
   const dischargesTo = url.searchParams.get("t") ?? yesterdayString;
@@ -37,7 +39,7 @@ export async function load({ url }) {
 
   return {
     patients: fetchedPatients,
-    dateFrom: `${dateFrom.getFullYear()}-${`${dateFrom.getMonth() + 1}`.padStart(2, "0")}-${`${dateFrom.getDate()}`.padStart(2, "0")}`,
-    dateTo: `${dateTo.getFullYear()}-${`${dateTo.getMonth() + 1}`.padStart(2, "0")}-${`${dateTo.getDate()}`.padStart(2, "0")}`,
+    dateFrom: formatDate(dateFrom),
+    dateTo: formatDate(dateTo),
   };
 }

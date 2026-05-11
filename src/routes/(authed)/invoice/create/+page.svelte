@@ -9,10 +9,10 @@
   let [yesterday, tomorrow] = $derived.by(() => {
     const fDate = new Date(data.dateFrom);
     fDate.setDate(fDate.getDate() - 1);
-    const yDay = formatDate(fDate, "yyyy-MM-dd");
+    const yDay = formatDate(fDate);
 
     fDate.setDate(fDate.getDate() + 2);
-    const nxDay = formatDate(fDate, "yyyy-MM-dd");
+    const nxDay = formatDate(fDate);
 
     return [yDay, nxDay];
   });
@@ -60,10 +60,10 @@
           <a href="/invoice/list/{patient.id}" class="btn">{patient.id}</a>
         </td>
         <td>{patient.name}</td>
-        <td>{formatDate(patient.admission_date)}</td>
+        <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
         <td>
           {#if patient.discharge_date}
-            {formatDate(patient.discharge_date)}
+            {formatDate(patient.discharge_date, "YYYY/MM/DD")}
           {/if}
         </td>
         <td>

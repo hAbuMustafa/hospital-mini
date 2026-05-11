@@ -3,7 +3,7 @@ import duration from "dayjs/plugin/duration";
 
 dayjs.extend(duration);
 
-export function formatDate(date: number | string | Date, format = "YYYY/MM/DD") {
+export function formatDate(date: number | string | Date, format = "YYYY-MM-DD") {
   return dayjs(date).format(format);
 }
 
