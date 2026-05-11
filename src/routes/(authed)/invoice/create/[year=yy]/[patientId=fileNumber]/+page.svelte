@@ -7,6 +7,8 @@
     setToEndOfDay,
   } from "$lib/date/utils";
 
+  import { debounce } from "lodash-es";
+
   const today = getToday();
   setToEndOfDay(today);
 
@@ -33,6 +35,26 @@
       "أيام",
     ),
   );
+
+  let staleData = $derived(data.staleData);
+
+  let fromInput: HTMLInputElement;
+  let toInput: HTMLInputElement;
+
+  function updateStaleDataOnInput(node: HTMLInputElement) {
+    node.addEventListener(
+      "change",
+      debounce(async () => {
+        if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
+
+        staleData = (await fetch(
+          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`,
+        ).then((d) => d.json())) as StaleData;
+
+        console.log(staleData);
+      }, 1000),
+    );
+  }
 </script>
 
 <header>
@@ -57,8 +79,7 @@
       </tr>
       <tr>
         <th>القسم:</th>
-        <!-- todo: should be tied to pricing period-->
-        <td>{patient.ward_recent ?? patient.ward_on_admission}</td>
+        <td>{staleData.ward}</td>
 
         <th>تاريخ الدخول:</th>
         <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
@@ -92,6 +113,8 @@
               bind:value={fromDateString}
               min={stringifiedAdmissionDate}
               max={stringifiedDischargeDate}
+              bind:this={fromInput}
+              use:updateStaleDataOnInput
             />
             <span class="selected-date">{fromDateString.replaceAll("-", "/")}</span>
           </td>
@@ -102,6 +125,8 @@
               bind:value={toDateString}
               min={fromDateString}
               max={stringifiedDischargeDate}
+              bind:this={toInput}
+              use:updateStaleDataOnInput
             />
             <span class="selected-date">{toDateString.replaceAll("-", "/")}</span>
           </td>
