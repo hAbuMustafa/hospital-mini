@@ -17,6 +17,12 @@
   --main-unselected-accent-color: lightslategray;
 
   --main-border: 1px solid light-dark(#333, #ccc);
+  --main-shadow: light-dark(#333, #666) 2px 2px 10px;
+
+  --menu-bg-color: light-dark(
+    hsl(from var(--main-bg-color) h s 60%),
+    hsl(from var(--main-bg-color) h s 10%)
+  );
 }
 
 * {
