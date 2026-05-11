@@ -88,6 +88,12 @@ input:user-invalid {
   justify-self: anchor-center;
 }
 
+@position-try --top-center {
+  inset: unset;
+  inset-block-end: calc(anchor(top) + 0.25rem);
+  justify-self: anchor-center;
+}
+
 .hide-in-print {
   @media print {
     display: none !important;
