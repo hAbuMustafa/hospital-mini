@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import {
     formatDate,
     getDuration,
@@ -8,6 +9,7 @@
   } from "$lib/date/utils";
 
   import { debounce } from "lodash-es";
+  import { scale } from "svelte/transition";
 
   const today = getToday();
   setToEndOfDay(today);
@@ -51,10 +53,14 @@
           `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`,
         ).then((d) => d.json())) as StaleData;
 
-        console.log(staleData);
+        if (staleData.narcotics.length) {
+          // todo: add narcotics amounts to invoice
+        }
       }, 1000),
     );
   }
+
+  let selectedDrugs: InvoiceDrugT[] = $state([]);
 </script>
 
 <header>
@@ -137,14 +143,80 @@
   <h2>سداد فاتورة</h2>
 </header>
 
+<DrugLookup bind:list={selectedDrugs} />
+
+{#if selectedDrugs.length}
+  <table class="invoice-items">
+    <thead>
+      <tr>
+        <th>م</th>
+        {#if !patient.insured}
+          <th>كود النفقة</th>
+        {/if}
+        <th>اسم الصنف</th>
+        <th>الكمية</th>
+        <th>سعر الوحدة</th>
+        <th>الإجمالي</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each selectedDrugs as drug, i (drug.id)}
+        <tr class:hide-in-print={drug.amount === 0} transition:scale>
+          <td>
+            <button
+              onclick={() => {
+                selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
+              }}
+            >
+              {i + 1}
+            </button>
+          </td>
+          {#if !patient.insured}
+            <td>{drug.smc_code}</td>
+          {/if}
+          <td>{drug.name_ar}</td>
+          <td>
+            <input
+              type="number"
+              name="amount-{drug.id}"
+              id="amount-{drug.id}"
+              bind:value={drug.amount}
+            />
+          </td>
+          <td>{drug.price_resale?.toFixed(2)}</td>
+          <td>{drug.total().toFixed(2)}</td>
+        </tr>
+      {/each}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="3">إجمالي الأدوية المنصرفة:</th>
+        <td colspan="3"
+          >{selectedDrugs.reduce((acc, curr) => acc + curr.total(), 0).toFixed(2)}</td
+        >
+      </tr>
+    </tfoot>
+  </table>
+{/if}
+
+<!-- todo: separate entries in dedicated component -->
+<!-- todo: print with thead in all pages -->
+
 <style>
   table {
     td {
       text-align: center;
     }
+
+    thead {
+      background-color: var(--main-table-header-bg-color);
+      th {
+        padding: 0.5rem 0.75rem;
+      }
+    }
   }
 
-  .patient-data {
+  table.patient-data {
     th {
       text-align: end;
     }
@@ -167,10 +239,6 @@
         border: var(--main-border);
       }
 
-      thead {
-        background-color: var(--main-table-header-bg-color);
-      }
-
       input[type="date"] {
         width: 80%;
         text-align: center;
@@ -189,6 +257,47 @@
         span.selected-date {
           display: inline-block;
         }
+      }
+    }
+  }
+
+  table.invoice-items {
+    border-collapse: collapse;
+
+    th,
+    td {
+      border: var(--main-border);
+      padding-inline: 0.75rem;
+    }
+
+    tbody > tr > td:has(> button) {
+      padding: 0;
+
+      & > button {
+        all: unset;
+        cursor: pointer;
+        position: relative;
+        width: 100%;
+
+        &:hover::after {
+          content: "❌";
+          position: absolute;
+          inset: 0;
+          padding: 0;
+          pointer-events: none;
+        }
+      }
+    }
+
+    tfoot {
+      th {
+        background-color: var(--main-table-header-bg-color);
+        text-align: end;
+      }
+
+      td {
+        font-size: 1.5rem;
+        font-weight: bold;
       }
     }
   }
