@@ -91,7 +91,7 @@ export function sheetRowToObject(row: string[], type: SeedType) {
         const parsedDate = parseDate(row[i]);
         if (parsedDate) result[fieldName] = parsedDate;
       } else if (fieldName.includes("time") && type !== "narcotic_dispense") {
-        const parsedDatetime = parseDate(row[i], "M/D/YYY h:mm:ss");
+        const parsedDatetime = parseDate(row[i], "M/D/YYYY h:mm:ss");
         if (parsedDatetime) result[fieldName] = parsedDatetime;
       } else if (/^\d$/.test(row[i])) {
         // parse booleans
