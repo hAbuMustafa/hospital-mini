@@ -228,8 +228,7 @@
   </table>
 {/if}
 
-<!-- todo: separate entries in dedicated component -->
-<!-- todo: print with thead in all pages -->
+<!-- todo: separate entries in dedicated component and give it a property `editable` for things like narcotics shouldn't be editable. and also readonly invoices in display page -->
 
 <style>
   table {
@@ -299,7 +298,24 @@
       padding-inline: 0.75rem;
     }
 
+    thead {
+      @media print {
+        display: table-header-group;
+      }
+    }
+
     tbody {
+      @media print {
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+
+        td {
+          page-break-inside: avoid;
+        }
+      }
+
       tr {
         td {
           & > input[type="number"] {
@@ -349,6 +365,19 @@
       td {
         font-size: 1.5rem;
         font-weight: bold;
+      }
+
+      @media print {
+        display: table-row-group; /* to prevent tfoot from repeating at the end of every table on a page */
+      }
+    }
+  }
+
+  @media print {
+    @page {
+      @bottom-center {
+        content: "صفحة " counter(page) " من " counter(pages);
+        visibility: if-multiple;
       }
     }
   }
