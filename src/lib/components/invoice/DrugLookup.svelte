@@ -91,6 +91,8 @@
 
     background-color: var(--menu-bg-color);
 
+    z-index: 1;
+
     li > button {
       display: flex;
       flex-direction: column;
