@@ -239,7 +239,7 @@
     thead {
       background-color: var(--main-table-header-bg-color);
       th {
-        padding: 0.5rem 0.75rem;
+        padding: 0.25rem 0.75rem;
       }
     }
   }
