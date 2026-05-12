@@ -15,12 +15,17 @@ declare global {
 
   type StaleData = {
     ward: string;
-    narcotics: InvoiceDrugT[];
+    narcotics: InvoiceNarcoticDrugT[];
   };
 
-  type InvoiceDrugT = DrugT & {
+  type InvoiceSelectedDrugT = DrugT & {
     amount: number;
-    total: number | (() => number);
+    total: () => number;
+  };
+
+  type InvoiceNarcoticDrugT = DrugT & {
+    amount: number;
+    total: number;
   };
 }
 

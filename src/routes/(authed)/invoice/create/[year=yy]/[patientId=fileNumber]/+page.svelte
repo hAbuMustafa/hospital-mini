@@ -54,7 +54,7 @@
         ).then((d) => d.json())) as StaleData;
 
         if (staleData.narcotics.length) {
-          selectedDrugs
+          invoiceDrugs
             .filter((n) => typeof n.total === "function")
             .unshift(...staleData.narcotics);
         }
@@ -62,7 +62,12 @@
     );
   }
 
-  let selectedDrugs: InvoiceDrugT[] = $state([...staleData.narcotics]);
+  let selectedDrugs: InvoiceSelectedDrugT[] = $state([]);
+
+  let invoiceDrugs: (InvoiceNarcoticDrugT | InvoiceSelectedDrugT)[] = $derived([
+    ...staleData.narcotics,
+    ...selectedDrugs,
+  ]);
 </script>
 
 <header>
@@ -147,7 +152,7 @@
 
 <DrugLookup bind:list={selectedDrugs} />
 
-{#if selectedDrugs.length}
+{#if invoiceDrugs.length}
   <table class="invoice-items">
     <thead>
       <tr>
@@ -162,7 +167,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each selectedDrugs as drug, i (drug.id)}
+      {#each invoiceDrugs as drug, i (drug.id)}
         <tr class:hide-in-print={drug.amount === 0} transition:scale>
           <td>
             {#if typeof drug.total === "number"}
@@ -170,7 +175,7 @@
             {:else}
               <button
                 onclick={() => {
-                  selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
+                  invoiceDrugs = invoiceDrugs.filter((d) => d.id !== drug.id);
                 }}
               >
                 {i + 1}
@@ -208,7 +213,7 @@
       <tr>
         <th colspan="3">إجمالي الأدوية المنصرفة:</th>
         <td colspan="3">
-          {selectedDrugs
+          {invoiceDrugs
             .reduce((acc, curr) => {
               if (typeof curr.total === "number") {
                 return acc + curr.total;
