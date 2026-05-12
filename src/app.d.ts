@@ -15,12 +15,12 @@ declare global {
 
   type StaleData = {
     ward: string;
-    narcotics: (typeof narcoticsDispensed.$inferSelect)[];
+    narcotics: InvoiceDrugT[];
   };
 
   type InvoiceDrugT = DrugT & {
     amount: number;
-    total: () => number;
+    total: number | (() => number);
   };
 }
 

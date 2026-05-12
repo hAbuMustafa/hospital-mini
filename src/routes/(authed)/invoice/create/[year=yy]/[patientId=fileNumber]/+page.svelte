@@ -54,13 +54,15 @@
         ).then((d) => d.json())) as StaleData;
 
         if (staleData.narcotics.length) {
-          // todo: add narcotics amounts to invoice
+          selectedDrugs
+            .filter((n) => typeof n.total === "function")
+            .unshift(...staleData.narcotics);
         }
       }, 1000),
     );
   }
 
-  let selectedDrugs: InvoiceDrugT[] = $state([]);
+  let selectedDrugs: InvoiceDrugT[] = $state([...staleData.narcotics]);
 </script>
 
 <header>
@@ -163,37 +165,59 @@
       {#each selectedDrugs as drug, i (drug.id)}
         <tr class:hide-in-print={drug.amount === 0} transition:scale>
           <td>
-            <button
-              onclick={() => {
-                selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
-              }}
-            >
+            {#if typeof drug.total === "number"}
               {i + 1}
-            </button>
+            {:else}
+              <button
+                onclick={() => {
+                  selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
+                }}
+              >
+                {i + 1}
+              </button>
+            {/if}
           </td>
           {#if !patient.insured}
             <td>{drug.smc_code}</td>
           {/if}
           <td>{drug.name_ar}</td>
           <td>
-            <input
-              type="number"
-              name="amount-{drug.id}"
-              id="amount-{drug.id}"
-              bind:value={drug.amount}
-            />
+            {#if typeof drug.total === "number"}
+              {drug.amount}
+            {:else}
+              <input
+                type="number"
+                name="amount-{drug.id}"
+                id="amount-{drug.id}"
+                bind:value={drug.amount}
+              />
+            {/if}
           </td>
           <td>{drug.price_resale?.toFixed(2)}</td>
-          <td>{drug.total().toFixed(2)}</td>
+          <td>
+            {#if typeof drug.total === "number"}
+              {drug.total.toFixed(2)}
+            {:else}
+              {drug.total().toFixed(2)}
+            {/if}
+          </td>
         </tr>
       {/each}
     </tbody>
     <tfoot>
       <tr>
         <th colspan="3">إجمالي الأدوية المنصرفة:</th>
-        <td colspan="3"
-          >{selectedDrugs.reduce((acc, curr) => acc + curr.total(), 0).toFixed(2)}</td
-        >
+        <td colspan="3">
+          {selectedDrugs
+            .reduce((acc, curr) => {
+              if (typeof curr.total === "number") {
+                return acc + curr.total;
+              } else {
+                return acc + curr.total();
+              }
+            }, 0)
+            .toFixed(2)}
+        </td>
       </tr>
     </tfoot>
   </table>
@@ -270,21 +294,43 @@
       padding-inline: 0.75rem;
     }
 
-    tbody > tr > td:has(> button) {
-      padding: 0;
+    tbody {
+      tr {
+        td {
+          & > input[type="number"] {
+            width: 40%;
+            text-align: center;
 
-      & > button {
-        all: unset;
-        cursor: pointer;
-        position: relative;
-        width: 100%;
+            @media print {
+              appearance: textfield;
+              border: none;
+              font-size: 1rem;
+              &::-webkit-outer-spin-button,
+              &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+            }
+          }
 
-        &:hover::after {
-          content: "❌";
-          position: absolute;
-          inset: 0;
-          padding: 0;
-          pointer-events: none;
+          &:has(> button) {
+            padding: 0;
+
+            & > button {
+              all: unset;
+              cursor: pointer;
+              position: relative;
+              width: 100%;
+
+              &:hover::after {
+                content: "❌";
+                position: absolute;
+                inset: 0;
+                padding: 0;
+                pointer-events: none;
+              }
+            }
+          }
         }
       }
     }
