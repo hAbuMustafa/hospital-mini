@@ -1,13 +1,14 @@
 import { formatDate, setToEndOfDay } from "$lib/date/utils";
 import { db } from "$lib/server/db/";
 import {
+  drugs,
   narcoticsDispensed,
   patients_view,
   patientTransfers,
 } from "$lib/server/db/schema.js";
 import { json } from "@sveltejs/kit";
 import dayjs from "dayjs";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
 
 export async function GET({ url }) {
   const patient_id = url.searchParams.get("patient_id");
@@ -44,15 +45,23 @@ export async function GET({ url }) {
   to.setDate(to.getDate() + 1); // +1 offset as a days dispensed registration often happens next day
 
   const narcotics = await db
-    .select()
+    .select({
+      ...getTableColumns(drugs),
+      amount: sql<number>`sum(${narcoticsDispensed.amount})`.as("amount"),
+      total: sql<number>`sum(${narcoticsDispensed.amount}) * ${drugs.price_resale}`.as(
+        "total",
+      ),
+    })
     .from(narcoticsDispensed)
+    .innerJoin(drugs, eq(narcoticsDispensed.item_id, drugs.id))
     .where(
       and(
         eq(narcoticsDispensed.patient_id, patient_id),
         gte(narcoticsDispensed.timestamp, from),
         lte(narcoticsDispensed.timestamp, to),
       ),
-    );
+    )
+    .groupBy(narcoticsDispensed.item_id);
 
   return json({
     ward: periodWard?.to_ward ?? patient.ward_on_admission,
