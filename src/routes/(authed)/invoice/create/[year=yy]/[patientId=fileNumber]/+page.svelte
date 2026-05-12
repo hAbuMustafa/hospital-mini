@@ -291,6 +291,7 @@
 
   table.invoice-items {
     border-collapse: collapse;
+    max-width: 80vw;
 
     th,
     td {
@@ -377,8 +378,9 @@
     @page {
       @bottom-center {
         content: "صفحة " counter(page) " من " counter(pages);
-        visibility: if-multiple;
+        vertical-align: top;
       }
+      margin-bottom: 1.5cm;
     }
   }
 </style>
