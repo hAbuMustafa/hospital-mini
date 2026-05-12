@@ -2,7 +2,7 @@
   import { debounce } from "lodash-es";
 
   type PropsT = {
-    list: InvoiceDrugT[];
+    list: InvoiceSelectedDrugT[];
   };
 
   let { list = $bindable([]) }: PropsT = $props();
@@ -11,7 +11,7 @@
 
   let matches: DrugT[] = $state([]);
 
-  function selectDrug(item: InvoiceDrugT) {
+  function selectDrug(item: InvoiceSelectedDrugT) {
     const foundItemIndexInList = list.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
       alert(`الصنف موجود بالفعل في السطر ${foundItemIndexInList + 1}`);
