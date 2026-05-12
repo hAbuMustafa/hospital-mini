@@ -154,6 +154,16 @@
 
 {#if invoiceDrugs.length}
   <table class="invoice-items">
+    <colgroup>
+      <col />
+      {#if !patient.insured}
+        <col />
+      {/if}
+      <col />
+      <col class="amount-column" />
+      <col />
+      <col />
+    </colgroup>
     <thead>
       <tr>
         <th>م</th>
@@ -300,6 +310,10 @@
       padding-inline: 0.75rem;
     }
 
+    .amount-column {
+      width: 8vw;
+    }
+
     thead {
       @media print {
         display: table-header-group;
@@ -320,18 +334,23 @@
 
       tr {
         td {
-          & > input[type="number"] {
-            width: 40%;
-            text-align: center;
+          &:has(input[type="number"]) {
+            padding: 0;
 
-            @media print {
-              appearance: textfield;
-              border: none;
-              font-size: 1rem;
-              &::-webkit-outer-spin-button,
-              &::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
+            & > input[type="number"] {
+              box-sizing: border-box;
+              width: 100%;
+              text-align: center;
+
+              @media print {
+                appearance: textfield;
+                border: none;
+                font-size: 1rem;
+                &::-webkit-outer-spin-button,
+                &::-webkit-inner-spin-button {
+                  -webkit-appearance: none;
+                  margin: 0;
+                }
               }
             }
           }
