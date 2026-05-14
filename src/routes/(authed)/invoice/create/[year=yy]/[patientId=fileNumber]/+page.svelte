@@ -1,5 +1,6 @@
 <script lang="ts">
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
+  import PageBorder from "$lib/components/PageBorder.svelte";
   import {
     formatDate,
     getDuration,
@@ -237,7 +238,7 @@
     </tfoot>
   </table>
 {/if}
-<div class="page-border"></div>
+<PageBorder />
 
 <!-- todo: separate entries in dedicated component and give it a property `editable` for things like narcotics shouldn't be editable. and also readonly invoices in display page -->
 
@@ -391,20 +392,6 @@
       @media print {
         display: table-row-group; /* to prevent tfoot from repeating at the end of every table on a page */
       }
-    }
-  }
-
-  .page-border {
-    display: none;
-
-    @media print {
-      display: block;
-
-      position: fixed;
-      inset: 0;
-      border: 3px double black;
-      pointer-events: none;
-      z-index: 9999;
     }
   }
 
