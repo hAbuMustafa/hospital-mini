@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import "./styles.css";
   import { Toaster } from "svelte-sonner";
 
@@ -6,7 +7,7 @@
 </script>
 
 <svelte:head>
-  <title>مستشفى 23 يوليو للأمراض الصدرية</title>
+  <title>{page.data.title ?? "مستشفى 23 يوليو للأمراض الصدرية"}</title>
 </svelte:head>
 
 <nav>
