@@ -4,9 +4,10 @@
 
   type PropsT = {
     list: InvoiceSelectedDrugT[];
+    filterIds?: number[];
   };
 
-  let { list = $bindable([]) }: PropsT = $props();
+  let { list = $bindable([]), filterIds }: PropsT = $props();
 
   let query = $state("");
 
@@ -36,7 +37,11 @@
     oninput={debounce(async () => {
       if (query === "") return;
 
-      matches = await fetch(`/api/v1/drug?q=${query}`).then((d) => d.json());
+      matches = await fetch(`/api/v1/drug?q=${query}`)
+        .then((data) => data.json())
+        .then((dList: DrugT[]) =>
+          dList.filter((d) => filterIds?.every((id) => d.id != id)),
+        );
     }, 500)}
   />
   {#if matches.length}

@@ -151,7 +151,7 @@
   <h2>سداد فاتورة</h2>
 </header>
 
-<DrugLookup bind:list={selectedDrugs} />
+<DrugLookup bind:list={selectedDrugs} filterIds={[116, 117, 119, 229]} />
 
 {#if invoiceDrugs.length}
   <table class="invoice-items">
