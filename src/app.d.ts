@@ -21,11 +21,13 @@ declare global {
   type InvoiceSelectedDrugT = DrugT & {
     amount: number;
     total: () => number;
+    editable: boolean;
   };
 
   type InvoiceNarcoticDrugT = DrugT & {
     amount: number;
     total: number;
+    editable?: boolean;
   };
 }
 

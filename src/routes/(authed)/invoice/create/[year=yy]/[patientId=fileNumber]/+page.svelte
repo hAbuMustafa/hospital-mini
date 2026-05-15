@@ -181,7 +181,7 @@
       {#each invoiceDrugs as drug, i (drug.id)}
         <tr class:hide-in-print={drug.amount === 0} transition:scale>
           <td>
-            {#if typeof drug.total === "number"}
+            {#if !drug.editable}
               {i + 1}
             {:else}
               <button
@@ -198,7 +198,7 @@
           {/if}
           <td>{drug.name_ar}</td>
           <td>
-            {#if typeof drug.total === "number"}
+            {#if !drug.editable}
               {drug.amount}
             {:else}
               <input
@@ -239,8 +239,6 @@
   </table>
 {/if}
 <PageBorder />
-
-<!-- todo: separate entries in dedicated component and give it a property `editable` for things like narcotics shouldn't be editable. and also readonly invoices in display page -->
 
 <style>
   table {
