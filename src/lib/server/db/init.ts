@@ -14,6 +14,7 @@ import {
 } from "$lib/server/db/schema";
 import { getSheetRange } from "$lib/server/gcp/sheets";
 import { sheetRowToObject } from "$lib/server/gcp/utils";
+import type { SQLiteTableWithColumns } from "drizzle-orm/sqlite-core";
 
 export async function initialize() {
   // 1. FETCH
@@ -65,7 +66,7 @@ export async function initialize() {
     .slice(1)
     .map((item) =>
       sheetRowToObject(item, "admission"),
-    ) as unknown as typeof patientAdmissions.$inferInsert;
+    ) as unknown as (typeof patientAdmissions.$inferInsert)[];
 
   const seedableDischarges = fetchedPatientDischarges.values
     .slice(1)
@@ -80,11 +81,17 @@ export async function initialize() {
     .map((item) => sheetRowToObject(item, "narcotic_dispense"));
 
   // 4. INSERT New data
-  await db.insert(drugs).values(seedableDrugs);
-  await db.insert(patientAdmissions).values(seedableAdmissions);
-  await db.insert(patientTransfers).values(seedableTransfers);
-  await db.insert(patientDischarges).values(seedableDischarges);
-  await db.insert(narcoticsDispensed).values(seedableNarcoticsDispensed);
+  try {
+    await db.insert(drugs).values(seedableDrugs);
+    seedableAdmissions.forEach(async (v) => await db.insert(patientAdmissions).values(v));
+    seedableTransfers.forEach(async (v) => await db.insert(patientTransfers).values(v));
+    seedableDischarges.forEach(async (v) => await db.insert(patientDischarges).values(v));
+    seedableNarcoticsDispensed.forEach(
+      async (v) => await db.insert(narcoticsDispensed).values(v),
+    );
+  } catch (e) {
+    console.error("INSERT FAILED::", e);
+  }
 
   await db.insert(status).values([
     { item: "admissions", value: fetchedPatientAdmissions.values.length },
