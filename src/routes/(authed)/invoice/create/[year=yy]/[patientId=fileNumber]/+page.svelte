@@ -69,7 +69,17 @@
     ...staleData.narcotics,
     ...selectedDrugs,
   ]);
+
+  let pageTitle = $derived.by(() => {
+    if (periodSameAsStay) return patient.name;
+
+    return `${patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
+  });
 </script>
+
+<svelte:head>
+  <title>{pageTitle}</title>
+</svelte:head>
 
 <header>
   <h1>فاتورة أدوية</h1>
