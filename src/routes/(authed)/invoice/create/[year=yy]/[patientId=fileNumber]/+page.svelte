@@ -215,6 +215,7 @@
                 type="number"
                 name="amount-{drug.id}"
                 id="amount-{drug.id}"
+                min="0"
                 bind:value={drug.amount}
               />
             {/if}
