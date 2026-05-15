@@ -25,6 +25,7 @@
 
     item.amount = 1;
     item.total = () => item.amount * (item.price_resale ?? 0);
+    item.editable = true;
     list.push(item);
   }
 </script>
