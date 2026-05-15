@@ -1,5 +1,6 @@
 <script lang="ts">
   import { debounce } from "lodash-es";
+  import { toast } from "svelte-sonner";
 
   type PropsT = {
     list: InvoiceSelectedDrugT[];
@@ -14,7 +15,10 @@
   function selectDrug(item: InvoiceSelectedDrugT) {
     const foundItemIndexInList = list.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
-      alert(`الصنف موجود بالفعل في السطر ${foundItemIndexInList + 1}`);
+      list[foundItemIndexInList].amount++;
+      toast.info(
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${list[foundItemIndexInList].amount}`,
+      );
       return;
     }
 

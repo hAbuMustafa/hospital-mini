@@ -1,5 +1,7 @@
 <script lang="ts">
   import "./styles.css";
+  import { Toaster } from "svelte-sonner";
+
   const { data, children } = $props();
 </script>
 
@@ -21,6 +23,8 @@
 <div class="main-wrapper">
   {@render children()}
 </div>
+
+<Toaster position="bottom-left" richColors closeButton />
 
 <style>
   .main-wrapper {
