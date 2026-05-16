@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",
+    "@lucide/svelte": "^1.16.0",
     "dayjs": "^1.11.20",
     "google-auth-library": "^10.6.2",
     "googleapis": "^171.4.0",
