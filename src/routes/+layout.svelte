@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import SyncAll from "$lib/components/layout/SyncAll.svelte";
   import "./styles.css";
   import { Toaster } from "svelte-sonner";
 
@@ -19,6 +20,12 @@
     <li><a href="/invoice/create">إصدار فاتورة</a></li>
     <li><a href="/patients">المرضى</a></li>
   </ul>
+
+  <ul>
+    <li>
+      <SyncAll />
+    </li>
+  </ul>
 </nav>
 
 <div class="main-wrapper">
@@ -37,16 +44,10 @@
 
   nav {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
 
     position: relative;
-  }
-
-  nav > .logo {
-    position: absolute;
-    inset-inline-start: 0;
-    inset-block-start: 0;
   }
 
   nav > ul {
