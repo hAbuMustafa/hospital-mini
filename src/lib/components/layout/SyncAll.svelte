@@ -21,15 +21,20 @@
   }}
 >
   <button type="submit" aria-label="sync all" disabled={loading} class:loading>
-    <span>
-      <RefreshCw />
-    </span>
+    <RefreshCw />
   </button>
 </form>
 
 <style>
-  .loading > span {
-    animation: spin 1s infinite;
+  button {
+    padding: 0;
+
+    &.loading {
+      :global(svg) {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+      }
+    }
   }
 
   @keyframes spin {
