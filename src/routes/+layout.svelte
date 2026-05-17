@@ -21,7 +21,7 @@
     <li><a href="/patients">المرضى</a></li>
   </ul>
 
-  <ul>
+  <ul class="hide-in-print">
     <li>
       <SyncAll />
     </li>
