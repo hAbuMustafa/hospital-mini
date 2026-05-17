@@ -1,10 +1,14 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
   import { RefreshCw } from "@lucide/svelte";
 
   let loading = $state(false);
+</script>
 
-  $effect(() => {
+<form
+  method="get"
+  onsubmit={(e) => {
+    e.preventDefault();
+
     loading = true;
 
     fetch("api/v1/sync/all")
@@ -14,13 +18,6 @@
         loading = false;
       })
       .catch((e) => console.error(e));
-  });
-</script>
-
-<form
-  method="get"
-  onsubmit={(e) => {
-    e.preventDefault();
   }}
 >
   <button type="submit" aria-label="sync all" disabled={loading} class:loading>
@@ -36,9 +33,6 @@
   }
 
   @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
     to {
       transform: rotate(1turn);
     }
