@@ -28,10 +28,23 @@
 <style>
   button {
     padding: 0;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+
+    :global(svg) {
+      display: inline-block;
+    }
+
+    &:hover {
+      :global(svg) {
+        filter: drop-shadow(0px 0px 4px lightgreen);
+        animation: spin 5s linear infinite;
+      }
+    }
 
     &.loading {
       :global(svg) {
-        display: inline-block;
         animation: spin 1s linear infinite;
       }
     }
