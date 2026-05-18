@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { authState } from "$lib/auth-client/auth.svelte";
   import SyncAll from "$lib/components/layout/SyncAll.svelte";
@@ -31,7 +32,16 @@
       </li>
       <li>أهلا، {authState.user!.name.split(" ")[0]}!</li>
       <li>
-        <button type="button" onclick={() => authState.signOut()}> تسجيل خروج </button>
+        <button
+          type="button"
+          class="link"
+          onclick={() => {
+            authState.signOut();
+            goto("/");
+          }}
+        >
+          تسجيل خروج
+        </button>
       </li>
     {:else}
       <li>

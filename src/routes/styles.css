@@ -67,6 +67,15 @@ button.btn {
   background-color: var(--main-accent-color);
 }
 
+button.link {
+  all: unset;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 input:user-invalid {
   background-color: salmon;
   color: black;
