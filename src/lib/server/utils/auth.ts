@@ -3,6 +3,8 @@ import { admin } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db_auth } from "$lib/server/db/index-auth";
 import { PUBLIC_BETTER_AUTH_URL } from "$env/static/public";
+import { sveltekitCookies } from "better-auth/svelte-kit";
+import { getRequestEvent } from "$app/server";
 
 export const auth = betterAuth({
   baseURL: PUBLIC_BETTER_AUTH_URL,
@@ -17,6 +19,7 @@ export const auth = betterAuth({
       defaultRole: "e-ph-pharmacist",
       adminRole: "admin",
     }),
+    sveltekitCookies(getRequestEvent),
   ],
   trustedOrigins: [PUBLIC_BETTER_AUTH_URL],
 });
