@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { authState } from "$lib/auth-client/auth.svelte";
   import SyncAll from "$lib/components/layout/SyncAll.svelte";
   import "./styles.css";
   import { Toaster } from "svelte-sonner";
@@ -16,15 +17,30 @@
     <img src="/favicon.png" alt="مستشفى 23 يوليو للأمراض الصدرية" width="120" />
   </a>
 
-  <ul class="hide-in-print">
-    <li><a href="/invoice/create">إصدار فاتورة</a></li>
-    <li><a href="/patients">المرضى</a></li>
-  </ul>
+  {#if authState.isAuthenticated}
+    <ul class="hide-in-print">
+      <li><a href="/invoice/create">إصدار فاتورة</a></li>
+      <li><a href="/patients">المرضى</a></li>
+    </ul>
+  {/if}
 
   <ul class="hide-in-print">
-    <li>
-      <SyncAll />
-    </li>
+    {#if authState.isAuthenticated}
+      <li>
+        <SyncAll />
+      </li>
+      <li>أهلا، {authState.user!.name.split(" ")[0]}!</li>
+      <li>
+        <button type="button" onclick={() => authState.signOut()}> تسجيل خروج </button>
+      </li>
+    {:else}
+      <li>
+        <a href="/register">إنشاء حساب</a>
+      </li>
+      <li>
+        <a href="/login">تسجيل الدخول</a>
+      </li>
+    {/if}
   </ul>
 </nav>
 
