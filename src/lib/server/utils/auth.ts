@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db_auth } from "$lib/server/db/index-auth";
 import { sveltekitCookies } from "better-auth/svelte-kit";
@@ -11,5 +12,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [sveltekitCookies(getRequestEvent)],
+  plugins: [
+    sveltekitCookies(getRequestEvent),
+    admin({
+      defaultRole: "e-ph-pharmacist",
+      adminRole: "admin",
+    }),
+  ],
 });
