@@ -3,8 +3,7 @@
   import { authState } from "$lib/auth-client/auth.svelte";
   import { goto } from "$app/navigation";
   import { triadicArabicName } from "$lib/utils/patterns";
-
-  let error = $state("");
+  import { toast } from "svelte-sonner";
 
   $effect(() => {
     if (authState.isAuthenticated) goto("/");
@@ -19,9 +18,10 @@
     return async ({ result }) => {
       if (result.type === "success") {
         await authState.refresh();
-        goto("/");
+        toast.success("تم تسجيل الحساب بنجاح. يمكنك الآن تسجيل الدخول");
+        goto("/login");
       } else if (result.type === "failure") {
-        error = (result.data?.message as string | undefined) ?? "فشل إنشاء الحساب";
+        toast.error((result.data?.message as string | undefined) ?? "فشل إنشاء الحساب");
       }
     };
   }}
@@ -44,10 +44,6 @@
 
   <label for="confirm-password">تأكيد كلمة المرور</label>
   <input type="password" id="confirm-password" name="confirm-password" required />
-
-  {#if error}
-    <p class="error">{error}</p>
-  {/if}
 
   <input type="submit" value="إنشاء حساب" required />
 </form>
@@ -72,9 +68,5 @@
       border-radius: 4px;
       border: var(--main-border);
     }
-  }
-
-  p.error {
-    grid-column: 1/-1;
   }
 </style>

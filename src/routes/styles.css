@@ -83,24 +83,6 @@ input:user-invalid {
   animation: shake 0.1s infinite;
 }
 
-p.error {
-  background-color: salmon;
-  color: maroon;
-  border: maroon 1px solid;
-  border-radius: 4px;
-  text-align: center;
-  padding: 0.25rem 1rem;
-}
-
-p.success {
-  background-color: greenyellow;
-  color: green;
-  border: green 1px solid;
-  border-radius: 4px;
-  text-align: center;
-  padding: 0.25rem 1rem;
-}
-
 @media print {
   @page {
     margin: 5mm;
