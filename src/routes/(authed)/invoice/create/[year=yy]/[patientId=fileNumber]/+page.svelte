@@ -163,30 +163,30 @@
 
 <DrugLookup bind:list={selectedDrugs} filterIds={[116, 117, 119, 229]} />
 
-{#if invoiceDrugs.length}
-  <table class="invoice-items">
-    <colgroup>
+<table class="invoice-items">
+  <colgroup>
+    <col />
+    {#if !patient.insured}
       <col />
+    {/if}
+    <col />
+    <col class="amount-column" />
+    <col />
+    <col />
+  </colgroup>
+  <thead>
+    <tr>
+      <th>م</th>
       {#if !patient.insured}
-        <col />
+        <th>كود النفقة</th>
       {/if}
-      <col />
-      <col class="amount-column" />
-      <col />
-      <col />
-    </colgroup>
-    <thead>
-      <tr>
-        <th>م</th>
-        {#if !patient.insured}
-          <th>كود النفقة</th>
-        {/if}
-        <th>اسم الصنف</th>
-        <th>الكمية</th>
-        <th>سعر الوحدة</th>
-        <th>الإجمالي</th>
-      </tr>
-    </thead>
+      <th>اسم الصنف</th>
+      <th>الكمية</th>
+      <th>سعر الوحدة</th>
+      <th>الإجمالي</th>
+    </tr>
+  </thead>
+  {#if invoiceDrugs.length}
     <tbody>
       {#each invoiceDrugs as drug, i (drug.id)}
         <tr class:hide-in-print={drug.amount === 0} transition:scale>
@@ -247,8 +247,14 @@
         </td>
       </tr>
     </tfoot>
-  </table>
-{/if}
+  {:else}
+    <tbody>
+      <tr>
+        <td colspan="7">لم يتم إدخال أدوية</td>
+      </tr>
+    </tbody>
+  {/if}
+</table>
 <PageBorder />
 
 <style>
