@@ -406,11 +406,12 @@
 
   @media print {
     @page {
-      @bottom-center {
+      margin-bottom: 1.5cm;
+
+      @bottom-left {
         content: "صفحة " counter(page) " من " counter(pages);
         vertical-align: top;
       }
-      margin-bottom: 1.5cm;
     }
   }
 </style>
