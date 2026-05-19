@@ -1,4 +1,4 @@
-import type { drugs, narcoticsDispensed } from "$lib/server/db/schema";
+import type { drugs, narcoticsDispensed, patients_view } from "$lib/server/db/schema";
 import type { Session, User } from "better-auth";
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
@@ -16,6 +16,7 @@ declare global {
   }
 
   type DrugT = typeof drugs.$inferSelect;
+  type PatientT = typeof patients_view.$inferSelect;
 
   type StaleData = {
     ward: string;
