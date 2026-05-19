@@ -11,7 +11,7 @@
 
     loading = true;
 
-    fetch("api/v1/sync/all")
+    fetch("/api/v1/sync/all")
       .then((r) => r.json())
       .then((d) => {
         console.log(d);
