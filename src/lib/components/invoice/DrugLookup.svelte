@@ -87,6 +87,9 @@
     position-anchor: --drug-lookup-input;
     position-try-fallbacks: --bottom-center, --top-center;
 
+    max-height: 50svh;
+    overflow-y: scroll;
+
     list-style: none;
     padding: 1rem;
     border-radius: 0.5rem;
