@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
+  import PatientLookup from "$lib/components/PatientLookup.svelte";
   import { formatDate } from "$lib/date/utils";
 
   let { data } = $props();
@@ -74,6 +76,27 @@
   </tbody>
 </table>
 
+<PatientLookup>
+  {#snippet patientSnippet(patient: PatientT)}
+    <button
+      class="patient-select"
+      onclick={() => {
+        goto(`create/${patient.id}`);
+      }}
+    >
+      <span>{patient.id}</span>
+      <strong>{patient.name}</strong>
+      <span>
+        من <span class="date">{formatDate(patient.admission_date, "YYYY/MM/DD")}</span>
+        {#if patient.discharge_date}
+          إلى <span class="date">{formatDate(patient.discharge_date, "YYYY/MM/DD")}</span>
+        {/if}
+      </span>
+      <span>{patient.id_type}: {patient.id_number}</span>
+    </button>
+  {/snippet}
+</PatientLookup>
+
 <style>
   .date-controls {
     display: flex;
@@ -105,5 +128,18 @@
   th,
   td {
     padding: 0.5rem;
+  }
+
+  button.patient-select {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    & > span > span.date {
+      border: var(--main-border);
+      padding-inline: 0.25rem;
+      border-radius: 4px;
+    }
   }
 </style>
