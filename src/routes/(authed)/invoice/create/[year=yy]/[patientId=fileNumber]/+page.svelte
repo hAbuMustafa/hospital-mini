@@ -226,7 +226,7 @@
             {:else}
               <button
                 onclick={() => {
-                  invoiceDrugs = invoiceDrugs.filter((d) => d.id !== drug.id);
+                  selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
                 }}
               >
                 {i + 1}
