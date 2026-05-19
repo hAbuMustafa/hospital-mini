@@ -461,10 +461,16 @@
   }
 
   table.signatures {
+    display: none;
     margin-top: 1rem;
+    width: 80vw;
 
     thead {
       background-color: unset;
+    }
+
+    @media print {
+      display: table;
     }
   }
 
