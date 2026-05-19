@@ -11,6 +11,7 @@
   } from "$lib/date/utils";
 
   import { debounce } from "lodash-es";
+  import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
 
   const today = getToday();
@@ -76,6 +77,22 @@
 
     return `${patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
   });
+
+  function selectDrug(item: InvoiceSelectedDrugT) {
+    const foundItemIndexInList = selectedDrugs.findIndex((d) => d.id === item.id);
+    if (foundItemIndexInList > -1) {
+      selectedDrugs[foundItemIndexInList].amount++;
+      toast.info(
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`,
+      );
+      return;
+    }
+
+    item.amount = 1;
+    item.total = () => item.amount * (item.price_resale ?? 0);
+    item.editable = true;
+    selectedDrugs.push(item);
+  }
 </script>
 
 <svelte:head>
@@ -162,7 +179,19 @@
   <h2>سداد فاتورة</h2>
 </header>
 
-<DrugLookup bind:list={selectedDrugs} filterIds={[116, 117, 119, 229]} />
+<DrugLookup filterIds={[116, 117, 119, 229]}>
+  {#snippet drugSnippet(drug: DrugT)}
+    <button
+      type="button"
+      class="drug-select"
+      onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+    >
+      <strong class="name-ar">{drug.name_ar}</strong>
+      <span class="name">{drug.tradename_ar}</span>
+      <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
+    </button>
+  {/snippet}
+</DrugLookup>
 
 <table class="invoice-items">
   <colgroup>
@@ -448,5 +477,11 @@
         vertical-align: top;
       }
     }
+  }
+
+  button.drug-select {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 </style>
