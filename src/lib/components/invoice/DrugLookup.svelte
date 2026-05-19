@@ -51,7 +51,7 @@
         <li>
           <button type="button" onclick={() => selectDrug(drug)}>
             <strong class="name-ar">{drug.name_ar}</strong>
-            <span class="name">{drug.name}</span>
+            <span class="name">{drug.tradename_ar}</span>
             <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
           </button>
         </li>
