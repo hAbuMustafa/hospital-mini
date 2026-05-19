@@ -1,6 +1,6 @@
 import { db } from "$lib/server/db/";
 import { patients_view } from "$lib/server/db/schema";
-import { like, eq } from "drizzle-orm";
+import { like, eq, desc } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 import { fuzzyQuery } from "$lib/server/db/utils.js";
 
@@ -23,19 +23,22 @@ export async function GET({ url }) {
       patientMatches = await db
         .select()
         .from(patients_view)
-        .where(like(patients_view.name, fuzzyQuery(patientQuery)));
+        .where(like(patients_view.name, fuzzyQuery(patientQuery)))
+        .orderBy(desc(patients_view.admission_date));
       break;
     case "file_id":
       patientMatches = await db
         .select()
         .from(patients_view)
-        .where(eq(patients_view.id, patientQuery));
+        .where(eq(patients_view.id, patientQuery))
+        .orderBy(desc(patients_view.admission_date));
       break;
     default:
       patientMatches = await db
         .select()
         .from(patients_view)
-        .where(like(patients_view.id, `${patientQuery}%`));
+        .where(like(patients_view.id, `${patientQuery}%`))
+        .orderBy(desc(patients_view.admission_date));
 
       break;
   }
