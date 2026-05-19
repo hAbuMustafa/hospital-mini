@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { authState } from "$lib/auth-client/auth.svelte.js";
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
   import {
@@ -255,6 +256,26 @@
     </tbody>
   {/if}
 </table>
+
+<table class="signatures">
+  <thead>
+    <tr>
+      <th>مشرف القسم</th>
+      <th>طبيب صيدلي</th>
+      <th>مدير الرعاية</th>
+      <th>يعتمد،<br />مدير المستشفى/</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td></td>
+      <td>{authState.user?.name}</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
 <PageBorder />
 
 <style>
@@ -407,6 +428,14 @@
       @media print {
         display: table-row-group; /* to prevent tfoot from repeating at the end of every table on a page */
       }
+    }
+  }
+
+  table.signatures {
+    margin-top: 1rem;
+
+    thead {
+      background-color: unset;
     }
   }
 
