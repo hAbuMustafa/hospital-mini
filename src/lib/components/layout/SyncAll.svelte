@@ -1,44 +1,56 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
   import { RefreshCw } from "@lucide/svelte";
 
   let loading = $state(false);
-
-  $effect(() => {
-    loading = true;
-
-    fetch("api/v1/sync/all")
-      .then((r) => r.json())
-      .then((d) => {
-        console.log(d);
-        loading = false;
-      })
-      .catch((e) => console.error(e));
-  });
 </script>
 
 <form
   method="get"
   onsubmit={(e) => {
     e.preventDefault();
+
+    loading = true;
+
+    fetch("/api/v1/sync/all")
+      .then((r) => r.json())
+      .then((d) => {
+        console.log(d);
+        loading = false;
+      })
+      .catch((e) => console.error(e));
   }}
 >
   <button type="submit" aria-label="sync all" disabled={loading} class:loading>
-    <span>
-      <RefreshCw />
-    </span>
+    <RefreshCw />
   </button>
 </form>
 
 <style>
-  .loading > span {
-    animation: spin 1s infinite;
+  button {
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+
+    :global(svg) {
+      display: inline-block;
+    }
+
+    &:hover {
+      :global(svg) {
+        filter: drop-shadow(0px 0px 4px lightgreen);
+        animation: spin 5s linear infinite;
+      }
+    }
+
+    &.loading {
+      :global(svg) {
+        animation: spin 1s linear infinite;
+      }
+    }
   }
 
   @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
     to {
       transform: rotate(1turn);
     }

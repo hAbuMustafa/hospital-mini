@@ -15,7 +15,11 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db-auth:push": "drizzle-kit push --config=drizzle-auth.config.ts",
+    "db-auth:generate": "drizzle-kit generate --config=drizzle-auth.config.ts",
+    "db-auth:migrate": "drizzle-kit migrate --config=drizzle-auth.config.ts",
+    "db-auth:studio": "drizzle-kit studio --config=drizzle-auth.config.ts"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",
@@ -37,6 +41,7 @@
   "dependencies": {
     "@libsql/client": "^0.17.3",
     "@lucide/svelte": "^1.16.0",
+    "better-auth": "^1.6.11",
     "dayjs": "^1.11.20",
     "google-auth-library": "^10.6.2",
     "googleapis": "^171.4.0",
