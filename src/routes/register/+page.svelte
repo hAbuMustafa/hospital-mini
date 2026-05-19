@@ -4,8 +4,6 @@
   import { goto } from "$app/navigation";
   import { triadicArabicName } from "$lib/utils/patterns";
 
-  let { form } = $props();
-
   let error = $state("");
 
   $effect(() => {
