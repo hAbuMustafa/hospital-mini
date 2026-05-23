@@ -21,7 +21,7 @@
   {#if authState.isAuthenticated}
     <ul class="hide-in-print">
       <li><a href="/invoice/create">إصدار فاتورة</a></li>
-      <li><a href="/patients">المرضى</a></li>
+      <li><a href="/patient">المرضى</a></li>
     </ul>
   {/if}
 
