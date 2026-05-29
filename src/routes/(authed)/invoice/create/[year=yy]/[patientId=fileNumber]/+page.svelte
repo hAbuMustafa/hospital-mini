@@ -13,16 +13,23 @@
   import { debounce } from "lodash-es";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
+  import { invoiceData } from "./state.svelte";
 
   const today = getToday();
   setToEndOfDay(today);
 
   let { data } = $props();
 
-  const { patient } = $derived(data);
-  const stringifiedAdmissionDate = $derived(formatDate(patient.admission_date));
+  invoiceData.patient = data.patient;
+  invoiceData.staleData = data.staleData;
+
+  const stringifiedAdmissionDate = $derived(
+    formatDate(invoiceData.patient.admission_date)
+  );
   const stringifiedDischargeDate = $derived(
-    patient.discharge_date ? formatDate(patient.discharge_date) : ""
+    invoiceData.patient.discharge_date
+      ? formatDate(invoiceData.patient.discharge_date)
+      : ""
   );
 
   let fromDateString = $derived(stringifiedAdmissionDate);
@@ -41,8 +48,6 @@
     )
   );
 
-  let staleData = $derived(data.staleData);
-
   let fromInput: HTMLInputElement;
   let toInput: HTMLInputElement;
 
@@ -52,14 +57,14 @@
       debounce(async () => {
         if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
 
-        staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
+        invoiceData.staleData = (await fetch(
+          `/api/v1/patient/getStaleData?patient_id=${invoiceData.patient?.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
         ).then((d) => d.json())) as StaleData;
 
-        if (staleData.narcotics.length) {
+        if (invoiceData.staleData.narcotics.length) {
           invoiceDrugs
             .filter((n) => typeof n.total === "function")
-            .unshift(...staleData.narcotics);
+            .unshift(...invoiceData.staleData.narcotics);
         }
       }, 1000)
     );
@@ -68,14 +73,14 @@
   let selectedDrugs: InvoiceSelectedDrugT[] = $state([]);
 
   let invoiceDrugs: (InvoiceNarcoticDrugT | InvoiceSelectedDrugT)[] = $derived([
-    ...staleData.narcotics,
+    ...invoiceData.staleData.narcotics,
     ...selectedDrugs,
   ]);
 
   let pageTitle = $derived.by(() => {
-    if (periodSameAsStay) return patient.name;
+    if (periodSameAsStay) return invoiceData.patient?.name;
 
-    return `${patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
+    return `${invoiceData.patient?.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
   });
 
   function selectDrug(item: InvoiceSelectedDrugT) {
@@ -105,7 +110,7 @@
     <tbody>
       <tr>
         <th>رقم القيد:</th>
-        <td>{patient.id}</td>
+        <td>{invoiceData.patient?.id}</td>
 
         <th>مدة الإقامة:</th>
         <td>
@@ -114,26 +119,26 @@
       </tr>
       <tr>
         <th>اسم المريض:</th>
-        <td>{patient.name}</td>
+        <td>{invoiceData.patient?.name}</td>
 
-        <th>{patient.id_type}:</th>
-        <td>{patient.id_number}</td>
+        <th>{invoiceData.patient?.id_type}:</th>
+        <td>{invoiceData.patient?.id_number}</td>
       </tr>
       <tr>
         <th>القسم:</th>
-        <td>{staleData.ward}</td>
+        <td>{invoiceData.staleData?.ward}</td>
 
         <th>تاريخ الدخول:</th>
-        <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
+        <td>{formatDate(invoiceData.patient?.admission_date!, "YYYY/MM/DD")}</td>
       </tr>
       <tr>
         <th>التشخيص:</th>
-        <td>{patient.diagnosis}</td>
+        <td>{invoiceData.patient?.diagnosis}</td>
 
         <th>تاريخ الخروج:</th>
         <td>
-          {#if patient.discharge_date}
-            {formatDate(patient.discharge_date, "YYYY/MM/DD")}
+          {#if invoiceData.patient?.discharge_date}
+            {formatDate(invoiceData.patient?.discharge_date, "YYYY/MM/DD")}
           {/if}
         </td>
       </tr>
@@ -196,7 +201,7 @@
 <table class="invoice-items">
   <colgroup>
     <col />
-    {#if !patient.insured}
+    {#if !invoiceData.patient?.insured}
       <col />
     {/if}
     <col />
@@ -207,7 +212,7 @@
   <thead>
     <tr>
       <th>م</th>
-      {#if !patient.insured}
+      {#if !invoiceData.patient?.insured}
         <th>كود النفقة</th>
       {/if}
       <th>اسم الصنف</th>
@@ -239,7 +244,7 @@
               </button>
             {/if}
           </td>
-          {#if !patient.insured}
+          {#if !invoiceData.patient?.insured}
             <td>{drug.smc_code}</td>
           {/if}
           <td>{drug.name_ar}</td>
