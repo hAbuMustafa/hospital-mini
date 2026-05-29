@@ -454,6 +454,11 @@
         &.amount-not-allowed {
           background-color: salmon;
           text-decoration: line-through;
+
+          @media print {
+            background-color: unset;
+            text-decoration: unset;
+          }
         }
       }
     }
