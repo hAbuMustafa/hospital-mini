@@ -436,12 +436,16 @@
               position: relative;
               width: 100%;
 
-              &:hover::after {
+              &:is(:hover, :focus-within)::after {
                 content: "❌";
                 position: absolute;
                 inset: 0;
                 padding: 0;
                 pointer-events: none;
+              }
+
+              &:focus-within {
+                outline: 2px double var(--main-accent-color);
               }
             }
           }
