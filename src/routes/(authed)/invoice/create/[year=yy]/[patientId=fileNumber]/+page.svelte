@@ -1,22 +1,14 @@
 <script lang="ts">
-  import { authState } from "$lib/auth-client/auth.svelte.js";
+  import { authState } from "$lib/auth-client/auth.svelte";
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
-  import {
-    formatDate,
-    getDuration,
-    getTermed,
-    getToday,
-    setToEndOfDay,
-  } from "$lib/date/utils";
+  import { formatDate } from "$lib/date/utils";
 
   import { debounce } from "lodash-es";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
   import { invoiceData } from "./state.svelte";
-
-  const today = getToday();
-  setToEndOfDay(today);
+  import PatientData from "./PatientData.svelte";
 
   let { data } = $props();
 
@@ -32,20 +24,12 @@
       : ""
   );
 
-  let fromDateString = $derived(stringifiedAdmissionDate);
-  let toDateString = $derived(stringifiedDischargeDate);
+  invoiceData.fromDateString = stringifiedAdmissionDate;
+  invoiceData.toDateString = stringifiedDischargeDate;
 
   let periodSameAsStay = $derived(
-    fromDateString === stringifiedAdmissionDate &&
-      toDateString === stringifiedDischargeDate
-  );
-
-  const pricingDuration = $derived(
-    getTermed(
-      getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
-      "يوم",
-      "أيام"
-    )
+    invoiceData.fromDateString === stringifiedAdmissionDate &&
+      invoiceData.toDateString === stringifiedDischargeDate
   );
 
   let fromInput: HTMLInputElement;
@@ -58,7 +42,7 @@
         if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
 
         invoiceData.staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${invoiceData.patient?.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
+          `/api/v1/patient/getStaleData?patient_id=${invoiceData.patient.id}&f=${formatDate(invoiceData.fromDateString)}&t=${formatDate(invoiceData.toDateString)}`
         ).then((d) => d.json())) as StaleData;
 
         if (invoiceData.staleData.narcotics.length) {
@@ -78,9 +62,9 @@
   ]);
 
   let pageTitle = $derived.by(() => {
-    if (periodSameAsStay) return invoiceData.patient?.name;
+    if (periodSameAsStay) return invoiceData.patient.name;
 
-    return `${invoiceData.patient?.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
+    return `${invoiceData.patient.name} (من ${invoiceData.fromDateString.split("-").reverse().join("-")} إلى ${invoiceData.toDateString.split("-").reverse().join("-")})`;
   });
 
   function selectDrug(item: InvoiceSelectedDrugT) {
@@ -106,44 +90,7 @@
 
 <header>
   <h1>فاتورة أدوية</h1>
-  <table class="patient-data">
-    <tbody>
-      <tr>
-        <th>رقم القيد:</th>
-        <td>{invoiceData.patient?.id}</td>
-
-        <th>مدة الإقامة:</th>
-        <td>
-          {pricingDuration}
-        </td>
-      </tr>
-      <tr>
-        <th>اسم المريض:</th>
-        <td>{invoiceData.patient?.name}</td>
-
-        <th>{invoiceData.patient?.id_type}:</th>
-        <td>{invoiceData.patient?.id_number}</td>
-      </tr>
-      <tr>
-        <th>القسم:</th>
-        <td>{invoiceData.staleData?.ward}</td>
-
-        <th>تاريخ الدخول:</th>
-        <td>{formatDate(invoiceData.patient?.admission_date!, "YYYY/MM/DD")}</td>
-      </tr>
-      <tr>
-        <th>التشخيص:</th>
-        <td>{invoiceData.patient?.diagnosis}</td>
-
-        <th>تاريخ الخروج:</th>
-        <td>
-          {#if invoiceData.patient?.discharge_date}
-            {formatDate(invoiceData.patient?.discharge_date, "YYYY/MM/DD")}
-          {/if}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <PatientData />
   <div class="pricing-range" class:hide-in-print={periodSameAsStay}>
     <table>
       <thead>
@@ -157,25 +104,29 @@
           <td>
             <input
               type="date"
-              bind:value={fromDateString}
+              bind:value={invoiceData.fromDateString}
               min={stringifiedAdmissionDate}
               max={stringifiedDischargeDate}
               bind:this={fromInput}
               use:updateStaleDataOnInput
             />
-            <span class="selected-date">{fromDateString.replaceAll("-", "/")}</span>
+            <span class="selected-date"
+              >{invoiceData.fromDateString.replaceAll("-", "/")}</span
+            >
           </td>
           <th>إلى:</th>
           <td>
             <input
               type="date"
-              bind:value={toDateString}
-              min={fromDateString}
+              bind:value={invoiceData.toDateString}
+              min={invoiceData.fromDateString}
               max={stringifiedDischargeDate}
               bind:this={toInput}
               use:updateStaleDataOnInput
             />
-            <span class="selected-date">{toDateString.replaceAll("-", "/")}</span>
+            <span class="selected-date"
+              >{invoiceData.toDateString.replaceAll("-", "/")}</span
+            >
           </td>
         </tr>
       </tbody>
@@ -201,7 +152,7 @@
 <table class="invoice-items">
   <colgroup>
     <col />
-    {#if !invoiceData.patient?.insured}
+    {#if !invoiceData.patient.insured}
       <col />
     {/if}
     <col />
@@ -212,7 +163,7 @@
   <thead>
     <tr>
       <th>م</th>
-      {#if !invoiceData.patient?.insured}
+      {#if !invoiceData.patient.insured}
         <th>كود النفقة</th>
       {/if}
       <th>اسم الصنف</th>
@@ -244,7 +195,7 @@
               </button>
             {/if}
           </td>
-          {#if !invoiceData.patient?.insured}
+          {#if !invoiceData.patient.insured}
             <td>{drug.smc_code}</td>
           {/if}
           <td>{drug.name_ar}</td>
@@ -329,16 +280,6 @@
       th {
         padding: 0.25rem 0.75rem;
       }
-    }
-  }
-
-  table.patient-data {
-    th {
-      text-align: end;
-    }
-
-    td {
-      padding-inline: 3vw;
     }
   }
 
