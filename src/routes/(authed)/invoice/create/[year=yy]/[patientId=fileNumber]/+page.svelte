@@ -22,7 +22,7 @@
   const { patient } = $derived(data);
   const stringifiedAdmissionDate = $derived(formatDate(patient.admission_date));
   const stringifiedDischargeDate = $derived(
-    patient.discharge_date ? formatDate(patient.discharge_date) : "",
+    patient.discharge_date ? formatDate(patient.discharge_date) : ""
   );
 
   let fromDateString = $derived(stringifiedAdmissionDate);
@@ -30,15 +30,15 @@
 
   let periodSameAsStay = $derived(
     fromDateString === stringifiedAdmissionDate &&
-      toDateString === stringifiedDischargeDate,
+      toDateString === stringifiedDischargeDate
   );
 
   const pricingDuration = $derived(
     getTermed(
       getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
       "يوم",
-      "أيام",
-    ),
+      "أيام"
+    )
   );
 
   let staleData = $derived(data.staleData);
@@ -53,7 +53,7 @@
         if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
 
         staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`,
+          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
         ).then((d) => d.json())) as StaleData;
 
         if (staleData.narcotics.length) {
@@ -61,7 +61,7 @@
             .filter((n) => typeof n.total === "function")
             .unshift(...staleData.narcotics);
         }
-      }, 1000),
+      }, 1000)
     );
   }
 
@@ -83,7 +83,7 @@
     if (foundItemIndexInList > -1) {
       selectedDrugs[foundItemIndexInList].amount++;
       toast.info(
-        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`,
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`
       );
       return;
     }
@@ -219,7 +219,13 @@
   {#if invoiceDrugs.length}
     <tbody>
       {#each invoiceDrugs as drug, i (drug.id)}
-        <tr class:hide-in-print={drug.amount === 0} transition:scale>
+        <tr
+          class:hide-in-print={drug.amount === 0}
+          class:amount-not-allowed={drug.amount %
+            (drug.id === 166 ? 30 : drug.id === 198 ? 60 : 1) >
+            0}
+          transition:scale
+        >
           <td>
             {#if !drug.editable}
               {i + 1}
@@ -439,6 +445,11 @@
               }
             }
           }
+        }
+
+        &.amount-not-allowed {
+          background-color: salmon;
+          text-decoration: line-through;
         }
       }
     }
