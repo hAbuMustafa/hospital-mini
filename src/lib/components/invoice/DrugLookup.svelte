@@ -5,11 +5,10 @@
   type PropsT = {
     filterIds?: number[];
     drugSnippet: Snippet<[DrugT]>;
+    query: string;
   };
 
-  let { filterIds, drugSnippet }: PropsT = $props();
-
-  let query = $state("");
+  let { filterIds, drugSnippet, query = $bindable("") }: PropsT = $props();
 
   let matches: DrugT[] = $state([]);
 </script>
@@ -25,7 +24,7 @@
       matches = await fetch(`/api/v1/drug?q=${query}`)
         .then((data) => data.json())
         .then((dList: DrugT[]) =>
-          dList.filter((d) => filterIds?.every((id) => d.id != id)),
+          dList.filter((d) => filterIds?.every((id) => d.id != id))
         );
     }, 500)}
   />

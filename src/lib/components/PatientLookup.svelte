@@ -1,9 +1,7 @@
 <script lang="ts">
   import { debounce } from "lodash-es";
 
-  let { patientSnippet } = $props();
-
-  let query = $state("");
+  let { patientSnippet, query = $bindable("") } = $props();
 
   let matches: PatientT[] = $state([]);
 </script>

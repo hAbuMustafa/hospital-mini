@@ -93,6 +93,8 @@
     item.editable = true;
     selectedDrugs.push(item);
   }
+
+  let drugQuery = $state("");
 </script>
 
 <svelte:head>
@@ -179,19 +181,23 @@
   <h2>سداد فاتورة</h2>
 </header>
 
-<DrugLookup filterIds={[116, 117, 119, 229]}>
+<DrugLookup filterIds={[116, 117, 119, 229]} bind:query={drugQuery}>
   {#snippet drugSnippet(drug: DrugT)}
     <button
       type="button"
       class="drug-select"
       onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
     >
-      <strong class="name-ar">{drug.name_ar}</strong>
-      <span class="name">{drug.tradename_ar}</span>
+      <strong class="name-ar">{@render markMatches(drug.name_ar!)}</strong>
+      <span class="name">{@render markMatches(drug.tradename_ar!)}</span>
       <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
     </button>
   {/snippet}
 </DrugLookup>
+
+{#snippet markMatches(text: string)}
+  {@html text.replaceAll(drugQuery, (match) => `<mark>${match}</mark>`)}
+{/snippet}
 
 <table class="invoice-items">
   <colgroup>

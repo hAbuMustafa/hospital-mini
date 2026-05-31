@@ -20,6 +20,8 @@
   });
 
   let isSameDay = $derived(data.dateFrom === data.dateTo);
+
+  let patientQuery = $state("");
 </script>
 
 <h1>إصدار فاتورة</h1>
@@ -76,7 +78,7 @@
   </tbody>
 </table>
 
-<PatientLookup>
+<PatientLookup bind:query={patientQuery}>
   {#snippet patientSnippet(patient: PatientT)}
     <button
       class="patient-select"
@@ -84,18 +86,24 @@
         goto(`create/${patient.id}`);
       }}
     >
-      <span>{patient.id}</span>
-      <strong>{patient.name}</strong>
+      <span>{@render markMatches(patient.id)}</span>
+      <strong>{@render markMatches(patient.name!)}</strong>
       <span>
         من <span class="date">{formatDate(patient.admission_date, "YYYY/MM/DD")}</span>
         {#if patient.discharge_date}
           إلى <span class="date">{formatDate(patient.discharge_date, "YYYY/MM/DD")}</span>
         {/if}
       </span>
-      <span>{patient.id_type}: {patient.id_number}</span>
+      {#if patient.id_number}
+        <span>{patient.id_type}: {@render markMatches(patient.id_number)}</span>
+      {/if}
     </button>
   {/snippet}
 </PatientLookup>
+
+{#snippet markMatches(text: string)}
+  {@html text.replaceAll(patientQuery, (match) => `<mark>${match}</mark>`)}
+{/snippet}
 
 <style>
   .date-controls {
