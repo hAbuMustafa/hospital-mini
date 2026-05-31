@@ -2,6 +2,7 @@
   import { scale } from "svelte/transition";
   import { invoiceData } from "./state.svelte";
   import InvoiceItem from "./InvoiceItem.svelte";
+  import InvoiceFooter from "./InvoiceFooter.svelte";
 
   let invoiceDrugs: (InvoiceNarcoticDrugT | InvoiceSelectedDrugT)[] = $derived([
     ...invoiceData.staleData.narcotics,
@@ -38,22 +39,7 @@
         <InvoiceItem {drug} {i} />
       {/each}
     </tbody>
-    <tfoot>
-      <tr>
-        <th colspan="3">إجمالي الأدوية المنصرفة:</th>
-        <td colspan="3">
-          {invoiceDrugs
-            .reduce((acc, curr) => {
-              if (typeof curr.total === "number") {
-                return acc + curr.total;
-              } else {
-                return acc + curr.total();
-              }
-            }, 0)
-            .toFixed(2)}
-        </td>
-      </tr>
-    </tfoot>
+    <InvoiceFooter {invoiceDrugs} />
   {:else}
     <tbody>
       <tr>
@@ -107,22 +93,6 @@
         td {
           page-break-inside: avoid;
         }
-      }
-    }
-
-    tfoot {
-      th {
-        background-color: var(--main-table-header-bg-color);
-        text-align: end;
-      }
-
-      td {
-        font-size: 1.5rem;
-        font-weight: bold;
-      }
-
-      @media print {
-        display: table-row-group; /* to prevent tfoot from repeating at the end of every table on a page */
       }
     }
   }
