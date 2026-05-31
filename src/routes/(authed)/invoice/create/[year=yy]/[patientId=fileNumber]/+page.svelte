@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { authState } from "$lib/auth-client/auth.svelte";
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
   import {
@@ -15,6 +14,7 @@
   import { invoiceData } from "./state.svelte";
   import PatientData from "./PatientData.svelte";
   import PricingRange from "./PricingRange.svelte";
+  import InvoiceSignatures from "./InvoiceSignatures.svelte";
 
   let { data } = $props();
 
@@ -205,24 +205,7 @@
   {/if}
 </table>
 
-<table class="signatures">
-  <thead>
-    <tr>
-      <th>مشرف القسم</th>
-      <th>طبيب صيدلي</th>
-      <th>مدير الرعاية</th>
-      <th>يعتمد،<br />مدير المستشفى/</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td></td>
-      <td>{authState.user?.name}</td>
-      <td></td>
-      <td></td>
-    </tr>
-  </tbody>
-</table>
+<InvoiceSignatures />
 
 <PageBorder />
 
@@ -345,20 +328,6 @@
       @media print {
         display: table-row-group; /* to prevent tfoot from repeating at the end of every table on a page */
       }
-    }
-  }
-
-  table.signatures {
-    display: none;
-    margin-top: 1rem;
-    width: 80vw;
-
-    thead {
-      background-color: unset;
-    }
-
-    @media print {
-      display: table;
     }
   }
 
