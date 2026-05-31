@@ -2,15 +2,24 @@
   import { authState } from "$lib/auth-client/auth.svelte";
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
-  import { formatDate } from "$lib/date/utils";
+  import {
+    formatDate,
+    getDuration,
+    getTermed,
+    getToday,
+    setToEndOfDay,
+  } from "$lib/date/utils";
 
-  import { debounce } from "lodash-es";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
   import { invoiceData } from "./state.svelte";
   import PatientData from "./PatientData.svelte";
+  import PricingRange from "./PricingRange.svelte";
 
   let { data } = $props();
+
+  const today = getToday();
+  setToEndOfDay(today);
 
   invoiceData.patient = data.patient;
   invoiceData.staleData = data.staleData;
@@ -24,55 +33,41 @@
       : ""
   );
 
-  invoiceData.fromDateString = stringifiedAdmissionDate;
-  invoiceData.toDateString = stringifiedDischargeDate;
+  let fromDateString = $derived(stringifiedAdmissionDate);
+  let toDateString = $derived(stringifiedDischargeDate);
 
   let periodSameAsStay = $derived(
-    invoiceData.fromDateString === stringifiedAdmissionDate &&
-      invoiceData.toDateString === stringifiedDischargeDate
+    fromDateString === formatDate(invoiceData.patient.admission_date) &&
+      toDateString === formatDate(invoiceData.patient.discharge_date ?? new Date())
   );
 
-  let fromInput: HTMLInputElement;
-  let toInput: HTMLInputElement;
-
-  function updateStaleDataOnInput(node: HTMLInputElement) {
-    node.addEventListener(
-      "change",
-      debounce(async () => {
-        if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
-
-        invoiceData.staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${invoiceData.patient.id}&f=${formatDate(invoiceData.fromDateString)}&t=${formatDate(invoiceData.toDateString)}`
-        ).then((d) => d.json())) as StaleData;
-
-        if (invoiceData.staleData.narcotics.length) {
-          invoiceDrugs
-            .filter((n) => typeof n.total === "function")
-            .unshift(...invoiceData.staleData.narcotics);
-        }
-      }, 1000)
-    );
-  }
-
-  let selectedDrugs: InvoiceSelectedDrugT[] = $state([]);
+  const pricingDuration = $derived(
+    getTermed(
+      getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
+      "يوم",
+      "أيام"
+    )
+  );
 
   let invoiceDrugs: (InvoiceNarcoticDrugT | InvoiceSelectedDrugT)[] = $derived([
     ...invoiceData.staleData.narcotics,
-    ...selectedDrugs,
+    ...invoiceData.selectedDrugs,
   ]);
 
   let pageTitle = $derived.by(() => {
     if (periodSameAsStay) return invoiceData.patient.name;
 
-    return `${invoiceData.patient.name} (من ${invoiceData.fromDateString.split("-").reverse().join("-")} إلى ${invoiceData.toDateString.split("-").reverse().join("-")})`;
+    return `${invoiceData.patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
   });
 
   function selectDrug(item: InvoiceSelectedDrugT) {
-    const foundItemIndexInList = selectedDrugs.findIndex((d) => d.id === item.id);
+    const foundItemIndexInList = invoiceData.selectedDrugs.findIndex(
+      (d) => d.id === item.id
+    );
     if (foundItemIndexInList > -1) {
-      selectedDrugs[foundItemIndexInList].amount++;
+      invoiceData.selectedDrugs[foundItemIndexInList].amount++;
       toast.info(
-        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${invoiceData.selectedDrugs[foundItemIndexInList].amount}`
       );
       return;
     }
@@ -80,7 +75,7 @@
     item.amount = 1;
     item.total = () => item.amount * (item.price_resale ?? 0);
     item.editable = true;
-    selectedDrugs.push(item);
+    invoiceData.selectedDrugs.push(item);
   }
 </script>
 
@@ -90,48 +85,8 @@
 
 <header>
   <h1>فاتورة أدوية</h1>
-  <PatientData />
-  <div class="pricing-range" class:hide-in-print={periodSameAsStay}>
-    <table>
-      <thead>
-        <tr>
-          <th colspan="4">فترة التسعير</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>من:</th>
-          <td>
-            <input
-              type="date"
-              bind:value={invoiceData.fromDateString}
-              min={stringifiedAdmissionDate}
-              max={stringifiedDischargeDate}
-              bind:this={fromInput}
-              use:updateStaleDataOnInput
-            />
-            <span class="selected-date"
-              >{invoiceData.fromDateString.replaceAll("-", "/")}</span
-            >
-          </td>
-          <th>إلى:</th>
-          <td>
-            <input
-              type="date"
-              bind:value={invoiceData.toDateString}
-              min={invoiceData.fromDateString}
-              max={stringifiedDischargeDate}
-              bind:this={toInput}
-              use:updateStaleDataOnInput
-            />
-            <span class="selected-date"
-              >{invoiceData.toDateString.replaceAll("-", "/")}</span
-            >
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <PatientData {pricingDuration} />
+  <PricingRange bind:fromDateString bind:toDateString />
   <h2>سداد فاتورة</h2>
 </header>
 
@@ -188,7 +143,9 @@
             {:else}
               <button
                 onclick={() => {
-                  selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
+                  invoiceData.selectedDrugs = invoiceData.selectedDrugs.filter(
+                    (d) => d.id !== drug.id
+                  );
                 }}
               >
                 {i + 1}
@@ -279,41 +236,6 @@
       background-color: var(--main-table-header-bg-color);
       th {
         padding: 0.25rem 0.75rem;
-      }
-    }
-  }
-
-  .pricing-range {
-    margin-block-start: 1rem;
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-
-      &,
-      th,
-      td {
-        border: var(--main-border);
-      }
-
-      input[type="date"] {
-        width: 80%;
-        text-align: center;
-        font-size: inherit;
-      }
-
-      span.selected-date {
-        display: none;
-      }
-
-      @media print {
-        input[type="date"] {
-          display: none;
-        }
-
-        span.selected-date {
-          display: inline-block;
-        }
       }
     }
   }

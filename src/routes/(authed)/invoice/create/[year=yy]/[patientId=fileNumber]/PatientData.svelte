@@ -1,26 +1,8 @@
 <script lang="ts">
-  import {
-    formatDate,
-    getDuration,
-    getTermed,
-    getToday,
-    setToEndOfDay,
-  } from "$lib/date/utils";
+  import { formatDate } from "$lib/date/utils";
   import { invoiceData } from "./state.svelte";
 
-  const today = getToday();
-  setToEndOfDay(today);
-
-  const pricingDuration = $derived(
-    getTermed(
-      getDuration(
-        new Date(invoiceData.fromDateString),
-        new Date(invoiceData.toDateString) || today
-      ) || 1,
-      "يوم",
-      "أيام"
-    )
-  );
+  let { pricingDuration } = $props();
 </script>
 
 <table class="patient-data">
