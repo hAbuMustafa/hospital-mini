@@ -5,7 +5,7 @@ import {
   narcoticsDispensed,
   patients_view,
   patientTransfers,
-} from "$lib/server/db/schema.js";
+} from "$lib/server/db/schema";
 import { json } from "@sveltejs/kit";
 import dayjs from "dayjs";
 import { and, desc, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
@@ -35,8 +35,8 @@ export async function GET({ url }) {
           .where(
             and(
               eq(patientTransfers.patient_id, patient_id),
-              lte(patientTransfers.timestamp, from),
-            ),
+              lte(patientTransfers.timestamp, from)
+            )
           )
           .orderBy(desc(patientTransfers.id))
           .limit(1);
@@ -49,7 +49,7 @@ export async function GET({ url }) {
       ...getTableColumns(drugs),
       amount: sql<number>`sum(${narcoticsDispensed.amount})`.as("amount"),
       total: sql<number>`sum(${narcoticsDispensed.amount}) * ${drugs.price_resale}`.as(
-        "total",
+        "total"
       ),
     })
     .from(narcoticsDispensed)
@@ -58,8 +58,8 @@ export async function GET({ url }) {
       and(
         eq(narcoticsDispensed.patient_id, patient_id),
         gte(narcoticsDispensed.timestamp, from),
-        lte(narcoticsDispensed.timestamp, to),
-      ),
+        lte(narcoticsDispensed.timestamp, to)
+      )
     )
     .groupBy(narcoticsDispensed.item_id);
 

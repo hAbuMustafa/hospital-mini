@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { authState } from "$lib/auth-client/auth.svelte.js";
+  import { authState } from "$lib/auth-client/auth.svelte";
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
   import {

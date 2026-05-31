@@ -2,7 +2,7 @@ import { db } from "$lib/server/db/";
 import { patients_view } from "$lib/server/db/schema";
 import { like, eq, desc } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
-import { fuzzyQuery } from "$lib/server/db/utils.js";
+import { fuzzyQuery } from "$lib/server/db/utils";
 
 export async function GET({ url }) {
   const patientQuery = url.searchParams.get("q");

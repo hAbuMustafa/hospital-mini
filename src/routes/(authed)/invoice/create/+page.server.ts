@@ -1,4 +1,4 @@
-import { formatDate, setToEndOfDay, setToStartOfDay } from "$lib/date/utils.js";
+import { formatDate, setToEndOfDay, setToStartOfDay } from "$lib/date/utils";
 import { db } from "$lib/server/db";
 import { patients_view } from "$lib/server/db/schema";
 import { and, gte, lte } from "drizzle-orm";
@@ -25,8 +25,8 @@ export async function load({ url }) {
     .where(
       and(
         gte(patients_view.discharge_date, dateFrom),
-        lte(patients_view.discharge_date, dateTo),
-      ),
+        lte(patients_view.discharge_date, dateTo)
+      )
     )
     .orderBy(patients_view.admission_date);
 
