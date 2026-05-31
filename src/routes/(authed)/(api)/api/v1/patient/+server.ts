@@ -37,7 +37,7 @@ export async function GET({ url }) {
       patientMatches = await db
         .select()
         .from(patients_view)
-        .where(like(patients_view.id, `${patientQuery}%`))
+        .where(like(patients_view.id_number, `${patientQuery}%`))
         .orderBy(desc(patients_view.admission_date));
 
       break;
