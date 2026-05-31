@@ -9,19 +9,21 @@
     setToEndOfDay,
   } from "$lib/date/utils";
 
-  import { toast } from "svelte-sonner";
   import { invoiceData } from "./state.svelte";
   import PatientData from "./PatientData.svelte";
   import PricingRange from "./PricingRange.svelte";
   import InvoiceSignatures from "./InvoiceSignatures.svelte";
   import InvoiceTable from "./InvoiceTable.svelte";
+  import DrugLookupItem from "./DrugLookupItem.svelte";
 
   let { data } = $props();
 
   const today = getToday();
   setToEndOfDay(today);
 
+  // svelte-ignore state_referenced_locally
   invoiceData.patient = data.patient;
+  // svelte-ignore state_referenced_locally
   invoiceData.staleData = data.staleData;
 
   const stringifiedAdmissionDate = $derived(
@@ -54,24 +56,6 @@
 
     return `${invoiceData.patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
   });
-
-  function selectDrug(item: InvoiceSelectedDrugT) {
-    const foundItemIndexInList = invoiceData.selectedDrugs.findIndex(
-      (d) => d.id === item.id
-    );
-    if (foundItemIndexInList > -1) {
-      invoiceData.selectedDrugs[foundItemIndexInList].amount++;
-      toast.info(
-        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${invoiceData.selectedDrugs[foundItemIndexInList].amount}`
-      );
-      return;
-    }
-
-    item.amount = 1;
-    item.total = () => item.amount * (item.price_resale ?? 0);
-    item.editable = true;
-    invoiceData.selectedDrugs.push(item);
-  }
 </script>
 
 <svelte:head>
@@ -87,15 +71,7 @@
 
 <DrugLookup filterIds={[116, 117, 119, 229]}>
   {#snippet drugSnippet(drug: DrugT)}
-    <button
-      type="button"
-      class="drug-select"
-      onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
-    >
-      <strong class="name-ar">{drug.name_ar}</strong>
-      <span class="name">{drug.tradename_ar}</span>
-      <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
-    </button>
+    <DrugLookupItem {drug} />
   {/snippet}
 </DrugLookup>
 
@@ -115,11 +91,5 @@
         vertical-align: top;
       }
     }
-  }
-
-  button.drug-select {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
   }
 </style>
