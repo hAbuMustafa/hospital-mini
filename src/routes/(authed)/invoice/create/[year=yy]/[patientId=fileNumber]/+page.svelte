@@ -515,5 +515,6 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    border: none;
   }
 </style>

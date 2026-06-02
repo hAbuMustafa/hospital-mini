@@ -143,6 +143,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    border: none;
 
     & > span > span.date {
       border: var(--main-border);

@@ -41,6 +41,8 @@
 
 <style>
   .drug-lookup {
+    position: relative;
+
     input {
       width: 100%;
       font-size: 2rem;
@@ -66,12 +68,12 @@
     position-anchor: --drug-lookup-input;
     position-try-fallbacks: --bottom-center, --top-center;
 
+    width: 100%;
     max-height: 50svh;
     overflow-y: scroll;
 
     list-style: none;
-    padding: 1rem;
-    border-radius: 0.5rem;
+    padding: 0;
     border: var(--main-border);
     box-shadow: var(--main-shadow);
     margin: 0;
@@ -79,10 +81,13 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 0.5rem;
 
     background-color: var(--menu-bg-color);
 
     z-index: 1;
+
+    li:not(:first-of-type) {
+      border-block-start: var(--main-border);
+    }
   }
 </style>
