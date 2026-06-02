@@ -186,6 +186,7 @@
   filterFn={(d: DrugT) => [116, 117, 119, 229].every((id) => id !== d.id)}
   endpoint={`/api/v1/drug?q=${drugQuery}`}
   placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+  className="hide-in-print"
 >
   {#snippet itemSnippet(drug: DrugT)}
     <button

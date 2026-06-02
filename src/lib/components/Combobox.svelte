@@ -6,13 +6,14 @@
     query = $bindable(""),
     endpoint,
     filterFn = () => true,
+    className = "",
     ...rest
   } = $props();
 
   let matches: any[] = $state([]);
 </script>
 
-<div class="lookup-wrapper">
+<div class="lookup-wrapper {className}">
   <input
     type="search"
     bind:value={query}
