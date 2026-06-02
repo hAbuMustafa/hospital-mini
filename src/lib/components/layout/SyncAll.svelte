@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RefreshCw } from "@lucide/svelte";
+  import RefreshCw from "@lucide/svelte/icons/refresh-cw";
 
   let loading = $state(false);
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { debounce } from "lodash-es";
+  import debounce from "lodash-es/debounce";
 
   let {
     itemSnippet,

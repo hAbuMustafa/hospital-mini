@@ -10,7 +10,7 @@
     setToEndOfDay,
   } from "$lib/date/utils";
 
-  import { debounce } from "lodash-es";
+  import debounce from "lodash-es/debounce";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
 

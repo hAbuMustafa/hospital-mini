@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { sheets } from "@googleapis/sheets";
 import { GoogleAuth } from "google-auth-library";
 import { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY } from "$env/static/private";
 
@@ -15,7 +15,7 @@ const auth = new GoogleAuth({
 });
 
 // Initialize the Sheets API once
-const sheets = google.sheets({ version: "v4", auth });
+const sheetsAPI = sheets({ version: "v4", auth });
 
 /**
  * Fetch a single range from a specific Google Sheet
@@ -25,7 +25,7 @@ const sheets = google.sheets({ version: "v4", auth });
  */
 export async function getSheetRange(spreadsheetId: string, range: string) {
   try {
-    const response = await sheets.spreadsheets.values.get({
+    const response = await sheetsAPI.spreadsheets.values.get({
       spreadsheetId,
       range,
     });
