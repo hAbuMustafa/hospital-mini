@@ -11,12 +11,67 @@
   } = $props();
 
   let matches: any[] = $state([]);
+
+  let inputNode: HTMLInputElement;
+
+  function useKeyboardNavigation(node: HTMLElement) {
+    function handleKeydown(e: KeyboardEvent) {
+      if (
+        e.key !== "ArrowUp" &&
+        e.key !== "ArrowDown" &&
+        e.key !== "Escape" &&
+        e.key !== "Tab"
+      )
+        return;
+
+      e.preventDefault();
+
+      const items = Array.from(node.querySelectorAll("li>button")) as HTMLButtonElement[];
+      if (!items.length) return;
+
+      const trigger = document.activeElement as HTMLButtonElement;
+      const currentIndex = items.indexOf(trigger!);
+
+      switch (e.key) {
+        case "ArrowUp":
+          let prevIndex = (currentIndex - 1 + items.length) % items.length;
+          items[prevIndex].focus();
+
+          break;
+        case "ArrowDown":
+          let nextIndex = (currentIndex + 1) % items.length;
+          items[nextIndex].focus();
+          break;
+
+        case "Escape":
+          inputNode.focus();
+          break;
+        case "Tab":
+          if (e.shiftKey) {
+            inputNode.focus();
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    node.addEventListener("keydown", handleKeydown);
+
+    return {
+      destroy() {
+        node.removeEventListener("keydown", handleKeydown);
+      },
+    };
+  }
 </script>
 
 <div class="lookup-wrapper {className}">
   <input
     type="search"
     bind:value={query}
+    bind:this={inputNode}
     oninput={debounce(async () => {
       if (query === "") return;
 
@@ -27,7 +82,7 @@
     {...rest}
   />
   {#if matches.length}
-    <ul class="match-list">
+    <ul class="match-list" use:useKeyboardNavigation>
       {#each matches as item (item.id)}
         <li>
           {@render itemSnippet(item)}
