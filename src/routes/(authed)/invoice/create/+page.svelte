@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import PatientLookup from "$lib/components/PatientLookup.svelte";
+  import Combobox from "$lib/components/Combobox.svelte";
   import { formatDate } from "$lib/date/utils";
 
   let { data } = $props();
@@ -78,7 +78,7 @@
   </tbody>
 </table>
 
-<PatientLookup
+<Combobox
   bind:query={patientQuery}
   endpoint={`/api/v1/patient?q=${patientQuery}`}
   placeholder="اسم المريض"
@@ -103,7 +103,7 @@
       {/if}
     </button>
   {/snippet}
-</PatientLookup>
+</Combobox>
 
 {#snippet markMatches(text: string)}
   {@html text.replaceAll(patientQuery, (match) => `<mark>${match}</mark>`)}

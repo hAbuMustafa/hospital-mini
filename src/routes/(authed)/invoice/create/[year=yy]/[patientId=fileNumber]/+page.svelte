@@ -1,8 +1,7 @@
 <script lang="ts">
   import { authState } from "$lib/auth-client/auth.svelte";
-  import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
-  import PatientLookup from "$lib/components/PatientLookup.svelte";
+  import Combobox from "$lib/components/Combobox.svelte";
   import {
     formatDate,
     getDuration,
@@ -182,7 +181,7 @@
   <h2>سداد فاتورة</h2>
 </header>
 
-<PatientLookup
+<Combobox
   bind:query={drugQuery}
   filterFn={(d: DrugT) => [116, 117, 119, 229].every((id) => id !== d.id)}
   endpoint={`/api/v1/drug?q=${drugQuery}`}
@@ -199,7 +198,7 @@
       <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
     </button>
   {/snippet}
-</PatientLookup>
+</Combobox>
 
 {#snippet markMatches(text: string)}
   {@html text.replaceAll(drugQuery, (match) => `<mark>${match}</mark>`)}
