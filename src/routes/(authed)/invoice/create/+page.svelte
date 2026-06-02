@@ -154,5 +154,10 @@
       padding-inline: 0.25rem;
       border-radius: 4px;
     }
+
+    &:focus {
+      border: 3px double var(--main-accent-color);
+      outline: none;
+    }
   }
 </style>

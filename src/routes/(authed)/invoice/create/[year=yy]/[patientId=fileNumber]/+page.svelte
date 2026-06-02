@@ -522,5 +522,10 @@
     flex-direction: column;
     width: 100%;
     border: none;
+
+    &:focus {
+      border: 3px double var(--main-accent-color);
+      outline: none;
+    }
   }
 </style>
