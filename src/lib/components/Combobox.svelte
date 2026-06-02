@@ -13,6 +13,8 @@
   let matches: any[] = $state([]);
 
   let inputNode: HTMLInputElement;
+  // svelte-ignore non_reactive_update
+  let resultsNode: HTMLUListElement;
 
   function useKeyboardNavigation(node: HTMLElement) {
     function handleKeydown(e: KeyboardEvent) {
@@ -79,10 +81,13 @@
         .then((data) => data.json())
         .then((arr) => arr.filter(filterFn));
     }, 500)}
+    onkeydown={(e) => {
+      if (e.key === "ArrowDown") resultsNode.querySelector("button")?.focus();
+    }}
     {...rest}
   />
   {#if matches.length}
-    <ul class="match-list" use:useKeyboardNavigation>
+    <ul class="match-list" bind:this={resultsNode} use:useKeyboardNavigation>
       {#each matches as item (item.id)}
         <li>
           {@render itemSnippet(item)}
