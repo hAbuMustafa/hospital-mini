@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import PatientLookup from "$lib/components/PatientLookup.svelte";
+  import Combobox from "$lib/components/Combobox.svelte";
   import { formatDate } from "$lib/date/utils";
 
   let { data } = $props();
@@ -20,6 +20,8 @@
   });
 
   let isSameDay = $derived(data.dateFrom === data.dateTo);
+
+  let patientQuery = $state("");
 </script>
 
 <h1>إصدار فاتورة</h1>
@@ -76,26 +78,36 @@
   </tbody>
 </table>
 
-<PatientLookup>
-  {#snippet patientSnippet(patient: PatientT)}
+<Combobox
+  bind:query={patientQuery}
+  endpoint={`/api/v1/patient?q=${patientQuery}`}
+  placeholder="اسم المريض"
+>
+  {#snippet itemSnippet(patient: PatientT)}
     <button
       class="patient-select"
       onclick={() => {
         goto(`create/${patient.id}`);
       }}
     >
-      <span>{patient.id}</span>
-      <strong>{patient.name}</strong>
+      <span>{@render markMatches(patient.id)}</span>
+      <strong>{@render markMatches(patient.name!)}</strong>
       <span>
         من <span class="date">{formatDate(patient.admission_date, "YYYY/MM/DD")}</span>
         {#if patient.discharge_date}
           إلى <span class="date">{formatDate(patient.discharge_date, "YYYY/MM/DD")}</span>
         {/if}
       </span>
-      <span>{patient.id_type}: {patient.id_number}</span>
+      {#if patient.id_number}
+        <span>{patient.id_type}: {@render markMatches(patient.id_number)}</span>
+      {/if}
     </button>
   {/snippet}
-</PatientLookup>
+</Combobox>
+
+{#snippet markMatches(text: string)}
+  {@html text.replaceAll(patientQuery, (match) => `<mark>${match}</mark>`)}
+{/snippet}
 
 <style>
   .date-controls {
@@ -135,11 +147,17 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    border: none;
 
     & > span > span.date {
       border: var(--main-border);
       padding-inline: 0.25rem;
       border-radius: 4px;
+    }
+
+    &:focus {
+      border: 3px double var(--main-accent-color);
+      outline: none;
     }
   }
 </style>

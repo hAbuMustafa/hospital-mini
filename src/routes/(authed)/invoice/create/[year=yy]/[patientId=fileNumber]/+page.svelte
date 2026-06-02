@@ -1,7 +1,7 @@
 <script lang="ts">
   import { authState } from "$lib/auth-client/auth.svelte";
-  import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
+  import Combobox from "$lib/components/Combobox.svelte";
   import {
     formatDate,
     getDuration,
@@ -93,6 +93,8 @@
     item.editable = true;
     selectedDrugs.push(item);
   }
+
+  let drugQuery = $state("");
 </script>
 
 <svelte:head>
@@ -179,19 +181,29 @@
   <h2>سداد فاتورة</h2>
 </header>
 
-<DrugLookup filterIds={[116, 117, 119, 229]}>
-  {#snippet drugSnippet(drug: DrugT)}
+<Combobox
+  bind:query={drugQuery}
+  filterFn={(d: DrugT) => [116, 117, 119, 229].every((id) => id !== d.id)}
+  endpoint={`/api/v1/drug?q=${drugQuery}`}
+  placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+  className="hide-in-print"
+>
+  {#snippet itemSnippet(drug: DrugT)}
     <button
       type="button"
       class="drug-select"
       onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
     >
-      <strong class="name-ar">{drug.name_ar}</strong>
-      <span class="name">{drug.tradename_ar}</span>
+      <strong class="name-ar">{@render markMatches(drug.name_ar!)}</strong>
+      <span class="name">{@render markMatches(drug.tradename_ar!)}</span>
       <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
     </button>
   {/snippet}
-</DrugLookup>
+</Combobox>
+
+{#snippet markMatches(text: string)}
+  {@html text.replaceAll(drugQuery, (match) => `<mark>${match}</mark>`)}
+{/snippet}
 
 <table class="invoice-items">
   <colgroup>
@@ -509,5 +521,11 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    border: none;
+
+    &:focus {
+      border: 3px double var(--main-accent-color);
+      outline: none;
+    }
   }
 </style>
