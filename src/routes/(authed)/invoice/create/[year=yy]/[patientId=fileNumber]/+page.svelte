@@ -78,6 +78,8 @@
     return `${patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
   });
 
+  let isCashPricing = $state(false);
+
   function selectDrug(item: InvoiceSelectedDrugT) {
     const foundItemIndexInList = selectedDrugs.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
@@ -142,6 +144,11 @@
     </tbody>
   </table>
   <div class="pricing-range" class:hide-in-print={periodSameAsStay}>
+    <fieldset class="pricing-type">
+      <legend>نوع المحاسبة</legend>
+      <label><input type="radio" bind:group={isCashPricing} value={false} />عادي</label>
+      <label><input type="radio" bind:group={isCashPricing} value={true} />نقدي</label>
+    </fieldset>
     <table>
       <thead>
         <tr>
@@ -178,7 +185,9 @@
       </tbody>
     </table>
   </div>
-  <h2>سداد فاتورة</h2>
+  <h2>
+    سداد فاتورة {#if isCashPricing}نقدي{/if}
+  </h2>
 </header>
 
 <Combobox
@@ -350,7 +359,14 @@
   }
 
   .pricing-range {
-    margin-block-start: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    fieldset.pricing-type {
+      display: flex;
+      justify-content: space-around;
+    }
 
     table {
       width: 100%;
