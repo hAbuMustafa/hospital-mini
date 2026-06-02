@@ -67,6 +67,22 @@
       },
     };
   }
+
+  function returnToInputAfterSelection(node: HTMLElement) {
+    function handleButtonClick(e: Event) {
+      if (!(e.target instanceof HTMLButtonElement)) return;
+
+      inputNode.focus();
+    }
+
+    node.addEventListener("click", handleButtonClick);
+
+    return {
+      destroy() {
+        node.removeEventListener("click", handleButtonClick);
+      },
+    };
+  }
 </script>
 
 <div class="lookup-wrapper {className}">
@@ -87,7 +103,12 @@
     {...rest}
   />
   {#if matches.length}
-    <ul class="match-list" bind:this={resultsNode} use:useKeyboardNavigation>
+    <ul
+      class="match-list"
+      bind:this={resultsNode}
+      use:useKeyboardNavigation
+      use:returnToInputAfterSelection
+    >
       {#each matches as item (item.id)}
         <li>
           {@render itemSnippet(item)}
