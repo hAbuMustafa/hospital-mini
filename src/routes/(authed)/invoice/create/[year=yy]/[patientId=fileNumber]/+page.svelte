@@ -2,6 +2,7 @@
   import { authState } from "$lib/auth-client/auth.svelte";
   import DrugLookup from "$lib/components/invoice/DrugLookup.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
+  import PatientLookup from "$lib/components/PatientLookup.svelte";
   import {
     formatDate,
     getDuration,
@@ -181,8 +182,13 @@
   <h2>سداد فاتورة</h2>
 </header>
 
-<DrugLookup filterIds={[116, 117, 119, 229]} bind:query={drugQuery}>
-  {#snippet drugSnippet(drug: DrugT)}
+<PatientLookup
+  bind:query={drugQuery}
+  filterFn={(d: DrugT) => [116, 117, 119, 229].every((id) => id !== d.id)}
+  endpoint={`/api/v1/drug?q=${drugQuery}`}
+  placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+>
+  {#snippet itemSnippet(drug: DrugT)}
     <button
       type="button"
       class="drug-select"
@@ -193,7 +199,7 @@
       <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
     </button>
   {/snippet}
-</DrugLookup>
+</PatientLookup>
 
 {#snippet markMatches(text: string)}
   {@html text.replaceAll(drugQuery, (match) => `<mark>${match}</mark>`)}

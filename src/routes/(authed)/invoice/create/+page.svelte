@@ -78,8 +78,12 @@
   </tbody>
 </table>
 
-<PatientLookup bind:query={patientQuery}>
-  {#snippet patientSnippet(patient: PatientT)}
+<PatientLookup
+  bind:query={patientQuery}
+  endpoint={`/api/v1/patient?q=${patientQuery}`}
+  placeholder="اسم المريض"
+>
+  {#snippet itemSnippet(patient: PatientT)}
     <button
       class="patient-select"
       onclick={() => {

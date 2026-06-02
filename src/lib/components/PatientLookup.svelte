@@ -1,27 +1,35 @@
 <script lang="ts">
   import { debounce } from "lodash-es";
 
-  let { patientSnippet, query = $bindable("") } = $props();
+  let {
+    itemSnippet,
+    query = $bindable(""),
+    endpoint,
+    filterFn = () => true,
+    ...rest
+  } = $props();
 
-  let matches: PatientT[] = $state([]);
+  let matches: any[] = $state([]);
 </script>
 
-<div class="patient-lookup">
+<div class="lookup-wrapper">
   <input
     type="search"
-    placeholder="اسم المريض"
     bind:value={query}
     oninput={debounce(async () => {
       if (query === "") return;
 
-      matches = await fetch(`/api/v1/patient?q=${query}`).then((data) => data.json());
+      matches = await fetch(endpoint)
+        .then((data) => data.json())
+        .then((arr) => arr.filter(filterFn));
     }, 500)}
+    {...rest}
   />
   {#if matches.length}
-    <ul class="patient-list">
-      {#each matches as patient (patient.id)}
+    <ul class="match-list">
+      {#each matches as item (item.id)}
         <li>
-          {@render patientSnippet(patient)}
+          {@render itemSnippet(item)}
         </li>
       {/each}
     </ul>
@@ -29,7 +37,7 @@
 </div>
 
 <style>
-  .patient-lookup {
+  .lookup-wrapper {
     margin-block: 1rem;
     position: relative;
 
@@ -45,12 +53,12 @@
       }
     }
 
-    &:not(:focus-within) ul.patient-list {
+    &:not(:focus-within) ul.match-list {
       display: none;
     }
   }
 
-  ul.patient-list {
+  ul.match-list {
     inset: unset;
     position: absolute;
     inset-block-start: calc(anchor(bottom) + 0.25rem);
