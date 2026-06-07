@@ -1,5 +1,6 @@
 <script lang="ts">
   import debounce from "lodash-es/debounce";
+  import { fromAction } from "svelte/attachments";
 
   let {
     itemSnippet,
@@ -109,8 +110,8 @@
     <ul
       class="match-list"
       bind:this={resultsNode}
-      use:useKeyboardNavigation
-      use:returnToInputAfterSelection
+      {@attach fromAction(useKeyboardNavigation)}
+      {@attach fromAction(returnToInputAfterSelection)}
     >
       {#each matches as item (item.id)}
         <li>
