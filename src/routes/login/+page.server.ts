@@ -1,3 +1,4 @@
+import { syncDrugs, syncPatients } from "$lib/server/db/sync";
 import { auth } from "$lib/server/utils/auth";
 import { fail } from "@sveltejs/kit";
 
@@ -22,6 +23,10 @@ export const actions = {
           message: "فشل تسجيل الدخول. تأكد من اسم المستخدم وكلمة المرور",
         });
       }
+
+      await syncDrugs();
+      await syncPatients();
+      console.log("✔️ Sync on login Success");
     } catch (e) {
       console.error(e);
 
