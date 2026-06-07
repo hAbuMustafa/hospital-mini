@@ -1,5 +1,5 @@
 <script lang="ts">
-  import RefreshCw from "@lucide/svelte/icons/cloud-sync";
+  import CloudSync from "@lucide/svelte/icons/cloud-sync";
 
   let loading = $state(false);
 </script>
@@ -23,7 +23,7 @@
         .catch((e) => console.error(e));
     }}
   >
-    <RefreshCw />
+    <CloudSync />
   </button>
 </div>
 
