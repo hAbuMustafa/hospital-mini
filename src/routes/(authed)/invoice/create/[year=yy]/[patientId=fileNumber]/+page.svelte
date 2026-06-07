@@ -319,7 +319,9 @@
     <tbody bind:this={invoiceItemsBody}>
       {#each invoiceDrugs as drug, i (drug.id)}
         <tr
-          class:hide-in-print={drug.amount === 0}
+          class:hide-in-print={typeof drug.total === "number"
+            ? drug.total === 0
+            : drug.total() === 0}
           class:amount-not-allowed={drug.amount %
             (drug.id === 166 ? 30 : drug.id === 198 ? 60 : 1) >
             0}
