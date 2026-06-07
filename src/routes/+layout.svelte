@@ -84,6 +84,8 @@
     display: flex;
     gap: 1rem;
 
+    align-items: center;
+
     a {
       text-decoration: none;
       color: unset;
