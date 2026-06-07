@@ -266,7 +266,10 @@
 
 <Combobox
   bind:query={drugQuery}
-  filterFn={(d: DrugT) => [116, 117, 119, 229].every((id) => id !== d.id)}
+  filterFn={(d: DrugT) =>
+    d.is_used !== "لاغي" &&
+    !d.is_used?.includes("فواتير") &&
+    [116, 117, 119, 229].every((id) => id !== d.id)}
   endpoint={`/api/v1/drug?q=${drugQuery}`}
   placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
   className="hide-in-print"
