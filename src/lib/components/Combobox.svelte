@@ -103,7 +103,7 @@
         .then((arr) => arr.filter(filterFn));
     }, 500)}
     onkeydown={(e) => {
-      if (e.key === "ArrowDown") resultsNode.querySelector("button")?.focus();
+      if (e.key === "ArrowDown") resultsNode?.querySelector("button")?.focus();
       if (e.key === "Enter") {
         select(matches[0]);
       }
