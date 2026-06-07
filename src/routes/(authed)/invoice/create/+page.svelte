@@ -106,7 +106,10 @@
 </Combobox>
 
 {#snippet markMatches(text: string)}
-  {@html text.replaceAll(patientQuery, (match) => `<mark>${match}</mark>`)}
+  {@html text.replaceAll(
+    new RegExp(patientQuery.replaceAll(" ", ".*"), "g"),
+    (match) => `<mark>${match}</mark>`,
+  )}
 {/snippet}
 
 <style>

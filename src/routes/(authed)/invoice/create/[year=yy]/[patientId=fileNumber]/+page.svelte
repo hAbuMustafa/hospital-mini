@@ -289,7 +289,10 @@
 </Combobox>
 
 {#snippet markMatches(text: string)}
-  {@html text.replaceAll(drugQuery, (match) => `<mark>${match}</mark>`)}
+  {@html text.replaceAll(
+    new RegExp(drugQuery.replaceAll(" ", ".*"), "g"),
+    (match) => `<mark>${match}</mark>`,
+  )}
 {/snippet}
 
 <table class="invoice-items">
