@@ -280,7 +280,7 @@
             {/if}
           </td>
           <td
-            >{#if isCashPricing}
+            >{#if isCashPricing && drug.editable}
               <input
                 type="number"
                 name="price-{drug.id}"
