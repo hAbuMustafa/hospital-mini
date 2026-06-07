@@ -47,10 +47,12 @@
 
         case "Escape":
           inputNode.focus();
+          inputNode.select();
           break;
         case "Tab":
           if (e.shiftKey) {
             inputNode.focus();
+            inputNode.select();
           }
           break;
 
@@ -73,6 +75,7 @@
       if (!(e.target instanceof HTMLButtonElement)) return;
 
       inputNode.focus();
+      inputNode.select();
     }
 
     node.addEventListener("click", handleButtonClick);
