@@ -22,7 +22,7 @@
   const { patient } = $derived(data);
   const stringifiedAdmissionDate = $derived(formatDate(patient.admission_date));
   const stringifiedDischargeDate = $derived(
-    patient.discharge_date ? formatDate(patient.discharge_date) : ""
+    patient.discharge_date ? formatDate(patient.discharge_date) : "",
   );
 
   let fromDateString = $derived(stringifiedAdmissionDate);
@@ -30,15 +30,15 @@
 
   let periodSameAsStay = $derived(
     fromDateString === stringifiedAdmissionDate &&
-      toDateString === stringifiedDischargeDate
+      toDateString === stringifiedDischargeDate,
   );
 
   const pricingDuration = $derived(
     getTermed(
       getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
       "يوم",
-      "أيام"
-    )
+      "أيام",
+    ),
   );
 
   let staleData = $derived(data.staleData);
@@ -53,7 +53,7 @@
         if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
 
         staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
+          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`,
         ).then((d) => d.json())) as StaleData;
 
         if (staleData.narcotics.length) {
@@ -61,7 +61,7 @@
             .filter((n) => typeof n.total === "function")
             .unshift(...staleData.narcotics);
         }
-      }, 1000)
+      }, 1000),
     );
   }
 
@@ -85,13 +85,15 @@
     if (foundItemIndexInList > -1) {
       selectedDrugs[foundItemIndexInList].amount++;
       toast.info(
-        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`,
       );
       return;
     }
 
     item.amount = 1;
-    item.total = () => item.amount * (item.price_resale ?? 0);
+    item.total = () =>
+      item.amount *
+      (isCashPricing && item.editable ? item.cashPrice : (item.price_resale ?? 0));
     item.editable = true;
     selectedDrugs.push(item);
   }
@@ -221,8 +223,8 @@
       <col />
     {/if}
     <col />
-    <col class="amount-column" />
-    <col />
+    <col class="num-input-column" />
+    <col class="num-input-column" />
     <col />
   </colgroup>
   <thead>
@@ -277,7 +279,18 @@
               />
             {/if}
           </td>
-          <td>{drug.price_resale?.toFixed(2)}</td>
+          <td
+            >{#if isCashPricing}
+              <input
+                type="number"
+                name="price-{drug.id}"
+                id="price-{drug.id}"
+                min="0"
+                step="0.01"
+                bind:value={drug.cashPrice}
+              />
+            {:else}{drug.price_resale?.toFixed(2)}{/if}</td
+          >
           <td>
             {#if typeof drug.total === "number"}
               {drug.total.toFixed(2)}
@@ -410,7 +423,7 @@
       padding-inline: 0.75rem;
     }
 
-    .amount-column {
+    .num-input-column {
       width: 8vw;
     }
 
