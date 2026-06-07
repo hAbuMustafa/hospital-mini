@@ -8,6 +8,7 @@
     endpoint,
     filterFn = () => true,
     className = "",
+    onSelect: select = () => null,
     ...rest
   } = $props();
 
@@ -103,6 +104,9 @@
     }, 500)}
     onkeydown={(e) => {
       if (e.key === "ArrowDown") resultsNode.querySelector("button")?.focus();
+      if (e.key === "Enter") {
+        select(matches[0]);
+      }
     }}
     {...rest}
   />

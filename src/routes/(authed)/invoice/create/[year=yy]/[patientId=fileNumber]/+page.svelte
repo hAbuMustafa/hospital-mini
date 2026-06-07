@@ -270,6 +270,7 @@
   endpoint={`/api/v1/drug?q=${drugQuery}`}
   placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
   className="hide-in-print"
+  onSelect={(drug: InvoiceSelectedDrugT) => selectDrug(drug)}
 >
   {#snippet itemSnippet(drug: DrugT)}
     <button
