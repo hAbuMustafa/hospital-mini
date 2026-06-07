@@ -1,29 +1,30 @@
 <script lang="ts">
-  import RefreshCw from "@lucide/svelte/icons/refresh-cw";
+  import RefreshCw from "@lucide/svelte/icons/cloud-sync";
 
   let loading = $state(false);
 </script>
 
-<form
-  method="get"
-  onsubmit={(e) => {
-    e.preventDefault();
+<div class="sync-buttons-wrapper">
+  <button
+    type="button"
+    aria-label="sync all"
+    disabled={loading}
+    class:loading
+    onclick={() => {
+      loading = true;
 
-    loading = true;
-
-    fetch("/api/v1/sync/all")
-      .then((r) => r.json())
-      .then((d) => {
-        console.log(d);
-        loading = false;
-      })
-      .catch((e) => console.error(e));
-  }}
->
-  <button type="submit" aria-label="sync all" disabled={loading} class:loading>
+      fetch("/api/v1/sync/all")
+        .then((r) => r.json())
+        .then((d) => {
+          console.log(d);
+          loading = false;
+        })
+        .catch((e) => console.error(e));
+    }}
+  >
     <RefreshCw />
   </button>
-</form>
+</div>
 
 <style>
   button {
