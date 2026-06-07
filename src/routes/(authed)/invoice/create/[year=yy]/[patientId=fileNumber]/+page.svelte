@@ -95,6 +95,7 @@
       item.amount *
       (isCashPricing && item.editable ? item.cashPrice : (item.price_resale ?? 0));
     item.editable = true;
+    item.cashPrice = 0;
     selectedDrugs.push(item);
   }
 
