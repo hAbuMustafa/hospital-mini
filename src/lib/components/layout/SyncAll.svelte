@@ -7,7 +7,8 @@
 <div class="sync-buttons-wrapper">
   <button
     type="button"
-    aria-label="sync all"
+    aria-label="تحديث جميع البيانات"
+    title="تحديث جميع البيانات"
     disabled={loading}
     class:loading
     onclick={() => {
