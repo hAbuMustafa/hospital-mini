@@ -90,14 +90,14 @@
     }
 
     &:hover {
-      :global(svg) {
+      :global(> svg) {
         filter: drop-shadow(0px 0px 4px lightgreen);
         animation: spin 5s linear infinite;
       }
     }
 
     &.loading {
-      :global(svg) {
+      :global(> svg) {
         animation: spin 1s linear infinite;
       }
     }
