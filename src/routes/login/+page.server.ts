@@ -24,9 +24,15 @@ export const actions = {
         });
       }
 
-      await syncDrugs();
-      await syncPatients();
-      console.log("✔️ Sync on login Success");
+      Promise.all([syncDrugs(), syncPatients()]).then(
+        () => {
+          console.log("✔️ Sync on login Success");
+        },
+        (e) => {
+          console.error("⚠️ Error in sync at login:");
+          console.error(e);
+        }
+      );
     } catch (e) {
       console.error(e);
 
