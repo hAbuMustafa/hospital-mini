@@ -81,7 +81,7 @@
 <Combobox
   bind:query={patientQuery}
   endpoint={`/api/v1/patient?q=${patientQuery}`}
-  placeholder="اسم المريض"
+  placeholder="بحث عن مريض"
 >
   {#snippet itemSnippet(patient: PatientT)}
     <button
@@ -108,7 +108,7 @@
 {#snippet markMatches(text: string)}
   {@html text.replaceAll(
     new RegExp(patientQuery.replaceAll(" ", ".*"), "g"),
-    (match) => `<mark>${match}</mark>`,
+    (match) => `<mark>${match}</mark>`
   )}
 {/snippet}
 
