@@ -36,15 +36,17 @@
 
 <style>
   form {
-    width: 80vw;
-
     border: var(--main-border);
     border-radius: 4px;
     padding: 1rem;
 
     display: grid;
-    grid-template-columns: 25% 1fr;
-    row-gap: 0.5rem;
+    grid-template-columns: 1fr 2fr;
+    gap: 0.5rem;
+
+    input {
+      text-align: center;
+    }
 
     [type="submit"] {
       grid-column: 1/-1;
