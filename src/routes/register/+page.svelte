@@ -17,7 +17,6 @@
   use:enhance={() => {
     return async ({ result }) => {
       if (result.type === "success") {
-        await authState.refresh();
         toast.success("تم تسجيل الحساب بنجاح. يمكنك الآن تسجيل الدخول");
         goto("/login");
       } else if (result.type === "failure") {

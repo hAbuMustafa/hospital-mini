@@ -1,5 +1,6 @@
 import { auth } from "$lib/server/utils/auth";
-import { fail, redirect, isRedirect } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
+import type { BetterAuthError } from "better-auth";
 
 export const actions = {
   default: async ({ request }) => {
@@ -13,7 +14,7 @@ export const actions = {
       return fail(400, { message: "كلمة المرور غير متطابقة" });
 
     try {
-      const result = await auth.api.signUpEmail({
+      await auth.api.signUpEmail({
         body: {
           name,
           email,
@@ -21,14 +22,10 @@ export const actions = {
         },
       });
 
-      if (!result.token) {
-        return fail(400, { message: "فشل إنشاء الحساب. برجاء التواصل مع مدير النظام" });
-      }
-
       return { message: "تم التسجيل بنجاح" };
     } catch (e) {
       return fail(400, {
-        message: "البريد الإلكتروني مسجل مسبقا",
+        message: (e as BetterAuthError).message,
       });
     }
   },
