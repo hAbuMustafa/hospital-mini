@@ -23,7 +23,7 @@
   const { patient } = $derived(data);
   const stringifiedAdmissionDate = $derived(formatDate(patient.admission_date));
   const stringifiedDischargeDate = $derived(
-    patient.discharge_date ? formatDate(patient.discharge_date) : "",
+    patient.discharge_date ? formatDate(patient.discharge_date) : ""
   );
 
   let fromDateString = $derived(stringifiedAdmissionDate);
@@ -31,15 +31,15 @@
 
   let periodSameAsStay = $derived(
     fromDateString === stringifiedAdmissionDate &&
-      toDateString === stringifiedDischargeDate,
+      toDateString === stringifiedDischargeDate
   );
 
   const pricingDuration = $derived(
     getTermed(
       getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
       "يوم",
-      "أيام",
-    ),
+      "أيام"
+    )
   );
 
   let staleData = $derived(data.staleData);
@@ -54,7 +54,7 @@
         if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
 
         staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`,
+          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
         ).then((d) => d.json())) as StaleData;
 
         if (staleData.narcotics.length) {
@@ -62,7 +62,7 @@
             .filter((n) => typeof n.total === "function")
             .unshift(...staleData.narcotics);
         }
-      }, 1000),
+      }, 1000)
     );
   }
 
@@ -86,7 +86,7 @@
     if (foundItemIndexInList > -1) {
       selectedDrugs[foundItemIndexInList].amount++;
       toast.info(
-        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`,
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`
       );
       return;
     }
@@ -116,10 +116,10 @@
         return;
 
       const similarNumberFields = Array.from(
-        invoiceItemsBody.querySelectorAll(`[id^="${selector}-"]`),
+        invoiceItemsBody.querySelectorAll(`[id^="${selector}-"]`)
       ) as HTMLInputElement[];
       const allNumberFields = Array.from(
-        invoiceItemsBody.querySelectorAll('[type="number"]'),
+        invoiceItemsBody.querySelectorAll('[type="number"]')
       ) as HTMLInputElement[];
       if (!similarNumberFields.length && !allNumberFields.length) return;
 
@@ -135,13 +135,16 @@
             (currentSimilarIndex - 1 + similarNumberFields.length) %
             similarNumberFields.length;
           similarNumberFields[prevSimilarIndex].focus();
+          similarNumberFields[prevSimilarIndex].select();
 
           break;
         case "ArrowRight":
           if (e.ctrlKey) {
+            e.preventDefault();
             let prevIndex =
               (currentIndex - 1 + allNumberFields.length) % allNumberFields.length;
             allNumberFields[prevIndex].focus();
+            allNumberFields[prevIndex].select();
           }
 
           break;
@@ -150,14 +153,18 @@
 
           let nextSimilarIndex = (currentSimilarIndex + 1) % similarNumberFields.length;
           similarNumberFields[nextSimilarIndex].focus();
+          similarNumberFields[nextSimilarIndex].select();
+
           break;
         case "ArrowLeft":
           if (e.ctrlKey) {
+            e.preventDefault();
             let nextIndex = (currentIndex + 1) % allNumberFields.length;
             allNumberFields[nextIndex].focus();
+            allNumberFields[nextIndex].select();
           }
-          break;
 
+          break;
         default:
           break;
       }
@@ -291,7 +298,7 @@
 {#snippet markMatches(text: string)}
   {@html text.replaceAll(
     new RegExp(drugQuery.replaceAll(" ", ".*"), "g"),
-    (match) => `<mark>${match}</mark>`,
+    (match) => `<mark>${match}</mark>`
   )}
 {/snippet}
 
