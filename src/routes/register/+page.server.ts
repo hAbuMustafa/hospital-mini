@@ -27,6 +27,7 @@ export const actions = {
 
       return { message: "تم التسجيل بنجاح" };
     } catch (e) {
+      console.error(e);
       return fail(400, {
         message: (e as BetterAuthError).message,
       });
