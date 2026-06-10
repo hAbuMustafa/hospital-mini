@@ -30,7 +30,7 @@
     type="text"
     id="name"
     name="name"
-    pattern={triadicArabicName.source}
+    pattern={`${triadicArabicName.source} ?`}
     title="اسم ثلاثي على الأقل"
     required
   />
