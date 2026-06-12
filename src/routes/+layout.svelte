@@ -3,10 +3,19 @@
   import { page } from "$app/state";
   import { authState } from "$lib/auth-client/auth.svelte";
   import SyncAll from "$lib/components/layout/SyncAll.svelte";
+  import { signOutOnShiftEnd } from "./logout-on-shift-end";
   import "./styles.css";
   import { Toaster } from "svelte-sonner";
 
   const { children } = $props();
+
+  $effect(() => {
+    const signOutInterval = signOutOnShiftEnd();
+
+    return () => {
+      window.clearInterval(signOutInterval);
+    };
+  });
 </script>
 
 <svelte:head>
