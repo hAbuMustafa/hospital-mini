@@ -22,10 +22,10 @@
   }}
 >
   <label for="email">البريد الإلكتروني</label>
-  <input type="email" id="email" name="email" />
+  <input type="email" id="email" name="email" required />
 
   <label for="password">كلمة المرور</label>
-  <input type="password" id="password" name="password" />
+  <input type="password" id="password" name="password" required />
 
   {#if error}
     <p class="error">{error}</p>

@@ -44,7 +44,7 @@
   <label for="confirm-password">تأكيد كلمة المرور</label>
   <input type="password" id="confirm-password" name="confirm-password" required />
 
-  <input type="submit" value="إنشاء حساب" required />
+  <input type="submit" value="إنشاء حساب" />
 </form>
 
 <style>
