@@ -224,12 +224,12 @@
       </tr>
     </tbody>
   </table>
+  <fieldset class="pricing-type hide-in-print">
+    <legend>نوع المحاسبة</legend>
+    <label><input type="radio" bind:group={isCashPricing} value={false} />عادي</label>
+    <label><input type="radio" bind:group={isCashPricing} value={true} />نقدي</label>
+  </fieldset>
   <div class="pricing-range" class:hide-in-print={periodSameAsStay}>
-    <fieldset class="pricing-type">
-      <legend>نوع المحاسبة</legend>
-      <label><input type="radio" bind:group={isCashPricing} value={false} />عادي</label>
-      <label><input type="radio" bind:group={isCashPricing} value={true} />نقدي</label>
-    </fieldset>
     <table>
       <thead>
         <tr>
@@ -461,16 +461,14 @@
     }
   }
 
-  .pricing-range {
+  fieldset.pricing-type {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    justify-content: space-around;
 
-    fieldset.pricing-type {
-      display: flex;
-      justify-content: space-around;
-    }
+    margin-block-end: 1rem;
+  }
 
+  .pricing-range {
     table {
       width: 100%;
       border-collapse: collapse;
