@@ -82,11 +82,11 @@
   let isCashPricing = $state(false);
 
   function selectDrug(item: InvoiceSelectedDrugT) {
-    const foundItemIndexInList = selectedDrugs.findIndex((d) => d.id === item.id);
+    const foundItemIndexInList = invoiceDrugs.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
-      selectedDrugs[foundItemIndexInList].amount++;
+      invoiceDrugs[foundItemIndexInList].amount++;
       toast.info(
-        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${selectedDrugs[foundItemIndexInList].amount}`
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${invoiceDrugs[foundItemIndexInList].amount}`
       );
       return;
     }
