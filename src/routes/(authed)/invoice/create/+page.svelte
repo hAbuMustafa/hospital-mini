@@ -72,7 +72,13 @@
             []),
         ])
       ).join(" - ")}
-      <tr class="patient-card">
+      <tr
+        class="patient-card"
+        class:is-economic={patient.insured ||
+          ["رعاية أ", "رعاية ب", "ثاني ج", "ثاني د"].some((w) =>
+            patientWards.includes(w)
+          )}
+      >
         <td>
           <a href="/invoice/list/{patient.id}" class="btn">{patient.id}</a>
         </td>
@@ -154,6 +160,10 @@
   th,
   td {
     border: var(--main-border);
+  }
+
+  tr.is-economic {
+    background-color: hsla(219, 100%, 56%, 0.4);
   }
 
   th,
