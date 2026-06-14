@@ -1,7 +1,11 @@
 import { formatDate, setToEndOfDay, setToStartOfDay } from "$lib/date/utils";
 import { db } from "$lib/server/db";
-import { patients_view } from "$lib/server/db/schema";
-import { and, gte, lte } from "drizzle-orm";
+import {
+  narcoticsDispensed,
+  patients_view,
+  patientTransfers,
+} from "$lib/server/db/schema";
+import { and, gte, inArray, lte, sql } from "drizzle-orm";
 
 export async function load({ url }) {
   const today = new Date();
@@ -30,9 +34,43 @@ export async function load({ url }) {
     )
     .orderBy(patients_view.admission_date);
 
+  const wards = fetchedPatients.length
+    ? await db
+        .select({
+          patient_id: patientTransfers.patient_id,
+          wards: sql<string>`string_agg(${patientTransfers.to_ward}, ' - ')`.as("wards"),
+        })
+        .from(patientTransfers)
+        .where(
+          inArray(
+            patientTransfers.patient_id,
+            fetchedPatients.map((p) => p?.id)
+          )
+        )
+        .groupBy(patientTransfers.patient_id)
+    : null;
+
+  const hasNarcotics = await db
+    .select({
+      patient_id: narcoticsDispensed.patient_id,
+      amount_dispensed: sql<number>`SUM(${narcoticsDispensed.amount})`.as(
+        "amount_dispensed"
+      ),
+    })
+    .from(narcoticsDispensed)
+    .where(
+      inArray(
+        narcoticsDispensed.patient_id,
+        fetchedPatients.map((p) => p?.id)
+      )
+    )
+    .groupBy(narcoticsDispensed.patient_id);
+
   return {
     patients: fetchedPatients,
     dateFrom: formatDate(dateFrom),
     dateTo: formatDate(dateTo),
+    wards,
+    hasNarcotics,
   };
 }

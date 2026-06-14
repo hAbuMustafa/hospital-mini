@@ -54,11 +54,24 @@
       <th>اسم المريض</th>
       <th>تاريخ الدخول</th>
       <th>تاريخ الخروج</th>
+      <th>مؤمن عليه؟</th>
+      <th>الأقسام</th>
+      <th>له منصرف مخدرات؟</th>
       <th>فاتورة</th>
     </tr>
   </thead>
   <tbody>
     {#each data.patients as patient, i (patient.id)}
+      {@const hasNarcotics =
+        (data.hasNarcotics.find((p) => p.patient_id === patient.id)?.amount_dispensed ??
+          0) > 0}
+      {@const patientWards = Array.from(
+        new Set([
+          patient.ward_on_admission,
+          ...(data.wards?.find((p) => p.patient_id === patient.id)?.wards?.split(" - ") ||
+            []),
+        ])
+      ).join(" - ")}
       <tr class="patient-card">
         <td>
           <a href="/invoice/list/{patient.id}" class="btn">{patient.id}</a>
@@ -70,6 +83,9 @@
             {formatDate(patient.discharge_date, "YYYY/MM/DD")}
           {/if}
         </td>
+        <td>{patient.insured ? "✔️" : "➖"}</td>
+        <td>{patientWards}</td>
+        <td>{hasNarcotics ? "✔️" : "➖"}</td>
         <td>
           <a href="/invoice/create/{patient.id}" class="btn">فاتورة</a>
         </td>
