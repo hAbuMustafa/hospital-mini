@@ -9,13 +9,13 @@ import { and, gte, inArray, lte, sql } from "drizzle-orm";
 
 export async function load({ url }) {
   const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
+  const theOtherDay = new Date(today);
+  theOtherDay.setDate(today.getDate() - 2);
 
-  const yesterdayString = formatDate(yesterday);
+  const theOtherDayString = formatDate(theOtherDay);
 
-  const dischargesFrom = url.searchParams.get("f") ?? yesterdayString;
-  const dischargesTo = url.searchParams.get("t") ?? yesterdayString;
+  const dischargesFrom = url.searchParams.get("f") ?? theOtherDayString;
+  const dischargesTo = url.searchParams.get("t") ?? theOtherDayString;
 
   const dateFrom = new Date(dischargesFrom);
   const dateTo = new Date(dischargesTo);
