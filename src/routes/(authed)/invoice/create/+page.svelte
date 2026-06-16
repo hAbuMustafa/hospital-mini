@@ -80,7 +80,7 @@
           )}
       >
         <td>
-          <a href="/invoice/list/{patient.id}" class="btn">{patient.id}</a>
+          <a href="/patient/{patient.id}" class="btn">{patient.id}</a>
         </td>
         <td>{patient.name}</td>
         <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
