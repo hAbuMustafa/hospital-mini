@@ -1,5 +1,7 @@
 <script lang="ts">
   import { formatDate, getTermed } from "$lib/date/utils";
+  import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
+  import { fly } from "svelte/transition";
 
   let { data } = $props();
 
@@ -89,6 +91,19 @@
   </table>
 {/snippet}
 
+{#if query}
+  <button
+    class="clear-filter"
+    in:fly={{ y: -1000 }}
+    title="إلغاء البحث"
+    onclick={() => {
+      query = "";
+    }}
+  >
+    <ClearFiltersIcon />
+  </button>
+{/if}
+
 <style>
   input[type="search"] {
     text-align: center;
@@ -139,5 +154,17 @@
   .btn.dispense {
     background-color: green;
     color: contrast-color(green);
+  }
+
+  button.clear-filter {
+    position: fixed;
+    inset-block-end: 1rem;
+    inset-inline-end: 1rem;
+
+    padding: 0.35rem 0.5rem;
+
+    border-radius: 50%;
+    background-color: var(--main-accent-color);
+    color: var(--main-bg-color);
   }
 </style>
