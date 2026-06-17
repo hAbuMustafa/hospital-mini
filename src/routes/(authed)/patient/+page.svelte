@@ -36,7 +36,8 @@
         .replaceAll(/اأإآ/g, "[اأإآ]")
         .replaceAll(/ةه/g, "[ةه]")
         .replaceAll(/يى/g, "[يى]")
-        .replaceAll(/\s+/g, ".*")
+        .replaceAll(/\s+/g, ".*"),
+      "g"
     )
   );
 </script>
@@ -75,7 +76,13 @@
           <td>
             <a href="/patient/{patient.id}" class="btn">{patient.id}</a>
           </td>
-          <td>{patient.name}</td>
+          <td>
+            {#if query}
+              {@html patient.name?.replaceAll(qRegex, (match) => `<mark>${match}</mark>`)}
+            {:else}
+              {patient.name}
+            {/if}
+          </td>
           <td>{patient.diagnosis}</td>
           <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
 
