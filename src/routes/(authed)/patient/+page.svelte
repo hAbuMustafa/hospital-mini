@@ -47,7 +47,7 @@
 <input type="search" bind:value={query} placeholder="بحث عن مريض محجوز 🔍" />
 
 {#each wards as ward (ward)}
-  {#if patientsByWard[ward]}
+  {#if patientsByWard[ward] && (!query || (query && patientsByWard[ward].some( (p) => qRegex.test(p.name!) )))}
     {@render Ward(ward, patientsByWard[ward])}
   {/if}
 {/each}
