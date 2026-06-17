@@ -4,8 +4,9 @@
   let { data } = $props();
 
   const patientsByWard = Object.groupBy(
+    // svelte-ignore state_referenced_locally
     data.patients,
-    (p) => (p.ward_recent || p.ward_on_admission)!,
+    (p) => (p.ward_recent || p.ward_on_admission)!
   );
 
   const wards = [
@@ -24,9 +25,23 @@
     "رابع ج",
     "رابع د",
   ];
+
+  let query = $state("");
+
+  let qRegex = $derived(
+    new RegExp(
+      query
+        .replaceAll(/اأإآ/g, "[اأإآ]")
+        .replaceAll(/ةه/g, "[ةه]")
+        .replaceAll(/يى/g, "[يى]")
+        .replaceAll(/\s+/g, ".*")
+    )
+  );
 </script>
 
 <h1>بيان بالمرضى بالأقسام</h1>
+
+<input type="search" bind:value={query} placeholder="بحث عن مريض محجوز 🔍" />
 
 {#each wards as ward (ward)}
   {#if patientsByWard[ward]}
@@ -54,7 +69,7 @@
     </thead>
     <tbody>
       {#each patientsList as patient (patient.id)}
-        <tr>
+        <tr class:filtered-out={!qRegex.test(patient.name!)}>
           <td>
             <a href="/patient/{patient.id}" class="btn">{patient.id}</a>
           </td>
@@ -75,6 +90,11 @@
 {/snippet}
 
 <style>
+  input[type="search"] {
+    text-align: center;
+    font-size: 1.5rem;
+  }
+
   h2 {
     width: 100%;
     display: flex;
@@ -102,6 +122,10 @@
       tr {
         td {
           padding: 0.5rem 0.25rem;
+        }
+
+        &.filtered-out {
+          display: none;
         }
       }
     }
