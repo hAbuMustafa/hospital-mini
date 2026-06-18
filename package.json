@@ -46,7 +46,8 @@
     "dayjs": "^1.11.21",
     "google-auth-library": "^10.7.0",
     "lodash-es": "^4.18.1",
-    "svelte-sonner": "^1.1.1"
+    "svelte-sonner": "^1.1.1",
+    "valibot": "^1.4.1"
   },
-  "packageManager": "pnpm@11.0.9"
+  "packageManager": "pnpm@11.8.0"
 }
