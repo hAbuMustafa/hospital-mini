@@ -1,0 +1,1 @@
+ALTER TABLE `transactionTickets` ADD `return_on_ticket_id` integer;
