@@ -73,8 +73,8 @@ export const transactionTickets = sqliteTable("transactionTickets", {
   store_id: int().notNull(),
   user_id: int().notNull(),
   patient_id: text(),
-  entity: text(),
-  type: int({ mode: "boolean" }), // `true` for sale, `false` for returns
+  entity: text(), // if it is a transfer from or to an other entity (not a dispense/return to/from a patient)
+  is_dispense: int({ mode: "boolean" }).notNull(), // `true` for sale, `false` for returns
 });
 
 export const transactions = sqliteTable("transactions", {
@@ -82,6 +82,7 @@ export const transactions = sqliteTable("transactions", {
   item_id: int().notNull(),
   qty: int().notNull(),
   unit_price: numeric().notNull(),
+  ticket_id: int().references(() => transactionTickets.id),
 });
 
 export const recentWards_view = sqliteView("recentWards_view", {
