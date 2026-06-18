@@ -9,7 +9,9 @@ export async function GET({ url }) {
 
   console.log("🌱 Seeding Started!");
 
+  console.time("💠 Seeding");
   await initialize();
+  console.timeEnd("💠 Seeding");
 
   return json("✔️ ALL SEEDING IS DONE!");
 }
