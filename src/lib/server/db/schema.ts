@@ -71,7 +71,7 @@ export const transactionTickets = sqliteTable("transactionTickets", {
   id: int().primaryKey({ autoIncrement: true }),
   timestamp: int({ mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
   store_id: int().notNull(),
-  user_id: int().notNull(),
+  user_id: text().notNull(),
   patient_id: text(),
   entity: text(), // if it is a transfer from or to an other entity (not a dispense/return to/from a patient)
   is_dispense: int({ mode: "boolean" }).notNull(), // `true` for sale, `false` for returns
