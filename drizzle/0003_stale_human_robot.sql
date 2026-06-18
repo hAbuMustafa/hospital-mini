@@ -1,0 +1,1 @@
+ALTER TABLE `transactionTickets` RENAME COLUMN "type" TO "is_dispense";
