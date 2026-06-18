@@ -8,4 +8,5 @@ export default defineConfig({
   dbCredentials: { url: "file:" + process.env.AUTH_DATABASE_URL },
   verbose: true,
   strict: true,
+  out: "./drizzle_auth",
 });
