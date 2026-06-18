@@ -75,6 +75,7 @@ export const transactionTickets = sqliteTable("transactionTickets", {
   patient_id: text(),
   entity: text(), // if it is a transfer from or to an other entity (not a dispense/return to/from a patient)
   is_dispense: int({ mode: "boolean" }).notNull(), // `true` for sale, `false` for returns
+  return_on_ticket_id: int(), // if it is a return ticket, insert its id
 });
 
 export const transactions = sqliteTable("transactions", {
