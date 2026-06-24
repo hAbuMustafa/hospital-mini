@@ -1,0 +1,58 @@
+import { form, query } from "$app/server";
+import { authState } from "$lib/auth-client/auth.svelte";
+import { db } from "$lib/server/db";
+import { patients_view, transactions, transactionTickets } from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
+import * as v from "valibot";
+
+export const getPatient = query(v.string(), async (patientId) => {
+  const [patient] = await db
+    .select()
+    .from(patients_view)
+    .where(eq(patients_view.id, patientId));
+
+  if (!patient) {
+    return {
+      id: patientId,
+    };
+  } else {
+    return patient;
+  }
+});
+
+export const registerTicket = form(
+  v.object({
+    patientId: v.pipe(v.string(), v.nonEmpty()),
+    drugs: v.array(
+      v.object({
+        item_id: v.number(),
+        qty: v.number(),
+        unit_price: v.number(),
+      })
+    ),
+  }),
+  async (data) => {
+    const ticketId = await db.transaction(async (tx) => {
+      const [ticket] = await tx
+        .insert(transactionTickets)
+        .values({
+          patient_id: data.patientId,
+          store_id: 1, // todo: reset by user's affiliation
+          user_id: authState.user!.id!,
+          is_dispense: true,
+        })
+        .returning();
+
+      const ticketItems = await tx
+        .insert(transactions)
+        .values(data.drugs.map((d) => ({ ...d, qty: d.qty * -1, ticket_id: ticket.id })));
+
+      return ticket.id;
+    });
+
+    return {
+      success: true,
+      ticketId,
+    };
+  }
+);
