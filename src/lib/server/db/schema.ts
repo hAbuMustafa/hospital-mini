@@ -82,7 +82,7 @@ export const transactions = sqliteTable("transactions", {
   id: int().primaryKey({ autoIncrement: true }),
   item_id: int().notNull(),
   qty: int().notNull(),
-  unit_price: numeric().notNull(),
+  unit_price: numeric({ mode: "number" }).notNull(),
   ticket_id: int().references(() => transactionTickets.id),
 });
 
