@@ -50,6 +50,11 @@ export const registerTicket = form(
       return ticket.id;
     });
 
+    /** TODO: If the ticket includes narcotics:
+     * 1. Append to Narcotics Google Sheet.
+     * 2. Update local count on `status` table of narcotics.
+     */
+
     return {
       success: true,
       ticketId,
