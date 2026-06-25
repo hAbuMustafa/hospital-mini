@@ -12,36 +12,28 @@ import {
   patientTransfers,
   status,
 } from "$lib/server/db/schema";
-import { getSheetRange } from "$lib/server/gcp/sheets";
+import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
 import { sheetRowToObject } from "$lib/server/gcp/utils";
-import type { SQLiteTableWithColumns } from "drizzle-orm/sqlite-core";
 
 export async function initialize() {
   // 1. FETCH
-  const fetchedPatientAdmissions = await getSheetRange(
-    patients_spreadsheetId,
+  const fetchedPatient = await getSheetRanges(patients_spreadsheetId, [
     "Admissions!C:Q",
-  );
-  const fetchedPatientTransfers = await getSheetRange(
-    patients_spreadsheetId,
     "Transfers!B:E",
-  );
-  const fetchedPatientDischarges = await getSheetRange(
-    patients_spreadsheetId,
     "Discharges!B:E",
-  );
+  ]);
 
   const fetchedNarcoticsDispensed = await getSheetRange(
     narcotics_spreadsheetId,
-    "Dispensed!A:E",
+    "Dispensed!A:E"
   );
 
   const fetchedDrugs = await getSheetRange(drugs_spreadsheetId, "الأدوية!A:P");
 
   if (
-    !fetchedPatientAdmissions.values ||
-    !fetchedPatientTransfers.values ||
-    !fetchedPatientDischarges.values ||
+    !fetchedPatient.Admissions.values ||
+    !fetchedPatient.Transfers.values ||
+    !fetchedPatient.Discharges.values ||
     !fetchedNarcoticsDispensed.values ||
     !fetchedDrugs.values
   ) {
@@ -62,17 +54,17 @@ export async function initialize() {
     .slice(1)
     .map((item) => sheetRowToObject(item, "drug"));
 
-  const seedableAdmissions = fetchedPatientAdmissions.values
+  const seedableAdmissions = fetchedPatient.Admissions.values
     .slice(1)
     .map((item) =>
-      sheetRowToObject(item, "admission"),
+      sheetRowToObject(item, "admission")
     ) as unknown as (typeof patientAdmissions.$inferInsert)[];
 
-  const seedableDischarges = fetchedPatientDischarges.values
+  const seedableDischarges = fetchedPatient.Discharges.values
     .slice(1)
     .map((item) => sheetRowToObject(item, "discharge"));
 
-  const seedableTransfers = fetchedPatientTransfers.values
+  const seedableTransfers = fetchedPatient.Transfers.values
     .slice(1)
     .map((item) => sheetRowToObject(item, "transfer"));
 
@@ -87,16 +79,16 @@ export async function initialize() {
     seedableTransfers.forEach(async (v) => await db.insert(patientTransfers).values(v));
     seedableDischarges.forEach(async (v) => await db.insert(patientDischarges).values(v));
     seedableNarcoticsDispensed.forEach(
-      async (v) => await db.insert(narcoticsDispensed).values(v),
+      async (v) => await db.insert(narcoticsDispensed).values(v)
     );
   } catch (e) {
     console.error("INSERT FAILED::", e);
   }
 
   await db.insert(status).values([
-    { item: "admissions", value: fetchedPatientAdmissions.values.length },
-    { item: "transfers", value: fetchedPatientTransfers.values.length },
-    { item: "discharges", value: fetchedPatientDischarges.values.length },
+    { item: "admissions", value: fetchedPatient.Admissions.values.length },
+    { item: "transfers", value: fetchedPatient.Transfers.values.length },
+    { item: "discharges", value: fetchedPatient.Discharges.values.length },
     { item: "narcotics_dispensed", value: fetchedNarcoticsDispensed.values.length },
   ]);
 }

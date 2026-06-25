@@ -4,7 +4,7 @@ import {
   patients_spreadsheetId,
 } from "$env/static/private";
 import { db } from "$lib/server/db";
-import { getSheetRange } from "$lib/server/gcp/sheets";
+import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
 import {
   drugs,
   narcoticsDispensed,
@@ -26,7 +26,7 @@ export async function syncPatients() {
   const latestTransferCount = latestRows.find((r) => r.item === "transfers")?.value;
   const latestDischargeCount = latestRows.find((r) => r.item === "discharges")?.value;
   const latestNarcoticsDispensedCount = latestRows.find(
-    (r) => r.item === "narcotics_dispensed",
+    (r) => r.item === "narcotics_dispensed"
   )?.value;
 
   if (
@@ -40,80 +40,78 @@ export async function syncPatients() {
   }
 
   // 2. FETCH Only what you need
-  const fetchedPatientAdmissions = await getSheetRange(
-    patients_spreadsheetId,
+  const fetchedPatientsData = await getSheetRanges(patients_spreadsheetId, [
     `Admissions!C${latestAdmissionCount + 1}:Q`,
-  );
-  const fetchedPatientTransfers = await getSheetRange(
-    patients_spreadsheetId,
     `Transfers!B${latestTransferCount + 1}:E`,
-  );
-  const fetchedPatientDischarges = await getSheetRange(
-    patients_spreadsheetId,
     `Discharges!B${latestDischargeCount + 1}:E`,
-  );
+  ]);
+
   const fetchedNarcoticsDispensed = await getSheetRange(
     narcotics_spreadsheetId,
-    `Dispensed!A${latestNarcoticsDispensedCount + 1}:E`,
+    `Dispensed!A${latestNarcoticsDispensedCount + 1}:E`
   );
 
   // 3. PARSE AND INSERT new data
   await db.transaction(async (tx) => {
-    if (fetchedPatientAdmissions.values) {
-      const seedableAdmissions = fetchedPatientAdmissions.values.map((item) =>
-        sheetRowToObject(item, "admission"),
+    if (fetchedPatientsData.Admissions.values) {
+      const seedableAdmissions = fetchedPatientsData.Admissions.values.map((item) =>
+        sheetRowToObject(item, "admission")
       ) as unknown as typeof patientAdmissions.$inferInsert;
 
       await tx.insert(patientAdmissions).values(seedableAdmissions);
 
       const [newCount] = await tx
         .update(status)
-        .set({ value: latestAdmissionCount + fetchedPatientAdmissions.values.length })
+        .set({
+          value: latestAdmissionCount + fetchedPatientsData.Admissions.values.length,
+        })
         .where(eq(status.item, "admissions"))
         .returning();
 
       console.log(
-        `♻️✔️ Synced ${fetchedPatientAdmissions.values.length} Admissions. Current count is ${newCount.value}`,
+        `♻️✔️ Synced ${fetchedPatientsData.Admissions.values.length} Admissions. Current count is ${newCount.value}`
       );
     }
   });
 
   await db.transaction(async (tx) => {
-    if (fetchedPatientTransfers.values) {
-      const seedableTransfers = fetchedPatientTransfers.values.map((item) =>
-        sheetRowToObject(item, "transfer"),
+    if (fetchedPatientsData.Transfers.values) {
+      const seedableTransfers = fetchedPatientsData.Transfers.values.map((item) =>
+        sheetRowToObject(item, "transfer")
       );
 
       await tx.insert(patientTransfers).values(seedableTransfers);
 
       const [newCount] = await tx
         .update(status)
-        .set({ value: latestTransferCount + fetchedPatientTransfers.values.length })
+        .set({ value: latestTransferCount + fetchedPatientsData.Transfers.values.length })
         .where(eq(status.item, "transfers"))
         .returning();
 
       console.log(
-        `♻️✔️ Synced ${fetchedPatientTransfers.values.length} Transfers. Current count is ${newCount.value}`,
+        `♻️✔️ Synced ${fetchedPatientsData.Transfers.values.length} Transfers. Current count is ${newCount.value}`
       );
     }
   });
 
   await db.transaction(async (tx) => {
-    if (fetchedPatientDischarges.values) {
-      const seedableDischarges = fetchedPatientDischarges.values.map((item) =>
-        sheetRowToObject(item, "discharge"),
+    if (fetchedPatientsData.Discharges.values) {
+      const seedableDischarges = fetchedPatientsData.Discharges.values.map((item) =>
+        sheetRowToObject(item, "discharge")
       );
 
       await tx.insert(patientDischarges).values(seedableDischarges);
 
       const [newCount] = await tx
         .update(status)
-        .set({ value: latestDischargeCount + fetchedPatientDischarges.values.length })
+        .set({
+          value: latestDischargeCount + fetchedPatientsData.Discharges.values.length,
+        })
         .where(eq(status.item, "discharges"))
         .returning();
 
       console.log(
-        `♻️✔️ Synced ${fetchedPatientDischarges.values.length} Discharges. Current count is ${newCount.value}`,
+        `♻️✔️ Synced ${fetchedPatientsData.Discharges.values.length} Discharges. Current count is ${newCount.value}`
       );
     }
   });
@@ -121,7 +119,7 @@ export async function syncPatients() {
   await db.transaction(async (tx) => {
     if (fetchedNarcoticsDispensed.values) {
       const seedableNarcoticsDispensed = fetchedNarcoticsDispensed.values.map((item) =>
-        sheetRowToObject(item, "narcotic_dispense"),
+        sheetRowToObject(item, "narcotic_dispense")
       );
 
       await tx.insert(narcoticsDispensed).values(seedableNarcoticsDispensed);
@@ -135,7 +133,7 @@ export async function syncPatients() {
         .returning();
 
       console.log(
-        `♻️✔️ Synced ${fetchedNarcoticsDispensed.values.length} narcotic dispenses. Current count is ${newCount.value}`,
+        `♻️✔️ Synced ${fetchedNarcoticsDispensed.values.length} narcotic dispenses. Current count is ${newCount.value}`
       );
     }
   });
