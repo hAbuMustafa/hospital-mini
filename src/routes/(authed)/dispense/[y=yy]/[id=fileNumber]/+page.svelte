@@ -14,9 +14,9 @@
       <tbody>
         <tr>
           <th>
-            <a href="/patient/{page.params.y}/{page.params.id}" class="file-number"
-              >{patient.id}</a
-            >
+            <a href="/patient/{page.params.y}/{page.params.id}" class="file-number">
+              {patient.id}
+            </a>
           </th>
           <td>{patient.name}</td>
 
