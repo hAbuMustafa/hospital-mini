@@ -13,8 +13,8 @@
   import debounce from "lodash-es/debounce";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
-  import type { Attachment } from "svelte/attachments";
-  import { narcoticsIds } from "$lib/CONSTANTS.js";
+  import { narcoticsIds } from "$lib/CONSTANTS";
+  import { useKeyboardNavigation } from "$lib/attachments";
 
   const today = getToday();
   setToEndOfDay(today);
@@ -103,82 +103,7 @@
 
   let drugQuery = $state("");
 
-  // svelte-ignore non_reactive_update
-  let invoiceItemsBody: HTMLElement;
-
-  function useKeyboardNavigation(selector: string): Attachment<HTMLInputElement> {
-    function handleKeydown(e: KeyboardEvent) {
-      if (
-        e.key !== "ArrowUp" &&
-        e.key !== "ArrowDown" &&
-        e.key !== "ArrowRight" &&
-        e.key !== "ArrowLeft"
-      )
-        return;
-
-      const similarNumberFields = Array.from(
-        invoiceItemsBody.querySelectorAll(`[id^="${selector}-"]`)
-      ) as HTMLInputElement[];
-      const allNumberFields = Array.from(
-        invoiceItemsBody.querySelectorAll('[type="number"]')
-      ) as HTMLInputElement[];
-      if (!similarNumberFields.length && !allNumberFields.length) return;
-
-      const trigger = document.activeElement as HTMLInputElement;
-      const currentSimilarIndex = similarNumberFields.indexOf(trigger!);
-      const currentIndex = allNumberFields.indexOf(trigger!);
-
-      switch (e.key) {
-        case "ArrowUp":
-          e.preventDefault();
-
-          let prevSimilarIndex =
-            (currentSimilarIndex - 1 + similarNumberFields.length) %
-            similarNumberFields.length;
-          similarNumberFields[prevSimilarIndex].focus();
-          similarNumberFields[prevSimilarIndex].select();
-
-          break;
-        case "ArrowRight":
-          if (e.ctrlKey) {
-            e.preventDefault();
-            let prevIndex =
-              (currentIndex - 1 + allNumberFields.length) % allNumberFields.length;
-            allNumberFields[prevIndex].focus();
-            allNumberFields[prevIndex].select();
-          }
-
-          break;
-        case "ArrowDown":
-          e.preventDefault();
-
-          let nextSimilarIndex = (currentSimilarIndex + 1) % similarNumberFields.length;
-          similarNumberFields[nextSimilarIndex].focus();
-          similarNumberFields[nextSimilarIndex].select();
-
-          break;
-        case "ArrowLeft":
-          if (e.ctrlKey) {
-            e.preventDefault();
-            let nextIndex = (currentIndex + 1) % allNumberFields.length;
-            allNumberFields[nextIndex].focus();
-            allNumberFields[nextIndex].select();
-          }
-
-          break;
-        default:
-          break;
-      }
-    }
-
-    return (node) => {
-      node.addEventListener("keydown", handleKeydown);
-
-      return () => {
-        node.removeEventListener("keydown", handleKeydown);
-      };
-    };
-  }
+  let invoiceItemsBody: HTMLElement | undefined = $state();
 </script>
 
 <svelte:head>
@@ -365,7 +290,7 @@
                 id="amount-{drug.id}"
                 min="0"
                 bind:value={drug.amount}
-                {@attach useKeyboardNavigation("amount")}
+                {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
               />
             {/if}
           </td>
@@ -378,7 +303,7 @@
                 min="0"
                 step="0.01"
                 bind:value={drug.cashPrice}
-                {@attach useKeyboardNavigation("price")}
+                {@attach useKeyboardNavigation("price", invoiceItemsBody)}
               />
             {:else}{drug.price_resale?.toFixed(2)}{/if}</td
           >
