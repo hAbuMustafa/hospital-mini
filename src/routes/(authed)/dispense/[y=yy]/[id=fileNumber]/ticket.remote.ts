@@ -18,7 +18,7 @@ export const getPatient = query(v.string(), async (patientId) => {
   }
 });
 
-export const registerTicket = form(
+export const postTicket = form(
   v.object({
     patientId: v.pipe(v.string(), v.nonEmpty()),
     drugs: v.array(

@@ -3,7 +3,7 @@
   import { page } from "$app/state";
   import { formatDate, getAge, getTermed } from "$lib/date/utils";
   import { toast } from "svelte-sonner";
-  import { getPatient, registerTicket } from "./ticket.remote";
+  import { getPatient, postTicket } from "./ticket.remote";
   import { onMount } from "svelte";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
