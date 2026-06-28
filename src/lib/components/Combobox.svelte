@@ -38,6 +38,7 @@
       if (e.key === "Enter") {
         select(matches[0]);
       }
+      if (e.key === "Escape") matches = [];
     }}
     {...rest}
   />
