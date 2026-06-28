@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useComboboxKeyboardNavigation } from "$lib/attachments";
   import debounce from "lodash-es/debounce";
   import { fromAction } from "svelte/attachments";
 
@@ -14,70 +15,15 @@
 
   let matches: any[] = $state([]);
 
-  let inputNode: HTMLInputElement;
-  // svelte-ignore non_reactive_update
-  let resultsNode: HTMLUListElement;
-
-  function useKeyboardNavigation(node: HTMLElement) {
-    function handleKeydown(e: KeyboardEvent) {
-      if (
-        e.key !== "ArrowUp" &&
-        e.key !== "ArrowDown" &&
-        e.key !== "Escape" &&
-        e.key !== "Tab"
-      )
-        return;
-
-      e.preventDefault();
-
-      const items = Array.from(node.querySelectorAll("li>button")) as HTMLButtonElement[];
-      if (!items.length) return;
-
-      const trigger = document.activeElement as HTMLButtonElement;
-      const currentIndex = items.indexOf(trigger!);
-
-      switch (e.key) {
-        case "ArrowUp":
-          let prevIndex = (currentIndex - 1 + items.length) % items.length;
-          items[prevIndex].focus();
-
-          break;
-        case "ArrowDown":
-          let nextIndex = (currentIndex + 1) % items.length;
-          items[nextIndex].focus();
-          break;
-
-        case "Escape":
-          inputNode.focus();
-          inputNode.select();
-          break;
-        case "Tab":
-          if (e.shiftKey) {
-            inputNode.focus();
-            inputNode.select();
-          }
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    node.addEventListener("keydown", handleKeydown);
-
-    return {
-      destroy() {
-        node.removeEventListener("keydown", handleKeydown);
-      },
-    };
-  }
+  let inputNode: HTMLInputElement | undefined = $state();
+  let resultsNode: HTMLUListElement | undefined = $state();
 
   function returnToInputAfterSelection(node: HTMLElement) {
     function handleButtonClick(e: Event) {
       if (!(e.target instanceof HTMLButtonElement)) return;
 
-      inputNode.focus();
-      inputNode.select();
+      inputNode?.focus();
+      inputNode?.select();
     }
 
     node.addEventListener("click", handleButtonClick);
@@ -114,7 +60,7 @@
     <ul
       class="match-list"
       bind:this={resultsNode}
-      {@attach fromAction(useKeyboardNavigation)}
+      {@attach useComboboxKeyboardNavigation(inputNode, resultsNode!)}
       {@attach fromAction(returnToInputAfterSelection)}
     >
       {#each matches as item (item.id)}
