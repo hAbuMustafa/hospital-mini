@@ -1,9 +1,22 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import { getAge, getTermed } from "$lib/date/utils";
+  import { formatDate, getAge, getTermed } from "$lib/date/utils";
+  import { toast } from "svelte-sonner";
   import { getPatient, registerTicket } from "./ticket.remote";
+  import { onMount } from "svelte";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
+
+  onMount(() => {
+    if (patient?.discharge_date !== null) {
+      goto("/patient");
+
+      toast.error(
+        `لا يمكنك الصرف لمريض غير مقيم بالمستشفى.\nالمريض ${patient?.name} خرج يوم ${formatDate(patient?.discharge_date!, "YYYY/MM/DD الساعة HH:mm")}`
+      );
+    }
+  });
 </script>
 
 {#if patient}
