@@ -3,74 +3,90 @@
   import { getAge, getTermed } from "$lib/date/utils";
   import { getPatient, registerTicket } from "./ticket.remote";
 
-  const patientRequest = getPatient(`${page.params.y}/${page.params.id}`);
+  const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 </script>
 
-{#await patientRequest}
-  <p>جار سحب بيانات المريض</p>
-{:then patient}
-  {#if patient}
-    <table>
-      <tbody>
-        <tr>
-          <th>
-            <a href="/patient/{page.params.y}/{page.params.id}" class="file-number">
-              {patient.id}
-            </a>
-          </th>
-          <td>{patient.name}</td>
+{#if patient}
+  <div class="patient_data" class:insured={patient.insured}>
+    <h1>
+      {#if typeof patient.gender === "boolean"}
+        <span class="patient_gender">
+          {patient.gender !== false ? "♂️" : "♀️"}
+        </span>
+      {/if}
+      <span class="patient_name">
+        <a href="/patient/{patient.id}" class="patient_link">
+          {patient.name}
+        </a>
+      </span>
+      {#if patient.birthdate}
+        <span class="patient_age">
+          ({patient.birthdate
+            ? getTermed(getAge(patient.birthdate), "عام", "أعوام")
+            : ""})
+        </span>
+      {/if}
+    </h1>
+    <h2>{patient.ward_recent ?? patient.ward_on_admission}</h2>
 
-          <th>القسم:</th>
-          <td>{patient.ward_recent ?? patient.ward_on_admission}</td>
-
-          <th>النوع:</th>
-          <td>
-            {patient.gender === null
-              ? "غير محدد"
-              : patient.gender !== false
-                ? "ذكر"
-                : "أنثى"}
-          </td>
-        </tr>
-        <tr>
-          <th>التشخيص:</th>
-          <td>{patient.diagnosis}</td>
-
-          <th>السن:</th>
-          <td>
-            {patient.birthdate
-              ? getTermed(getAge(patient.birthdate), "عام", "أعوام")
-              : ""}
-          </td>
-
-          <th>التأمين الصحي:</th>
-          <td>{patient.insured ? "منتفع" : "غير منتفع"}</td>
-        </tr>
-      </tbody>
-    </table>{/if}
-{/await}
+    <div class="diagnoses">
+      {#each patient.diagnosis?.split(" + ") as diagnosis, i (i)}
+        <span class="diagnosis">{diagnosis}</span>
+      {/each}
+    </div>
+  </div>
+{/if}
 
 <style>
-  table {
-    border-collapse: collapse;
+  .patient_data {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+
+    position: relative;
+
+    &.insured::after {
+      content: "مؤمن عليه";
+      font-size: 1rem;
+      position: absolute;
+      inset-inline-start: 100%;
+      inset-block-start: 0;
+      rotate: -45deg;
+      white-space: nowrap;
+
+      background-color: orange;
+      color: contrast-color(orange);
+      border-radius: 4px;
+      padding: 0.25rem 0.2rem;
+    }
   }
 
-  th,
-  td {
-    border: var(--main-border);
-    padding: 0.25rem 0.5rem;
-    max-width: 30ch;
+  h1,
+  h2 {
+    margin: 0;
   }
 
-  a.file-number {
+  a.patient_link {
     all: unset;
     cursor: pointer;
     border-radius: 4px;
-    text-decoration: underline dashed 2px var(--main-accent-color);
 
     &:hover,
     &:focus {
       background-color: var(--main-accent-color);
+    }
+  }
+
+  .diagnoses {
+    display: flex;
+    gap: 1rem;
+
+    .diagnosis {
+      background-color: var(--main-text-color);
+      color: var(--main-bg-color);
+      border-radius: 4px;
+      padding: 0.25rem 0.2rem;
     }
   }
 </style>
