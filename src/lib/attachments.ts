@@ -135,3 +135,21 @@ export function useComboboxKeyboardNavigation(
     };
   };
 }
+
+export function returnToInputAfterSelection(
+  inputNode: HTMLInputElement
+): Attachment<HTMLElement> {
+  function handleButtonClick(e: Event) {
+    if (!(e.target instanceof HTMLButtonElement)) return;
+
+    inputNode.focus();
+    inputNode.select();
+  }
+
+  return (node) => {
+    node.addEventListener("click", handleButtonClick);
+    return () => {
+      node.removeEventListener("click", handleButtonClick);
+    };
+  };
+}

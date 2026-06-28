@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { useComboboxKeyboardNavigation } from "$lib/attachments";
+  import {
+    returnToInputAfterSelection,
+    useComboboxKeyboardNavigation,
+  } from "$lib/attachments";
   import debounce from "lodash-es/debounce";
-  import { fromAction } from "svelte/attachments";
 
   let {
     itemSnippet,
@@ -17,23 +19,6 @@
 
   let inputNode: HTMLInputElement | undefined = $state();
   let resultsNode: HTMLUListElement | undefined = $state();
-
-  function returnToInputAfterSelection(node: HTMLElement) {
-    function handleButtonClick(e: Event) {
-      if (!(e.target instanceof HTMLButtonElement)) return;
-
-      inputNode?.focus();
-      inputNode?.select();
-    }
-
-    node.addEventListener("click", handleButtonClick);
-
-    return {
-      destroy() {
-        node.removeEventListener("click", handleButtonClick);
-      },
-    };
-  }
 </script>
 
 <div class="lookup-wrapper {className}">
@@ -61,7 +46,7 @@
       class="match-list"
       bind:this={resultsNode}
       {@attach useComboboxKeyboardNavigation(inputNode, resultsNode!)}
-      {@attach fromAction(returnToInputAfterSelection)}
+      {@attach returnToInputAfterSelection(inputNode)}
     >
       {#each matches as item (item.id)}
         <li>
