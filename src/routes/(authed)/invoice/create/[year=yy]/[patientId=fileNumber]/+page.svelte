@@ -14,6 +14,7 @@
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
   import type { Attachment } from "svelte/attachments";
+  import { narcoticsIds } from "$lib/CONSTANTS.js";
 
   const today = getToday();
   setToEndOfDay(today);
@@ -276,7 +277,7 @@
   filterFn={(d: DrugT) =>
     d.is_used !== "لاغي" &&
     !d.is_used?.includes("فواتير") &&
-    [116, 117, 119, 229].every((id) => id !== d.id)}
+    narcoticsIds.every((id) => id !== d.id)}
   endpoint={`/api/v1/drug?q=${encodeURIComponent(drugQuery.replaceAll("%", "\\%"))}`}
   placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
   className="hide-in-print"
