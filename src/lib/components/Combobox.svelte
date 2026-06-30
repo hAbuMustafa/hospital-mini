@@ -35,7 +35,7 @@
     }, 500)}
     onkeydown={(e) => {
       if (e.key === "ArrowDown") resultsNode?.querySelector("button")?.focus();
-      if (e.key === "Enter") {
+      if (e.key === "Enter" && matches.length) {
         select(matches[0]);
       }
       if (e.key === "Escape") matches = [];
