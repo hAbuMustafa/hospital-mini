@@ -11,7 +11,9 @@ export const getPatient = query(v.string(), async (patientId) => {
     .where(eq(patients_view.id, patientId));
 
   if (!patient) {
-    return;
+    return {
+      id: patientId,
+    };
   } else {
     return patient;
   }

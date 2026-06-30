@@ -12,8 +12,10 @@
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
+  const isRegisteredPatient = "name" in patient;
+
   onMount(() => {
-    if (patient?.discharge_date !== null) {
+    if (isRegisteredPatient && patient?.discharge_date !== null) {
       goto("/patient");
 
       toast.error(
@@ -43,32 +45,47 @@
 </script>
 
 {#if patient}
-  <div class="patient_data" class:insured={patient.insured}>
+  <div class="patient_data" class:insured={isRegisteredPatient && patient.insured}>
     <h1>
-      {#if typeof patient.gender === "boolean"}
-        <span class="patient_gender">
-          {patient.gender !== false ? "♂️" : "♀️"}
+      {#if isRegisteredPatient}
+        {#if typeof patient.gender === "boolean"}
+          <span class="patient_gender">
+            {patient.gender !== false ? "♂️" : "♀️"}
+          </span>
+        {/if}
+        <span class="patient_name">
+          <a href="/patient/{patient.id}" class="patient_link">
+            {patient.name}
+          </a>
         </span>
-      {/if}
-      <span class="patient_name">
-        <a href="/patient/{patient.id}" class="patient_link">
-          {patient.name}
-        </a>
-      </span>
-      {#if patient.birthdate}
-        <span class="patient_age">
-          ({patient.birthdate
-            ? getTermed(getAge(patient.birthdate), "عام", "أعوام")
-            : ""})
-        </span>
+        {#if patient.birthdate}
+          <span class="patient_age">
+            ({patient.birthdate
+              ? getTermed(getAge(patient.birthdate), "عام", "أعوام")
+              : ""})
+          </span>
+        {/if}
+      {:else}
+        <span class="not-yet-registered">مريض غير مسجل بعد</span>
       {/if}
     </h1>
-    <h2>{patient.ward_recent ?? patient.ward_on_admission}</h2>
+
+    <h2>
+      {#if isRegisteredPatient}
+        {patient.ward_recent ?? patient.ward_on_admission}
+      {:else}
+        <span class="not-yet-registered">قسم غير محدد</span>
+      {/if}
+    </h2>
 
     <div class="diagnoses">
-      {#each patient.diagnosis?.split(" + ") as diagnosis, i (i)}
-        <span class="diagnosis">{diagnosis}</span>
-      {/each}
+      {#if isRegisteredPatient}
+        {#each patient.diagnosis?.split(" + ") as diagnosis, i (i)}
+          <span class="diagnosis">{diagnosis}</span>
+        {/each}
+      {:else}
+        <span class="diagnoses not-yet-registered">تشخيص غير مسجل</span>
+      {/if}
     </div>
   </div>
 
@@ -224,6 +241,11 @@
       border-radius: 4px;
       padding: 0.25rem 0.2rem;
     }
+  }
+
+  .not-yet-registered {
+    text-decoration: line-through;
+    color: light-dark(maroon, salmon);
   }
 
   button.drug-select {
