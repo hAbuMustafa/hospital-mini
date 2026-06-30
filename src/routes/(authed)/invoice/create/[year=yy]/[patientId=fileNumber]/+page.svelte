@@ -212,6 +212,7 @@
     <button
       type="button"
       class="drug-select"
+      class:already-selected={selectedDrugs.findIndex((item) => item.id === drug.id) > -1}
       onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
     >
       <strong class="name-ar">{@render markMatches(drug.name_ar!)}</strong>
@@ -569,6 +570,10 @@
     &:focus {
       border: 3px double var(--main-accent-color);
       outline: none;
+    }
+
+    &.already-selected {
+      background-color: green;
     }
   }
 </style>
