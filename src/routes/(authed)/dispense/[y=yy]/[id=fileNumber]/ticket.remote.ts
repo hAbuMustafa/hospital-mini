@@ -1,7 +1,7 @@
 import { form, getRequestEvent, query } from "$app/server";
 import { db } from "$lib/server/db";
 import { patients_view, transactions, transactionTickets } from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getPatient = query(v.string(), async (patientId) => {
@@ -18,6 +18,33 @@ export const getPatient = query(v.string(), async (patientId) => {
     return patient;
   }
 });
+
+export const getItemLastDispensed = query(
+  v.object({
+    patientId: v.string(),
+    itemId: v.number(),
+  }),
+  async ({ patientId, itemId }) => {
+    const [lastDispense] = await db
+      .select({
+        ticketId: transactionTickets.id,
+        timestamp: transactionTickets.timestamp,
+        itemId: transactions.item_id,
+        qty: transactions.qty,
+      })
+      .from(transactionTickets)
+      .leftJoin(transactions, eq(transactionTickets.id, transactions.ticket_id))
+      .where(
+        and(
+          eq(transactionTickets.patient_id, patientId),
+          eq(transactions.item_id, itemId)
+        )
+      )
+      .orderBy(desc(transactionTickets.timestamp));
+
+    return lastDispense;
+  }
+);
 
 export const postTicket = form(
   v.object({

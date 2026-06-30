@@ -3,7 +3,7 @@
   import { page } from "$app/state";
   import { formatDate, getAge, getTermed } from "$lib/date/utils";
   import { toast } from "svelte-sonner";
-  import { getPatient, postTicket } from "./ticket.remote";
+  import { getItemLastDispensed, getPatient, postTicket } from "./ticket.remote";
   import { onMount } from "svelte";
   import Combobox from "$lib/components/Combobox.svelte";
   import { scale } from "svelte/transition";
@@ -13,6 +13,9 @@
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
   const isRegisteredPatient = "name" in patient;
+
+  const getLastDispensed = async (itemId: number) =>
+    await getItemLastDispensed({ patientId: patient.id, itemId });
 
   onMount(() => {
     if (isRegisteredPatient && patient?.discharge_date !== null) {
@@ -26,9 +29,12 @@
 
   let ticketItemsBody: HTMLElement | undefined = $state();
 
-  let ticketDrugs: (DrugT & { amount: number })[] = $state([]);
+  let ticketDrugs: (DrugT & {
+    amount: number;
+    lastDispensed: Awaited<ReturnType<typeof getItemLastDispensed>> | null;
+  })[] = $state([]);
 
-  function selectDrug(item: DrugT) {
+  async function selectDrug(item: DrugT) {
     const foundItemIndexInList = ticketDrugs.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
       ticketDrugs[foundItemIndexInList].amount++;
@@ -38,7 +44,11 @@
       return;
     }
 
-    ticketDrugs.push({ ...item, amount: 1 });
+    ticketDrugs.push({
+      ...item,
+      amount: 1,
+      lastDispensed: await getLastDispensed(item.id),
+    });
   }
 
   let drugQuery = $state("");
@@ -126,12 +136,14 @@
         <col />
         <col />
         <col class="num-input-column" />
+        <col />
       </colgroup>
       <thead>
         <tr>
           <th>م</th>
           <th>اسم الصنف</th>
           <th>الكمية</th>
+          <th>آخر صرف</th>
         </tr>
       </thead>
       {#if ticketDrugs.length}
@@ -171,6 +183,15 @@
                   bind:value={drug.amount}
                   {@attach useKeyboardNavigation("amount", ticketItemsBody)}
                 />
+              </td>
+              <!-- todo: use more localized format -->
+              <td>
+                {#if drug.lastDispensed}
+                  {Math.abs(drug.lastDispensed.qty!)} بتاريخ {formatDate(
+                    drug.lastDispensed.timestamp!,
+                    "DD MMM (hh:mm A)"
+                  )}
+                {/if}
               </td>
             </tr>
           {/each}
