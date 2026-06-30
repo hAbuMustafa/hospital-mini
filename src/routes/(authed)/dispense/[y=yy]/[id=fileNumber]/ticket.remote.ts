@@ -1,5 +1,4 @@
-import { form, query } from "$app/server";
-import { authState } from "$lib/auth-client/auth.svelte";
+import { form, getRequestEvent, query } from "$app/server";
 import { db } from "$lib/server/db";
 import { patients_view, transactions, transactionTickets } from "$lib/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -36,7 +35,7 @@ export const postTicket = form(
         .values({
           patient_id: data.patientId,
           store_id: 1, // todo: reset by user's affiliation
-          user_id: authState.user!.id!,
+          user_id: getRequestEvent().locals.user?.id!,
           is_dispense: true,
         })
         .returning();
