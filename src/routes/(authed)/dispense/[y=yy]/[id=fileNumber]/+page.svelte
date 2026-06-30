@@ -8,6 +8,7 @@
   import Combobox from "$lib/components/Combobox.svelte";
   import { scale } from "svelte/transition";
   import { useKeyboardNavigation } from "$lib/attachments";
+  import { nonDivisibleBoxes } from "$lib/CONSTANTS";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -80,7 +81,12 @@
     onSelect={(drug: DrugT) => selectDrug(drug)}
   >
     {#snippet itemSnippet(drug: DrugT)}
-      <button type="button" class="drug-select" onclick={() => selectDrug(drug as DrugT)}>
+      <button
+        type="button"
+        class="drug-select"
+        class:already-selected={ticketDrugs.findIndex((item) => item.id === drug.id) > -1}
+        onclick={() => selectDrug(drug as DrugT)}
+      >
         <strong class="name-ar">{@render markMatches(drug.name_ar!)}</strong>
         <span class="name">{@render markMatches(drug.tradename_ar!)}</span>
         <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
@@ -96,67 +102,75 @@
   {/snippet}
 
   <form {...postTicket}>
+    <input {...postTicket.fields.patientId.as("hidden", patient.id)} />
+
+    <table class="ticket-items">
+      <colgroup>
+        <col />
+        <col />
+        <col class="num-input-column" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>م</th>
+          <th>اسم الصنف</th>
+          <th>الكمية</th>
+        </tr>
+      </thead>
+      {#if ticketDrugs.length}
+        <tbody bind:this={ticketItemsBody}>
+          {#each ticketDrugs as drug, i (drug.id)}
+            <tr
+              class:amount-not-allowed={nonDivisibleBoxes
+                .map((item) => item.id)
+                .some((id) => id === drug.id) &&
+                drug.amount %
+                  nonDivisibleBoxes.find((item) => item.id === drug.id)?.min! >
+                  0}
+              transition:scale
+            >
+              <td>
+                <button
+                  type="button"
+                  onclick={() => {
+                    ticketDrugs = ticketDrugs.filter((d) => d.id !== drug.id);
+                  }}
+                >
+                  {i + 1}
+                </button>
+              </td>
+              <td>
+                <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
+                <label for="amount-{drug.id}">{drug.name_ar}</label>
+                <input
+                  {...postTicket.fields.drugs[i].unit_price.as("hidden", drug.price!)}
+                />
+              </td>
+              <td>
+                <input
+                  id="amount-{drug.id}"
+                  {...postTicket.fields.drugs[i].qty.as("number", drug.amount)}
+                  min="1"
+                  bind:value={drug.amount}
+                  {@attach useKeyboardNavigation("amount", ticketItemsBody)}
+                />
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      {:else}
+        <tbody>
+          <tr>
+            <td colspan="4">لم يتم إدخال أدوية</td>
+          </tr>
+        </tbody>
+      {/if}
+    </table>
+
     {#if ticketDrugs.length}
-      <input {...postTicket.fields.patientId.as("text", patient.id)} />
-      {#each ticketDrugs as drug, i (drug.id)}
-        <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
-        <label for="amount-{drug.id}">{drug.name_ar}</label>
-        <input {...postTicket.fields.drugs[i].qty.as("number", drug.amount)} />
-        <input {...postTicket.fields.drugs[i].unit_price.as("hidden", drug.price!)} />
-      {/each}
+      <input type="submit" class="btn" value="حفظ الطلبية" />
     {/if}
   </form>
-
-  <!-- todo: replace table with form -->
-
-  <table class="ticket-items">
-    <colgroup>
-      <col />
-      <col />
-      <col class="num-input-column" />
-    </colgroup>
-    <thead>
-      <tr>
-        <th>م</th>
-        <th>اسم الصنف</th>
-        <th>الكمية</th>
-      </tr>
-    </thead>
-    {#if ticketDrugs.length}
-      <tbody bind:this={ticketItemsBody}>
-        {#each ticketDrugs as drug, i (drug.id)}
-          <tr transition:scale>
-            <td>
-              <button
-                onclick={() => {
-                  ticketDrugs = ticketDrugs.filter((d) => d.id !== drug.id);
-                }}
-              >
-                {i + 1}
-              </button>
-            </td>
-            <td>{drug.name_ar}</td>
-            <td>
-              <input
-                type="number"
-                name="amount-{drug.id}"
-                id="amount-{drug.id}"
-                min="0"
-                bind:value={drug.amount}
-                {@attach useKeyboardNavigation("amount", ticketItemsBody)}
-              />
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    {:else}
-      <tbody>
-        <tr>
-          <td colspan="4">لم يتم إدخال أدوية</td>
-        </tr>
-      </tbody>
-    {/if}
-  </table>
 {/if}
 
 <style>
@@ -221,6 +235,64 @@
     &:focus {
       border: 3px double var(--main-accent-color);
       outline: none;
+    }
+
+    &.already-selected {
+      background-color: green;
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    table {
+      th,
+      td {
+        border: var(--main-border);
+      }
+
+      td {
+        padding-inline: 0.5rem;
+        &:has(input[type="number"]) {
+          padding: 0;
+
+          & > input[type="number"] {
+            box-sizing: border-box;
+            width: 100%;
+            text-align: center;
+          }
+        }
+
+        &:has(> button) {
+          padding: 0;
+
+          & > button {
+            all: unset;
+            cursor: pointer;
+            position: relative;
+            width: 100%;
+
+            &:is(:hover, :focus-within)::after {
+              content: "❌";
+              position: absolute;
+              inset: 0;
+              padding: 0;
+              pointer-events: none;
+            }
+
+            &:focus-within {
+              outline: 2px double var(--main-accent-color);
+            }
+          }
+        }
+      }
+
+      tr.amount-not-allowed {
+        background-color: salmon;
+        text-decoration: line-through;
+      }
     }
   }
 </style>
