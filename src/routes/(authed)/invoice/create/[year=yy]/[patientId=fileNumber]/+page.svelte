@@ -13,7 +13,7 @@
   import debounce from "lodash-es/debounce";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
-  import { narcoticsIds } from "$lib/CONSTANTS";
+  import { narcoticsIds, nonDivisibleBoxes } from "$lib/CONSTANTS";
   import { useKeyboardNavigation } from "$lib/attachments";
 
   const today = getToday();
@@ -259,9 +259,10 @@
           class:hide-in-print={typeof drug.total === "number"
             ? drug.total === 0
             : drug.total() === 0}
-          class:amount-not-allowed={drug.amount %
-            (drug.id === 166 ? 30 : drug.id === 198 ? 60 : 1) >
-            0}
+          class:amount-not-allowed={nonDivisibleBoxes
+            .map((item) => item.id)
+            .some((id) => id === drug.id) &&
+            drug.amount % nonDivisibleBoxes.find((item) => item.id === drug.id)?.min! > 0}
           transition:scale
         >
           <td>
