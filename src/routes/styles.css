@@ -58,7 +58,8 @@ table {
 }
 
 a.btn,
-button.btn {
+button.btn,
+input.btn {
   color: unset;
   text-decoration: unset;
   padding: 0.25rem;
