@@ -203,7 +203,7 @@
     d.is_used !== "لاغي" &&
     !d.is_used?.includes("فواتير") &&
     narcoticsIds.every((id) => id !== d.id)}
-  endpoint={`/api/v1/drug?q=${encodeURIComponent(drugQuery.replaceAll("%", "\\%"))}`}
+  endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '\\%'))}"
   placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
   className="hide-in-print"
   onSelect={(drug: InvoiceSelectedDrugT) => selectDrug(drug)}

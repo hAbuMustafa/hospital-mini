@@ -75,7 +75,7 @@
   <Combobox
     bind:query={drugQuery}
     filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
-    endpoint={`/api/v1/drug?q=${encodeURIComponent(drugQuery.replaceAll("%", "\\%"))}`}
+    endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '\\%'))}"
     placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
     className="hide-in-print"
     onSelect={(drug: DrugT) => selectDrug(drug)}
