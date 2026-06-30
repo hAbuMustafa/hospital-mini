@@ -208,6 +208,9 @@
     {#if ticketDrugs.length}
       <input type="submit" class="btn" value="حفظ الطلبية" />
     {/if}
+    <!-- todo: inform user on the submission result -->
+    <!-- todo: add error handling -->
+    <!-- todo: clear form after successful submission -->
   </form>
 {/if}
 
