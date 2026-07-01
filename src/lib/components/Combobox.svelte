@@ -35,9 +35,11 @@
     }, 500)}
     onkeydown={(e) => {
       if (e.key === "ArrowDown") {
+        e.preventDefault();
         resultsNode?.querySelector("button")?.focus();
       }
       if (e.key === "ArrowUp") {
+        e.preventDefault();
         const results = resultsNode?.querySelectorAll("button");
         results?.[results.length - 1]?.focus();
       }
