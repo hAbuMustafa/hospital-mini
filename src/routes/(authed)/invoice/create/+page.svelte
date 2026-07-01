@@ -100,6 +100,8 @@
   </tbody>
 </table>
 
+<br style="margin-block-start: 1rem;" />
+
 <Combobox
   bind:query={patientQuery}
   endpoint={`/api/v1/patient?q=${patientQuery}`}
