@@ -69,7 +69,6 @@
 
 <style>
   .lookup-wrapper {
-    margin-block: 1rem;
     position: relative;
 
     input {
