@@ -37,6 +37,7 @@
       if (e.key === "ArrowDown") resultsNode?.querySelector("button")?.focus();
       if (e.key === "Enter" && matches.length) {
         select(matches[0]);
+        inputNode?.select();
       }
       if (e.key === "Escape") matches = [];
     }}
