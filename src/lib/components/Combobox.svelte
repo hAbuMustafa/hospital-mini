@@ -34,7 +34,13 @@
         .then((arr) => arr.filter(filterFn));
     }, 500)}
     onkeydown={(e) => {
-      if (e.key === "ArrowDown") resultsNode?.querySelector("button")?.focus();
+      if (e.key === "ArrowDown") {
+        resultsNode?.querySelector("button")?.focus();
+      }
+      if (e.key === "ArrowUp") {
+        const results = resultsNode?.querySelectorAll("button");
+        results?.[results.length - 1]?.focus();
+      }
       if (e.key === "Enter" && matches.length) {
         select(matches[0]);
         inputNode?.select();
