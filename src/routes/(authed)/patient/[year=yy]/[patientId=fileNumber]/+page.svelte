@@ -9,7 +9,7 @@
 <table class="patient-data">
   <tbody>
     <tr>
-      <th>رقم الملف:</th>
+      <th>رقم القيد:</th>
       <td>{patient.id}</td>
 
       <th>{patient.id_type}:</th>
@@ -42,7 +42,7 @@
         {getTermed(
           getDuration(patient.admission_date, patient.discharge_date ?? new Date()) ?? 1,
           "يوم",
-          "أيام",
+          "أيام"
         )}
         {#if !patient.discharge_date}
           حتى اليوم
@@ -57,7 +57,7 @@
   <table class="other-admissions">
     <thead>
       <tr>
-        <th rowspan="2">رقم الملف</th>
+        <th rowspan="2">رقم القيد</th>
         <th colspan="2">فترة الإقامة</th>
         <th rowspan="2">إصدار فاتورة</th>
       </tr>
