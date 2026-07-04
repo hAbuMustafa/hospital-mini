@@ -473,6 +473,8 @@
 
               @media print {
                 appearance: textfield;
+                /* todo: borders should shrink in print to not cover table borders */
+
                 border: none;
                 font-size: 1rem;
                 &::-webkit-outer-spin-button,

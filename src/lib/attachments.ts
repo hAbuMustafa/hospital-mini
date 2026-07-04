@@ -68,6 +68,9 @@ export function useKeyboardNavigation(
     }
   }
 
+  // todo: 'enter' steps down (like arrowDown)
+  // todo: input focus auto selects all content
+
   return (node) => {
     node.addEventListener("keydown", handleKeydown);
 
