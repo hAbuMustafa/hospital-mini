@@ -442,6 +442,16 @@
     thead {
       @media print {
         display: table-header-group;
+
+        &::before {
+          content: "";
+          display: block;
+          height: 2rem;
+          line-height: 0;
+          font-size: 0;
+          visibility: hidden;
+          margin-bottom: 0;
+        }
       }
     }
 
