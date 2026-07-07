@@ -220,6 +220,7 @@
     flex-direction: column;
     gap: 1rem;
     align-items: center;
+    margin-block-end: 1rem;
 
     position: relative;
 
