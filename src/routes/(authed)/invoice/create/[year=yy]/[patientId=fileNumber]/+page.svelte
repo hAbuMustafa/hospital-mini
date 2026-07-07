@@ -473,9 +473,10 @@
 
               @media print {
                 appearance: textfield;
-                /* todo: borders should shrink in print to not cover table borders */
+                margin: 2px 4px;
+                width: 90%;
 
-                border: none;
+                border: red 1px solid;
                 font-size: 1rem;
                 &::-webkit-outer-spin-button,
                 &::-webkit-inner-spin-button {
