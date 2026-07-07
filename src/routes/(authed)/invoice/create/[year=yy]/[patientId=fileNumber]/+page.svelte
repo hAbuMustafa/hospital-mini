@@ -453,7 +453,11 @@
       @media print {
         tr {
           page-break-inside: avoid;
-          page-break-after: auto;
+        }
+
+        tr:nth-of-type(20),
+        tr:nth-of-type(35n + 20) {
+          page-break-after: always;
         }
 
         td {
