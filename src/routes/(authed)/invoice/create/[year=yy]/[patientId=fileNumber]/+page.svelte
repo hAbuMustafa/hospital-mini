@@ -476,7 +476,7 @@
                 margin: 2px 4px;
                 width: 90%;
 
-                border: red 1px solid;
+                border: none;
                 font-size: 1rem;
                 &::-webkit-outer-spin-button,
                 &::-webkit-inner-spin-button {
