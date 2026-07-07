@@ -1,5 +1,9 @@
 import type { Attachment } from "svelte/attachments";
 
+function handleFocus(e: Event) {
+  (e.currentTarget as HTMLInputElement).select();
+}
+
 export function useKeyboardNavigation(
   selector: string,
   tableBody: HTMLElement
@@ -70,13 +74,13 @@ export function useKeyboardNavigation(
     }
   }
 
-  // todo: input focus auto selects all content
-
   return (node) => {
     node.addEventListener("keydown", handleKeydown);
+    node.addEventListener("focus", handleFocus);
 
     return () => {
       node.removeEventListener("keydown", handleKeydown);
+      node.removeEventListener("focus", handleFocus);
     };
   };
 }
@@ -133,9 +137,11 @@ export function useComboboxKeyboardNavigation(
 
   return (node) => {
     node.addEventListener("keydown", handleKeydown);
+    inputNode.addEventListener("focus", handleFocus);
 
     return () => {
       node.removeEventListener("keydown", handleKeydown);
+      inputNode.removeEventListener("focus", handleFocus);
     };
   };
 }
