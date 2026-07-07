@@ -573,6 +573,8 @@
   @media print {
     @page {
       margin-bottom: 1.5cm;
+      size: a4 portrait;
+      margin-top: 1.5cm;
 
       @bottom-left {
         content: "صفحة " counter(page) " من " counter(pages);
