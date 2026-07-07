@@ -134,7 +134,7 @@
     <table class="ticket-items">
       <colgroup>
         <col />
-        <col />
+        <col class="item-name-column" />
         <col class="num-input-column" />
         <col />
       </colgroup>
@@ -297,6 +297,14 @@
     gap: 0.5rem;
 
     table {
+      col.item-name-column {
+        width: 25vw;
+      }
+
+      col.num-input-column {
+        width: 8vw;
+      }
+
       th,
       td {
         border: var(--main-border);
