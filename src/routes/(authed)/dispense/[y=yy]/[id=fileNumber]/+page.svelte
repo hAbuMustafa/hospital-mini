@@ -170,7 +170,9 @@
               </td>
               <td>
                 <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
-                <label for="amount-{drug.id}">{drug.name_ar}</label>
+                <label for="amount-{drug.id}" title={drug.tradename_ar}>
+                  {drug.name_ar}
+                </label>
                 <input
                   {...postTicket.fields.drugs[i].unit_price.as("hidden", drug.price!)}
                 />
