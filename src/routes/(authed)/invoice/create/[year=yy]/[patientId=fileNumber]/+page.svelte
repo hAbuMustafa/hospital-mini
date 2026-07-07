@@ -502,6 +502,10 @@
                 inset: 0;
                 padding: 0;
                 pointer-events: none;
+
+                @media print {
+                  display: none;
+                }
               }
 
               &:focus-within {
