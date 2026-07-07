@@ -9,7 +9,8 @@ export function useKeyboardNavigation(
       e.key !== "ArrowUp" &&
       e.key !== "ArrowDown" &&
       e.key !== "ArrowRight" &&
-      e.key !== "ArrowLeft"
+      e.key !== "ArrowLeft" &&
+      e.key !== "Enter"
     )
       return;
 
@@ -47,6 +48,7 @@ export function useKeyboardNavigation(
 
         break;
       case "ArrowDown":
+      case "Enter":
         e.preventDefault();
 
         let nextSimilarIndex = (currentSimilarIndex + 1) % similarNumberFields.length;
@@ -68,7 +70,6 @@ export function useKeyboardNavigation(
     }
   }
 
-  // todo: 'enter' steps down (like arrowDown)
   // todo: input focus auto selects all content
 
   return (node) => {
