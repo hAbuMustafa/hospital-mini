@@ -50,6 +50,14 @@
   <input type="search" bind:value={query} placeholder="بحث عن مريض محجوز 🔍" />
 </header>
 
+<ul class="nav" role="navigation">
+  {#each wards.filter((w) => Object.keys(patientsByWard).includes(w)) as ward (ward)}
+    <li>
+      <a href="#{ward}">{ward}</a>
+    </li>
+  {/each}
+</ul>
+
 {#each wards as ward (ward)}
   {#if patientsByWard[ward] && (!query || (query && patientsByWard[ward].some( (p) => qRegex.test(p.name!) )))}
     <div class="ward-wrapper" style:--header-height={headerHight - 1 + "px"}>
@@ -64,7 +72,7 @@
     <small>{getTermed(patientsList?.length, "مريض", "مرضى")}</small>
   </h2>
 
-  <table>
+  <table id={wardName}>
     <thead>
       <tr>
         <th>رقم القيد</th>
@@ -132,6 +140,28 @@
     z-index: 2;
   }
 
+  ul.nav {
+    position: fixed;
+    inset-inline-end: -4px;
+    inset-block: 50%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border: var(--main-border);
+    border-radius: 4px;
+
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 1rem;
+
+    a {
+      color: var(--main-text-color);
+      text-decoration: none;
+    }
+  }
+
   input[type="search"] {
     text-align: center;
     font-size: 1.5rem;
@@ -160,6 +190,7 @@
 
   table {
     max-width: 80vw;
+    scroll-margin-top: 150px;
 
     th,
     td {
