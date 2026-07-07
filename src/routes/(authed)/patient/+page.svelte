@@ -40,15 +40,21 @@
       "g"
     )
   );
+
+  let headerHight = $state(0);
 </script>
 
-<h1>بيان بالمرضى بالأقسام</h1>
+<header bind:clientHeight={headerHight}>
+  <h1>بيان بالمرضى بالأقسام</h1>
 
-<input type="search" bind:value={query} placeholder="بحث عن مريض محجوز 🔍" />
+  <input type="search" bind:value={query} placeholder="بحث عن مريض محجوز 🔍" />
+</header>
 
 {#each wards as ward (ward)}
   {#if patientsByWard[ward] && (!query || (query && patientsByWard[ward].some( (p) => qRegex.test(p.name!) )))}
-    {@render Ward(ward, patientsByWard[ward])}
+    <div class="ward-wrapper" style:--header-height={headerHight - 1 + "px"}>
+      {@render Ward(ward, patientsByWard[ward])}
+    </div>
   {/if}
 {/each}
 
@@ -112,12 +118,32 @@
 {/if}
 
 <style>
+  header {
+    position: sticky;
+    inset-block-start: 0;
+
+    background-color: var(--main-bg-color);
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    z-index: 2;
+  }
+
   input[type="search"] {
     text-align: center;
     font-size: 1.5rem;
   }
 
   h2 {
+    position: sticky;
+    inset-block-start: var(--header-height);
+    background-color: var(--main-bg-color);
+
+    z-index: 1;
+
     width: 100%;
     display: flex;
     justify-content: space-around;
@@ -138,6 +164,11 @@
     th,
     td {
       border: var(--main-border);
+    }
+
+    thead {
+      position: sticky;
+      inset-block-start: calc(var(--header-height) + 1.5rem);
     }
 
     tbody {
