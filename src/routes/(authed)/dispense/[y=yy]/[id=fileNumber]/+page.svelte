@@ -184,13 +184,15 @@
                   {@attach useKeyboardNavigation("amount", ticketItemsBody)}
                 />
               </td>
-              <!-- todo: use more localized format -->
               <td>
                 {#if drug.lastDispensed}
-                  {Math.abs(drug.lastDispensed.qty!)} بتاريخ {formatDate(
-                    drug.lastDispensed.timestamp!,
-                    "DD MMM (hh:mm A)"
-                  )}
+                  <span class="old-amount">
+                    {Math.abs(drug.lastDispensed.qty!)}
+                  </span>
+                  {drug.unit}
+                  {formatDate(drug.lastDispensed.timestamp!, "YYYY/MM/DD (hh:mm A)")
+                    .replace("AM", "ص")
+                    .replace("PM", "م")}
                 {/if}
               </td>
             </tr>
@@ -333,6 +335,15 @@
               outline: 2px double var(--main-accent-color);
             }
           }
+        }
+
+        span.old-amount {
+          display: inline-block;
+          background-color: var(--main-text-color);
+          color: var(--main-bg-color);
+          border-radius: 4px;
+          padding: 1px 0.5rem;
+          margin-block: 1px;
         }
       }
 
