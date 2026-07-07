@@ -334,6 +334,21 @@
             .toFixed(2)}
         </td>
       </tr>
+      <tr>
+        <td colspan="7">
+          <dl class="signatures">
+            <dt>مشرف القسم</dt>
+            <dt>طبيب صيدلي</dt>
+            <dt>مدير الرعاية</dt>
+            <dt>يعتمد،<br />مدير المستشفى/</dt>
+
+            <dd></dd>
+            <dd>{authState.user?.name}</dd>
+            <dd></dd>
+            <dd></dd>
+          </dl>
+        </td>
+      </tr>
     </tfoot>
   {:else}
     <tbody>
@@ -342,25 +357,6 @@
       </tr>
     </tbody>
   {/if}
-</table>
-
-<table class="signatures">
-  <thead>
-    <tr>
-      <th>مشرف القسم</th>
-      <th>طبيب صيدلي</th>
-      <th>مدير الرعاية</th>
-      <th>يعتمد،<br />مدير المستشفى/</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td></td>
-      <td>{authState.user?.name}</td>
-      <td></td>
-      <td></td>
-    </tr>
-  </tbody>
 </table>
 
 <PageBorder />
@@ -541,20 +537,36 @@
       @media print {
         display: table-row-group; /* to prevent tfoot from repeating at the end of every table on a page */
       }
-    }
-  }
 
-  table.signatures {
-    display: none;
-    margin-top: 1rem;
-    width: 80vw;
+      tr {
+        &:has(.signatures) td {
+          border: none;
+        }
 
-    thead {
-      background-color: unset;
-    }
+        .signatures {
+          display: none;
+          margin-top: 1rem;
+          width: 80vw;
+          border: none;
+          font-size: 1rem;
 
-    @media print {
-      display: table;
+          dt {
+            font-weight: bold;
+          }
+
+          dd {
+            font-weight: normal;
+            margin: 0;
+          }
+
+          @media print {
+            display: grid;
+            grid-template: repeat(4, 1fr) / repeat(4, 1fr);
+            align-items: center;
+            text-align: center;
+          }
+        }
+      }
     }
   }
 
