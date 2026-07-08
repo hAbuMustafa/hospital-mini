@@ -145,6 +145,8 @@
     inset-inline-end: -4px;
     inset-block: 50%;
     height: fit-content;
+    background-color: var(--main-bg-color);
+    box-shadow: var(--main-shadow);
 
     display: flex;
     flex-direction: column;
@@ -155,6 +157,7 @@
     list-style: none;
     margin: 0;
     padding: 0.5rem 1rem;
+    z-index: 3;
 
     a {
       color: var(--main-text-color);
