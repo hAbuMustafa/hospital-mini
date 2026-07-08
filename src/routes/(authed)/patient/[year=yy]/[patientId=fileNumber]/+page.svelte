@@ -1,8 +1,14 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import { formatDate, getDuration, getTermed } from "$lib/date/utils";
+  import { getOtherAdmissions, getPatientData } from "./getPatientHistory.remote";
 
-  let { data } = $props();
-  const { patient, otherAdmissions } = $derived(data);
+  const patientId = [page.params.year, page.params.patientId].join("/");
+
+  const patient = await getPatientData(patientId);
+  const otherAdmissions = patient.id_number
+    ? await getOtherAdmissions({ patientId, patientIdDocNumber: patient.id_number })
+    : [];
 </script>
 
 <h1>{patient.name}</h1>
