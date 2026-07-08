@@ -58,6 +58,8 @@
   </tbody>
 </table>
 
+<!-- todo: add transfers -->
+
 {#if otherAdmissions.length}
   <h2>دخول سابق</h2>
   <table class="other-admissions">
