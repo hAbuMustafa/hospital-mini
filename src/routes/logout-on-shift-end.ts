@@ -18,14 +18,16 @@ export function signOutOnShiftEnd() {
       ) {
         await authState.signOut();
         goto("/login");
-        toast.warning("تم تسجيل خروجك لانتهاء وقت الوردية");
+        toast.warning("تم تسجيل خروجك لانتهاء وقت الوردية", { duration: 200000 });
       } else if (
         authState.isAuthenticated &&
         thePreviousHours.includes(now.getHours()) &&
         now.getMinutes() === 55 &&
         now.getSeconds() === 0
       ) {
-        toast.warning("سيتم تسجيل خروجك تلقائيا خلال 5 دقائق عند نهاية الوردية");
+        toast.warning("سيتم تسجيل خروجك تلقائيا خلال 5 دقائق عند نهاية الوردية", {
+          duration: 5 * 60 * 1000,
+        });
       }
     }, 1000);
   }
