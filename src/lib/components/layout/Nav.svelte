@@ -21,8 +21,8 @@
       <li>
         <button popovertarget="pharmacy-nav-list">الصيدلية</button>
         <ul id="pharmacy-nav-list" popover="hint">
-          <li><a href="/tickets">عرض تذاكر الصرف</a></li>
-          <li><a href="/dispense-report">المنصرف</a></li>
+          <li><a href="/pharmacy/tickets">عرض تذاكر الصرف</a></li>
+          <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
           <hr />
           <li><a href="/stock/transfer">صرف لجهة</a></li>
           <li><a href="/stock/receive">استلام وارد</a></li>
