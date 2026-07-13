@@ -1,6 +1,8 @@
 import { form, getRequestEvent, query } from "$app/server";
+import { unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
 import { patients_view, transactions, transactionTickets } from "$lib/server/db/schema";
+import { invalid } from "@sveltejs/kit";
 import { and, desc, eq } from "drizzle-orm";
 import * as v from "valibot";
 
@@ -57,7 +59,19 @@ export const postTicket = form(
       })
     ),
   }),
-  async (data) => {
+  async (data, issue) => {
+    const hasInvalidBoxQt = data.drugs.findIndex((d) =>
+      unacceptedAmount(d.item_id, d.qty)
+    );
+    if (hasInvalidBoxQt > -1) {
+      invalid(issue.drugs[hasInvalidBoxQt]("الصنف يصرف بالعلبة وليس بالوحدة الصغرى"));
+    }
+
+    const hasInvalidQt = data.drugs.findIndex((d) => d.qty < 1);
+    if (hasInvalidQt > -1) {
+      invalid(issue.drugs[hasInvalidQt]("برجاء إدخال كمية صحيحة"));
+    }
+
     const ticketId = await db.transaction(async (tx) => {
       const [ticket] = await tx
         .insert(transactionTickets)

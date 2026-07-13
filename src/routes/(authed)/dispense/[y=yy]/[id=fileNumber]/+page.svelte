@@ -8,7 +8,7 @@
   import Combobox from "$lib/components/Combobox.svelte";
   import { scale } from "svelte/transition";
   import { useKeyboardNavigation } from "$lib/attachments";
-  import { nonDivisibleBoxes } from "$lib/CONSTANTS";
+  import { unacceptedAmount } from "$lib/CONSTANTS";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -149,15 +149,7 @@
       {#if ticketDrugs.length}
         <tbody bind:this={ticketItemsBody}>
           {#each ticketDrugs as drug, i (drug.id)}
-            <tr
-              class:amount-not-allowed={nonDivisibleBoxes
-                .map((item) => item.id)
-                .some((id) => id === drug.id) &&
-                drug.amount %
-                  nonDivisibleBoxes.find((item) => item.id === drug.id)?.min! >
-                  0}
-              transition:scale
-            >
+            <tr transition:scale>
               <td>
                 <button
                   type="button"
@@ -198,6 +190,17 @@
                 {/if}
               </td>
             </tr>
+            {#if unacceptedAmount(drug.id, drug.amount) || postTicket.fields.drugs[i].issues()?.length}
+              <tr class="issue" hidden={!unacceptedAmount(drug.id, drug.amount)}>
+                <td colspan="6">
+                  <ul>
+                    {#each postTicket.fields.drugs[i].issues() as issue, issueIdx (issueIdx)}
+                      <li>{issue.message}</li>
+                    {/each}
+                  </ul>
+                </td>
+              </tr>
+            {/if}
           {/each}
         </tbody>
       {:else}
@@ -357,9 +360,20 @@
         }
       }
 
-      tr.amount-not-allowed {
-        background-color: salmon;
-        text-decoration: line-through;
+      tr.issue {
+        background-color: maroon;
+
+        ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          font-weight: bold;
+
+          li::before {
+            content: "⚠️";
+            margin-inline-end: 0.5rem;
+          }
+        }
       }
     }
   }
