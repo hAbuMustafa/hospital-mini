@@ -21,9 +21,11 @@
       <li>
         <button popovertarget="pharmacy-nav-list">الصيدلية</button>
         <ul id="pharmacy-nav-list" popover="hint">
-          <li><a href="/dispense">صرف طلبية</a></li>
-          <li><a href="/tickets">مراجعة طلبيات</a></li>
+          <li><a href="/tickets">عرض تذاكر الصرف</a></li>
           <li><a href="/dispense-report">المنصرف</a></li>
+          <hr />
+          <li><a href="/stock/transfer">صرف لجهة</a></li>
+          <li><a href="/stock/receive">استلام وارد</a></li>
         </ul>
       </li>
     </ul>
@@ -98,7 +100,6 @@
         &:hover,
         &:focus {
           cursor: pointer;
-          text-decoration: underline solid;
         }
       }
 
@@ -112,9 +113,33 @@
         border-radius: 4px;
         border: var(--main-border);
         box-shadow: var(--main-shadow);
+        gap: 0.5rem;
 
         &:popover-open {
           display: flex;
+        }
+
+        hr {
+          margin: 0;
+          width: 80%;
+        }
+
+        a {
+          padding: 0.25rem 0.5rem;
+
+          &:hover,
+          &:focus {
+            text-decoration: none;
+          }
+        }
+      }
+
+      button[popovertarget],
+      ul[popover] li {
+        &:hover,
+        &:focus {
+          background-color: gray;
+          border-radius: 4px;
         }
       }
     }
