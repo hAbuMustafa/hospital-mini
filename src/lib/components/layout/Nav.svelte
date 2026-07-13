@@ -11,8 +11,21 @@
 
   {#if authState.isAuthenticated}
     <ul>
-      <li><a href="/invoice/create">إصدار فاتورة</a></li>
-      <li><a href="/patient">المرضى</a></li>
+      <li>
+        <button popovertarget="patient-nav-list">المرضى</button>
+        <ul id="patient-nav-list" popover="hint">
+          <li><a href="/patient">بيان المرضى بالأقسام</a></li>
+          <li><a href="/invoice/create">إصدار فاتورة</a></li>
+        </ul>
+      </li>
+      <li>
+        <button popovertarget="pharmacy-nav-list">الصيدلية</button>
+        <ul id="pharmacy-nav-list" popover="hint">
+          <li><a href="/dispense">صرف طلبية</a></li>
+          <li><a href="/tickets">مراجعة طلبيات</a></li>
+          <li><a href="/dispense-report">المنصرف</a></li>
+        </ul>
+      </li>
     </ul>
   {/if}
 
@@ -74,6 +87,35 @@
 
       @media print {
         display: none;
+      }
+
+      button[popovertarget] {
+        background-color: unset;
+        color: unset;
+        border: unset;
+        font-size: unset;
+
+        &:hover,
+        &:focus {
+          cursor: pointer;
+          text-decoration: underline solid;
+        }
+      }
+
+      ul[popover] {
+        display: none;
+        flex-direction: column;
+        position-area: bottom;
+        margin-block-start: 0.4rem;
+        padding: 0.5rem;
+        background-color: var(--main-bg-color);
+        border-radius: 4px;
+        border: var(--main-border);
+        box-shadow: var(--main-shadow);
+
+        &:popover-open {
+          display: flex;
+        }
       }
     }
   }
