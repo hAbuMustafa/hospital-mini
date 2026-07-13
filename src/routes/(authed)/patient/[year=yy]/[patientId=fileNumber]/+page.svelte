@@ -93,6 +93,7 @@
       <tr>
         <th rowspan="2">رقم القيد</th>
         <th colspan="2">فترة الإقامة</th>
+        <th rowspan="2">سبب الخروج</th>
         <th rowspan="2">إصدار فاتورة</th>
       </tr>
       <tr>
@@ -112,6 +113,7 @@
               {formatDate(p.discharge_date, "YYYY/MM/DD")}
             {/if}
           </td>
+          <td>{p.discharge_reason}</td>
           <td>
             <a href="/invoice/create/{p.id}" class="btn invoice">فاتورة</a>
           </td>
