@@ -68,6 +68,15 @@ input.btn {
 
   font-weight: bolder;
   background-color: var(--main-accent-color);
+
+  &:hover,
+  &:focus {
+    background-color: hsl(from var(--main-accent-color) h s 60%);
+  }
+
+  &:active {
+    background-color: hsl(from var(--main-accent-color) h s 40%);
+  }
 }
 
 button.link {
