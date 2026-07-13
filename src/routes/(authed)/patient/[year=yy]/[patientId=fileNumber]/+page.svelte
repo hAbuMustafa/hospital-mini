@@ -1,11 +1,17 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import Timeline from "$lib/components/Timeline/Timeline.svelte";
   import { formatDate, getDuration, getTermed } from "$lib/date/utils";
-  import { getOtherAdmissions, getPatientData } from "./getPatientHistory.remote";
+  import {
+    getOtherAdmissions,
+    getPatientData,
+    getPatientTransfers,
+  } from "./getPatientHistory.remote";
 
   const patientId = [page.params.year, page.params.patientId].join("/");
 
   const patient = await getPatientData(patientId);
+  const transfers = await getPatientTransfers(patientId);
   const otherAdmissions = patient.id_number
     ? await getOtherAdmissions({ patientId, patientIdDocNumber: patient.id_number })
     : [];
@@ -58,7 +64,17 @@
   </tbody>
 </table>
 
-<!-- todo: add transfers -->
+{#if transfers.length}
+  <Timeline
+    events={transfers}
+    eventTime_name="timestamp"
+    eventTitle_name="to_ward"
+    dateTimeFormatter={(dt: Date) =>
+      formatDate(dt, "YYYY/MM/DD (hh:mm A)").replace("AM", "ص").replace("PM", "م")}
+    endEvent_label="خروج"
+    endEvent_time={patient.discharge_date}
+  />
+{/if}
 
 {#if otherAdmissions.length}
   <h2>دخول سابق</h2>
