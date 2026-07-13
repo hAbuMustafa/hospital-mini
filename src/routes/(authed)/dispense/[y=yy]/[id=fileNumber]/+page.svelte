@@ -3,7 +3,11 @@
   import { page } from "$app/state";
   import { formatDate, getAge, getTermed } from "$lib/date/utils";
   import { toast } from "svelte-sonner";
-  import { getItemLastDispensed, getPatient, postTicket } from "./ticket.remote";
+  import {
+    getItemLastDispensed,
+    getPatient,
+    postTicket,
+  } from "../../../pharmacy/ticket.remote";
   import { onMount } from "svelte";
   import Combobox from "$lib/components/Combobox.svelte";
   import { scale } from "svelte/transition";
