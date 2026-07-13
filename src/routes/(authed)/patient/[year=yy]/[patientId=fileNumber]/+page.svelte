@@ -78,7 +78,7 @@
       {#each otherAdmissions as p (p.id)}
         <tr>
           <td>
-            <a href="/patient/{p.id}" class="btn">{p.id}</a>
+            <a href="/patient/{p.id}" class="btn" data-sveltekit-reload>{p.id}</a>
           </td>
           <td>{formatDate(p.admission_date, "YYYY/MM/DD")}</td>
           <td>
