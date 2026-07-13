@@ -128,7 +128,24 @@
     )}
   {/snippet}
 
-  <form {...postTicket}>
+  <form
+    {...postTicket.enhance(async (form) => {
+      try {
+        if (await form.submit()) {
+          ticketDrugs = [];
+
+          toast.success(`تم تسجيل الطلبية بالرقم ${form.result?.ticketId}`, {
+            duration: 5000,
+          });
+        } else {
+          toast.error("لم يتم تسجيل الطلبية. راجع الأخطاء المذكورة.");
+        }
+      } catch (err) {
+        toast.error("حدث خطأ غير متوقع أثناء تسجيل الطلبية");
+        console.log(err);
+      }
+    })}
+  >
     <input {...postTicket.fields.patientId.as("hidden", patient.id)} />
 
     <table class="ticket-items">
@@ -190,7 +207,7 @@
                 {/if}
               </td>
             </tr>
-            {#if unacceptedAmount(drug.id, drug.amount) || postTicket.fields.drugs[i].issues()?.length}
+            {#if postTicket.fields.drugs[i].issues()?.length}
               <tr class="issue" hidden={!unacceptedAmount(drug.id, drug.amount)}>
                 <td colspan="6">
                   <ul>
@@ -215,8 +232,6 @@
     {#if ticketDrugs.length}
       <input type="submit" class="btn" value="حفظ الطلبية" />
     {/if}
-    <!-- todo: inform user on the submission result -->
-    <!-- todo: clear form after successful submission -->
   </form>
 {/if}
 
