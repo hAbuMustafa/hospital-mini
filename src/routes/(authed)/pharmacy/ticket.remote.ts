@@ -1,9 +1,16 @@
 import { form, getRequestEvent, query } from "$app/server";
 import { isNarcotic, unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
-import { patients_view, transactions, transactionTickets } from "$lib/server/db/schema";
+import { db_auth } from "$lib/server/db/index-auth";
+import {
+  drugs,
+  patients_view,
+  transactions,
+  transactionTickets,
+} from "$lib/server/db/schema";
+import { user } from "$lib/server/db/schema-auth";
 import { invalid } from "@sveltejs/kit";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getPatient = query(v.string(), async (patientId) => {
@@ -107,5 +114,52 @@ export const postTicket = form(
       success: true,
       ticketId,
     };
+  }
+);
+
+export const getTickets = query(
+  v.object({
+    from: v.date(),
+    to: v.date(),
+  }),
+  async (data) => {
+    const tickets = await db
+      .select({
+        ticket_id: transactionTickets.id,
+        timestamp: transactionTickets.timestamp,
+        user_id: transactionTickets.user_id,
+        patient_id: patients_view.id,
+        patient_name: patients_view.name,
+        item_id: drugs.id,
+        item_name: drugs.name_ar,
+        item_tradename: drugs.tradename_ar,
+        qty: transactions.qty,
+        is_dispense: transactionTickets.is_dispense,
+      })
+      .from(transactionTickets)
+      .where(
+        and(
+          gte(transactionTickets.timestamp, data.from),
+          lte(transactionTickets.timestamp, data.to),
+          isNotNull(transactionTickets.patient_id)
+        )
+      )
+      .leftJoin(transactions, eq(transactions.ticket_id, transactionTickets.id))
+      .leftJoin(patients_view, eq(transactionTickets.patient_id, patients_view.id))
+      .leftJoin(drugs, eq(transactions.item_id, drugs.id));
+
+    const userIds = Array.from(new Set(tickets.map((t) => t.user_id)));
+
+    const users = await db_auth.select().from(user).where(inArray(user.id, userIds));
+
+    return Object.entries(
+      Object.groupBy(
+        tickets.map((t) => ({
+          ...t,
+          user_name: users.find((u) => u.id === t.user_id)?.name,
+        })),
+        (t) => t.ticket_id
+      )
+    );
   }
 );
