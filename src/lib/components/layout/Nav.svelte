@@ -10,13 +10,13 @@
   </a>
 
   {#if authState.isAuthenticated}
-    <ul class="hide-in-print">
+    <ul>
       <li><a href="/invoice/create">إصدار فاتورة</a></li>
       <li><a href="/patient">المرضى</a></li>
     </ul>
   {/if}
 
-  <ul class="hide-in-print">
+  <ul>
     {#if authState.isAuthenticated}
       <li>
         <SyncAll />
@@ -70,6 +70,10 @@
         &:hover {
           text-decoration: underline;
         }
+      }
+
+      @media print {
+        display: none;
       }
     }
   }
