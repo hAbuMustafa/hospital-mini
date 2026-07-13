@@ -64,6 +64,7 @@
   </tbody>
 </table>
 
+<h2>التحويلات</h2>
 {#if transfers.length}
   <Timeline
     events={transfers}
@@ -74,10 +75,12 @@
     endEvent_label="خروج"
     endEvent_time={patient.discharge_date}
   />
+{:else}
+  <p>لا توجد تحويلات مسجلة للمريض بين الأقسام</p>
 {/if}
 
+<h2>دخول سابق</h2>
 {#if otherAdmissions.length}
-  <h2>دخول سابق</h2>
   <table class="other-admissions">
     <thead>
       <tr>
@@ -109,6 +112,8 @@
       {/each}
     </tbody>
   </table>
+{:else}
+  <p>لا توجد مرات دخول أخرى مسجلة</p>
 {/if}
 
 <style>
