@@ -1,5 +1,5 @@
 import { form, getRequestEvent, query } from "$app/server";
-import { unacceptedAmount } from "$lib/CONSTANTS";
+import { isNarcotic, unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
 import { patients_view, transactions, transactionTickets } from "$lib/server/db/schema";
 import { invalid } from "@sveltejs/kit";
@@ -70,6 +70,14 @@ export const postTicket = form(
     const hasInvalidQt = data.drugs.findIndex((d) => d.qty < 1);
     if (hasInvalidQt > -1) {
       invalid(issue.drugs[hasInvalidQt]("برجاء إدخال كمية صحيحة"));
+    }
+
+    if (data.drugs.some((d) => isNarcotic(d.item_id)) && data.drugs.length > 1) {
+      invalid(
+        issue(
+          "لا يمكن كتابة أصناف أخرى مع المخدرات في نفس الطلبية، أو كتابة أكثر من مخدر في نفس الطلبية"
+        )
+      );
     }
 
     const ticketId = await db.transaction(async (tx) => {
