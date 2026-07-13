@@ -208,9 +208,14 @@
                     {Math.abs(drug.lastDispensed.qty!)}
                   </span>
                   {drug.unit}
-                  {formatDate(drug.lastDispensed.timestamp!, "YYYY/MM/DD (hh:mm A)")
-                    .replace("AM", "ص")
-                    .replace("PM", "م")}
+                  <span
+                    class="old-amount-time"
+                    title={formatDate(drug.lastDispensed.timestamp!, "hh:mm A")
+                      .replace("AM", "ص")
+                      .replace("PM", "م")}
+                  >
+                    {formatDate(drug.lastDispensed.timestamp!, "MM/DD")}
+                  </span>
                 {/if}
               </td>
             </tr>
