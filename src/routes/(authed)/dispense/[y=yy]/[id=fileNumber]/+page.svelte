@@ -139,6 +139,9 @@
           });
         } else {
           toast.error("لم يتم تسجيل الطلبية. راجع الأخطاء المذكورة.");
+          postTicket.fields.allIssues()?.forEach((issue) => {
+            toast.warning(issue.message);
+          });
         }
       } catch (err) {
         toast.error("حدث خطأ غير متوقع أثناء تسجيل الطلبية");
