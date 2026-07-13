@@ -6,7 +6,7 @@ import {
   patientTransfers,
 } from "$lib/server/db/schema";
 import { error } from "@sveltejs/kit";
-import { and, eq, ne } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getPatientData = query(v.string(), async (patientId) => {
@@ -40,7 +40,8 @@ export const getOtherAdmissions = query(
           eq(patients_view.id_number, patientIdDocNumber),
           ne(patients_view.id, patientId)
         )
-      );
+      )
+      .orderBy(desc(patients_view.admission_date));
 
     return otherAdmissions;
   }
