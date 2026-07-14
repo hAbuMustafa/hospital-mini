@@ -18,7 +18,9 @@ export function signOutOnShiftEnd() {
       ) {
         await authState.signOut();
         goto("/login");
-        toast.warning("تم تسجيل خروجك لانتهاء وقت الوردية", { duration: 200000 });
+        toast.warning("تم تسجيل خروجك لانتهاء وقت الوردية", {
+          duration: Number.POSITIVE_INFINITY,
+        });
       } else if (
         authState.isAuthenticated &&
         thePreviousHours.includes(now.getHours()) &&
