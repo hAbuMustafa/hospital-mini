@@ -39,8 +39,8 @@
     ليوم {formatDate(from)}
   {:else}
     {`من ${formatDate(from, "الساعة HH:mm:ss يوم DD/MM/YYYY")} إلى ${formatDate(to, "الساعة HH:mm:ss يوم DD/MM/YYYY")}`
-      .replace("الساعة 00:00:00", "بداية")
-      .replace("الساعة 23:59:59", "نهاية")}
+      .replaceAll("الساعة 00:00:00", "بداية")
+      .replaceAll("الساعة 23:59:59", "نهاية")}
   {/if}
 </h2>
 
