@@ -38,7 +38,7 @@
   {#if isWholeDay}
     ليوم {formatDate(from,"YYYY/MM/DD")}
   {:else}
-    {`من ${formatDate(from, "الساعة HH:mm:ss يوم DD/MM/YYYY")} إلى ${formatDate(to, "الساعة HH:mm:ss يوم DD/MM/YYYY")}`
+    {`من ${formatDate(from, "الساعة HH:mm:ss يوم YYYY/MM/DD")} إلى ${formatDate(to, "الساعة HH:mm:ss يوم YYYY/MM/DD")}`
       .replaceAll("الساعة 00:00:00", "بداية")
       .replaceAll("الساعة 23:59:59", "نهاية")}
   {/if}
