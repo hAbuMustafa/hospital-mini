@@ -1,23 +1,10 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Combobox from "$lib/components/Combobox.svelte";
+  import DateControls from "$lib/components/DateControls.svelte";
   import { formatDate } from "$lib/date/utils";
 
   let { data } = $props();
-
-  let dateFrom = $derived(data.dateFrom);
-  let dateTo = $derived(data.dateTo);
-
-  let [yesterday, tomorrow] = $derived.by(() => {
-    const fDate = new Date(data.dateFrom);
-    fDate.setDate(fDate.getDate() - 1);
-    const yDay = formatDate(fDate);
-
-    fDate.setDate(fDate.getDate() + 2);
-    const nxDay = formatDate(fDate);
-
-    return [yDay, nxDay];
-  });
 
   let isSameDay = $derived(data.dateFrom === data.dateTo);
 
@@ -30,22 +17,8 @@
     ? `يوم ${data.dateFrom.split("-").reverse().join("-")}`
     : `في الفترة من ${data.dateFrom.split("-").reverse().join("-")} إلى ${data.dateTo.split("-").reverse().join("-")}`}
 </h2>
-<div class="date-controls">
-  <a href="?f={yesterday}&t={yesterday}" class="btn">&Lt;</a>
-  <form method="GET">
-    <label>
-      من:
-      <input type="date" name="f" bind:value={dateFrom} max={dateTo} />
-    </label>
 
-    <label>
-      إلى:
-      <input type="date" name="t" bind:value={dateTo} min={dateFrom} />
-    </label>
-    <button type="submit">تأكيد</button>
-  </form>
-  <a href="?f={tomorrow}&t={tomorrow}" class="btn">&Gt;</a>
-</div>
+<DateControls from={data.dateFrom} to={data.dateTo} />
 
 <table>
   <thead>
@@ -137,17 +110,6 @@
 {/snippet}
 
 <style>
-  .date-controls {
-    display: flex;
-    gap: 1rem;
-    justify-content: space-around;
-    align-items: center;
-  }
-
-  form {
-    display: contents;
-  }
-
   table {
     border-collapse: collapse;
     margin-block-start: 1rem;
