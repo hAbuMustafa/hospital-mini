@@ -12,14 +12,18 @@
   {#if authState.isAuthenticated}
     <ul>
       <li>
-        <button popovertarget="patient-nav-list">المرضى</button>
+        <button popovertarget="patient-nav-list" interestfor="patient-nav-list"
+          >المرضى</button
+        >
         <ul id="patient-nav-list" popover="hint">
           <li><a href="/patient">بيان المرضى بالأقسام</a></li>
           <li><a href="/invoice/create">إصدار فاتورة</a></li>
         </ul>
       </li>
       <li>
-        <button popovertarget="pharmacy-nav-list">الصيدلية</button>
+        <button popovertarget="pharmacy-nav-list" interestfor="pharmacy-nav-list"
+          >الصيدلية</button
+        >
         <ul id="pharmacy-nav-list" popover="hint">
           <li><a href="/pharmacy/tickets">عرض تذاكر الصرف</a></li>
           <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
@@ -101,6 +105,10 @@
         &:focus {
           cursor: pointer;
         }
+      }
+
+      button[interestfor] {
+        interest-delay-start: 0s;
       }
 
       ul[popover] {
