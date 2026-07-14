@@ -17,6 +17,17 @@
       to.getMinutes() === 59
   );
 
+    let [yesterday, tomorrow] = $derived.by(() => {
+    const fDate = new Date(from);
+    fDate.setDate(fDate.getDate() - 1);
+    const yDay = formatDate(fDate) + "T00:00:00";
+
+    fDate.setDate(fDate.getDate() + 2);
+    const nxDay = formatDate(fDate) + "T23:59:59";
+
+    return [yDay, nxDay];
+  });
+
   // svelte-ignore state_referenced_locally
   const tickets = await getTickets({ from, to });
 </script>
@@ -34,6 +45,7 @@
 </h2>
 
 <div class="date-controls">
+  <a href="?f={yesterday}&t={yesterday}" class="btn" data-sveltekit-reload>&Lt;</a>
   <form method="GET" data-sveltekit-reload>
     <label>
       من:
@@ -46,6 +58,7 @@
     </label>
     <button type="submit">تأكيد</button>
   </form>
+  <a href="?f={tomorrow}&t={tomorrow}" class="btn" data-sveltekit-reload>&Gt;</a>
 </div>
 
 <div class="tickets-wrapper">
@@ -79,6 +92,13 @@
 </div>
 
 <style>
+  .date-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-around;
+    align-items: center;
+  }
+
   .tickets-wrapper {
     margin: 1rem 10vw;
     display: flex;
