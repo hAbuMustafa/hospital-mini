@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import DateTimeControls from "$lib/components/DateTimeControls.svelte";
   import { formatDate } from "$lib/date/utils";
   import { getTickets } from "../ticket.remote";
 
@@ -17,17 +18,6 @@
       to.getMinutes() === 59
   );
 
-    let [yesterday, tomorrow] = $derived.by(() => {
-    const fDate = new Date(from);
-    fDate.setDate(fDate.getDate() - 1);
-    const yDay = formatDate(fDate);
-
-    fDate.setDate(fDate.getDate() + 2);
-    const nxDay = formatDate(fDate);
-
-    return [yDay, nxDay];
-  });
-
   // svelte-ignore state_referenced_locally
   const tickets = await getTickets({ from, to });
 </script>
@@ -36,7 +26,7 @@
 
 <h2>
   {#if isWholeDay}
-    ليوم {formatDate(from,"YYYY/MM/DD")}
+    ليوم {formatDate(from, "YYYY/MM/DD")}
   {:else}
     {`من ${formatDate(from, "الساعة HH:mm:ss يوم YYYY/MM/DD")} إلى ${formatDate(to, "الساعة HH:mm:ss يوم YYYY/MM/DD")}`
       .replaceAll("الساعة 00:00:00", "بداية")
@@ -44,40 +34,27 @@
   {/if}
 </h2>
 
-<div class="date-controls">
-  <a href="?f={yesterday}T00:00:00&t={yesterday}T23:59:59" class="btn" data-sveltekit-reload>&Lt;</a>
-  <form method="GET" data-sveltekit-reload>
-    <label>
-      من:
-      <input type="datetime-local" name="f" value={urlFrom} step="1" />
-    </label>
-
-    <label>
-      إلى:
-      <input type="datetime-local" name="t" value={urlTo} step="1" />
-    </label>
-    <button type="submit">تأكيد</button>
-  </form>
-  <a href="?f={tomorrow}T00:00:00&t={tomorrow}T23:59:59" class="btn" data-sveltekit-reload>&Gt;</a>
-</div>
+<DateTimeControls from={urlFrom} to={urlTo} />
 
 <div class="tickets-wrapper">
   {#each tickets as [ticketId, items], i (ticketId)}
-  {const ticket = items?.[0]}
-  {const isReturn = !ticket?.is_dispense}
+    {@const ticket = items?.[0]}
+    {@const isReturn = !ticket?.is_dispense}
     <div class="ticket" class:return={isReturn}>
       <div class="ticket-data">
         <h3>
-          {ticket?.patient_name} ({ticket?.patient_id}) 
+          {ticket?.patient_name} ({ticket?.patient_id})
           <span class="ticket-numbers">
             <span class="ticket-time">
-          {isWholeDay?formatDate(ticket?.timestamp!,"HH:mm"):formatDate(ticket?.timestamp!,"YYYY/MM/DD (HH:mm)")}
-        </span>
-        <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
-      </span>
-    </h3>
+              {isWholeDay
+                ? formatDate(ticket?.timestamp!, "HH:mm")
+                : formatDate(ticket?.timestamp!, "YYYY/MM/DD (HH:mm)")}
+            </span>
+            <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
+          </span>
+        </h3>
       </div>
-  
+
       <ul class="items">
         {#each items as item, j (item.item_id)}
           <li>
@@ -92,13 +69,6 @@
 </div>
 
 <style>
-  .date-controls {
-    display: flex;
-    gap: 1rem;
-    justify-content: space-around;
-    align-items: center;
-  }
-
   .tickets-wrapper {
     margin: 1rem 10vw;
     display: flex;
@@ -108,8 +78,8 @@
 
   .ticket {
     width: 100%;
-    padding: 1rem .5rem;
-    border:var(--main-border);
+    padding: 1rem 0.5rem;
+    border: var(--main-border);
     border-radius: 4px;
 
     &.return {
@@ -123,12 +93,12 @@
       margin: 0;
 
       .ticket-numbers {
-        font-size: .9rem;
+        font-size: 0.9rem;
 
         .ticket-time {
           background-color: hsl(from var(--main-bg-color) h s 40%);
           border-radius: 4px;
-          padding: .15rem;
+          padding: 0.15rem;
         }
 
         .ticket-id {
@@ -144,7 +114,7 @@
       gap: 0.25rem;
       padding: 0;
       margin: 0.5rem 0;
-      
+
       li {
         margin-inline-start: 1rem;
       }
@@ -158,7 +128,7 @@
 
     .signature {
       border-block-start: var(--main-border);
-      padding-block-start: .5rem;
+      padding-block-start: 0.5rem;
       text-align: end;
     }
   }
