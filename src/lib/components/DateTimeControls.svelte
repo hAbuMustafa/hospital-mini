@@ -55,4 +55,8 @@
     justify-content: space-around;
     align-items: center;
   }
+
+  form {
+    display: contents;
+  }
 </style>
