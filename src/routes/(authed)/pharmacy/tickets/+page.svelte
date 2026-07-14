@@ -20,10 +20,10 @@
     let [yesterday, tomorrow] = $derived.by(() => {
     const fDate = new Date(from);
     fDate.setDate(fDate.getDate() - 1);
-    const yDay = formatDate(fDate) + "T00:00:00";
+    const yDay = formatDate(fDate);
 
     fDate.setDate(fDate.getDate() + 2);
-    const nxDay = formatDate(fDate) + "T23:59:59";
+    const nxDay = formatDate(fDate);
 
     return [yDay, nxDay];
   });
@@ -45,20 +45,20 @@
 </h2>
 
 <div class="date-controls">
-  <a href="?f={yesterday}&t={yesterday}" class="btn" data-sveltekit-reload>&Lt;</a>
+  <a href="?f={yesterday}T00:00:00&t={yesterday}T23:59:59" class="btn" data-sveltekit-reload>&Lt;</a>
   <form method="GET" data-sveltekit-reload>
     <label>
       من:
-      <input type="datetime-local" name="f" value={urlFrom} max={urlTo} step="1" />
+      <input type="datetime-local" name="f" value={urlFrom} step="1" />
     </label>
 
     <label>
       إلى:
-      <input type="datetime-local" name="t" value={urlTo} min={urlFrom} step="1" />
+      <input type="datetime-local" name="t" value={urlTo} step="1" />
     </label>
     <button type="submit">تأكيد</button>
   </form>
-  <a href="?f={tomorrow}&t={tomorrow}" class="btn" data-sveltekit-reload>&Gt;</a>
+  <a href="?f={tomorrow}T00:00:00&t={tomorrow}T23:59:59" class="btn" data-sveltekit-reload>&Gt;</a>
 </div>
 
 <div class="tickets-wrapper">
