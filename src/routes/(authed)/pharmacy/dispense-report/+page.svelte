@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import DateTimeControls from "$lib/components/DateTimeControls.svelte";
+  import TradeNameToggle from "$lib/components/TradeNameToggle.svelte";
   import { formatDate } from "$lib/date/utils";
   import { getDrugsTransactionAmountTotals } from "./transactions.remote";
 
@@ -20,6 +21,8 @@
 
   // svelte-ignore state_referenced_locally
   const totals = await getDrugsTransactionAmountTotals({ from, to });
+
+  let useTradeName = $state(false);
 </script>
 
 <h1>عرض المنصرف</h1>
@@ -35,12 +38,13 @@
 </h2>
 
 <DateTimeControls from={urlFrom} to={urlTo} />
+<TradeNameToggle bind:useTradeName />
 
 <ul class="totals">
   {#each totals as item, i (i)}
-    <li title={item.item_tradename}>
+    <li title={useTradeName ? item.item_name : item.item_tradename}>
       <span class="item-qty">{-item.amount!}</span>
-      <span class="item-name">{item.item_name}</span>
+      <span class="item-name">{useTradeName ? item.item_tradename : item.item_name}</span>
     </li>
   {/each}
 </ul>
