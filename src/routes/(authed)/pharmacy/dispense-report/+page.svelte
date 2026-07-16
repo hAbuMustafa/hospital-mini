@@ -50,6 +50,17 @@
 </ul>
 
 <style>
+  .totals {
+    width: 80vw;
+    list-style: none;
+    margin: 0;
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: start;
+  }
+
   .item-qty {
     background-color: var(--main-text-color);
     color: var(--main-bg-color);
