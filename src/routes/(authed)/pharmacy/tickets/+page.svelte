@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import DateTimeControls from "$lib/components/DateTimeControls.svelte";
+  import TicketDisplay from "$lib/components/TicketDisplay.svelte";
   import { formatDate } from "$lib/date/utils";
   import { getTickets } from "../ticket.remote";
 
@@ -38,33 +39,7 @@
 
 <div class="tickets-wrapper">
   {#each tickets as [ticketId, items], i (ticketId)}
-    {@const ticket = items?.[0]}
-    {@const isReturn = !ticket?.is_dispense}
-    <div class="ticket" class:return={isReturn}>
-      <div class="ticket-data">
-        <h3>
-          {ticket?.patient_name} ({ticket?.patient_id})
-          <span class="ticket-numbers">
-            <span class="ticket-time">
-              {isWholeDay
-                ? formatDate(ticket?.timestamp!, "HH:mm")
-                : formatDate(ticket?.timestamp!, "YYYY/MM/DD (HH:mm)")}
-            </span>
-            <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
-          </span>
-        </h3>
-      </div>
-
-      <ul class="items">
-        {#each items as item, j (item.item_id)}
-          <li>
-            <span class="item-qty">{Math.abs(item.qty!)}</span>
-            <span class="item-name" title={item.item_tradename}>{item.item_name}</span>
-          </li>
-        {/each}
-      </ul>
-      <div class="signature">{ticket?.user_name}</div>
-    </div>
+    <TicketDisplay dateOnly={isWholeDay} items={items!} />
   {/each}
 </div>
 
@@ -74,62 +49,5 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-  }
-
-  .ticket {
-    width: 100%;
-    padding: 1rem 0.5rem;
-    border: var(--main-border);
-    border-radius: 4px;
-
-    &.return {
-      background-color: hsl(from salmon h s 40%);
-    }
-
-    h3 {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 0;
-
-      .ticket-numbers {
-        font-size: 0.9rem;
-
-        .ticket-time {
-          background-color: hsl(from var(--main-bg-color) h s 40%);
-          border-radius: 4px;
-          padding: 0.15rem;
-        }
-
-        .ticket-id {
-          color: gray;
-        }
-      }
-    }
-
-    ul.items {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      padding: 0;
-      margin: 0.5rem 0;
-
-      li {
-        margin-inline-start: 1rem;
-      }
-
-      .item-qty {
-        background-color: gray;
-        border-radius: 4px;
-        padding: 0.05rem 0.25rem;
-      }
-    }
-
-    .signature {
-      border-block-start: var(--main-border);
-      padding-block-start: 0.5rem;
-      text-align: end;
-    }
   }
 </style>
