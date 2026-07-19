@@ -1,14 +1,13 @@
 import { form, getRequestEvent, query } from "$app/server";
 import { isNarcotic, unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
-import { db_auth } from "$lib/server/db/index-auth";
 import {
   drugs,
   patients_view,
   transactions,
   transactionTickets,
+  user,
 } from "$lib/server/db/schema";
-import { user } from "$lib/server/db/schema-auth";
 import { invalid } from "@sveltejs/kit";
 import { and, desc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 import * as v from "valibot";
@@ -127,7 +126,7 @@ export const getTickets = query(
       .select({
         ticket_id: transactionTickets.id,
         timestamp: transactionTickets.timestamp,
-        user_id: transactionTickets.user_id,
+        user_name: user.name,
         patient_id: patients_view.id,
         patient_name: patients_view.name,
         item_id: drugs.id,
@@ -146,20 +145,9 @@ export const getTickets = query(
       )
       .leftJoin(transactions, eq(transactions.ticket_id, transactionTickets.id))
       .leftJoin(patients_view, eq(transactionTickets.patient_id, patients_view.id))
-      .leftJoin(drugs, eq(transactions.item_id, drugs.id));
+      .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+      .leftJoin(user, eq(transactionTickets.user_id, user.id));
 
-    const userIds = Array.from(new Set(tickets.map((t) => t.user_id)));
-
-    const users = await db_auth.select().from(user).where(inArray(user.id, userIds));
-
-    return Object.entries(
-      Object.groupBy(
-        tickets.map((t) => ({
-          ...t,
-          user_name: users.find((u) => u.id === t.user_id)?.name,
-        })),
-        (t) => t.ticket_id
-      )
-    );
+    return Object.entries(Object.groupBy(tickets, (t) => t.ticket_id));
   }
 );
