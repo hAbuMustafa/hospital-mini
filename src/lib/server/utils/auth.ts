@@ -89,4 +89,5 @@ export const auth = betterAuth({
       },
     },
   },
+  appName: "مستشفى 23 يوليو للأمراض الصدرية",
 });
