@@ -22,3 +22,4 @@
 - [x] Allow login with phone-number or username.
 - [ ] add Have I Been Pwned support (from Better Auth).
 - [ ] add TOTP support to restore account (Better Auth).
+- [ ] localize Better Auth Errors ([reference](https://better-auth.com/docs/plugins/i18n)).
