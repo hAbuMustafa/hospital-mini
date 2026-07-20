@@ -13,3 +13,8 @@
 - [-] Create reports pages.
   - [ ] Daily dispensed.
   - [x] Daily requests listing.
+
+## Security
+
+- [ ] add Have I Been Pwned support (from Better Auth).
+- [ ] add TOTP support to restore account (Better Auth)
