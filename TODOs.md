@@ -1,11 +1,16 @@
 # Todos
 
-- [ ] Remote sync flow:
+## Sync
+
+- [-] Remote sync flow:
   - [x] Add sync buttons to Nav.
   - [ ] Pull edits from remote:
     - [ ] New sheet in one of the google sheets for sync orders (id,timestamp,sql_order)
     - [ ] Add entry to `status` table with latest synced id.
     - [ ] Add sql execution logic to sync functions.
+
+## Pages
+
 - [x] Complete `invoice/create/yy/id` page.
 - [x] Move invoicing homepage to `/invoice`.
 - [x] Create listing of all current inpatients.
