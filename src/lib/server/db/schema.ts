@@ -1,3 +1,4 @@
+import { phoneNumber } from "better-auth/plugins";
 import { relations, sql } from "drizzle-orm";
 import {
   sqliteTable,
@@ -149,13 +150,20 @@ export const status = sqliteTable("status", {
   value: int(),
 });
 
+// Special table to bypass user phone-number update through OTP only
+export const otp = sqliteTable("otp", {
+  phoneNumber: text("phone-number").notNull().unique(),
+  otp: text().notNull(),
+});
+
 /* AUTH SCHEMA */
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
+  username: text("username").unique(),
+  phoneNumber: text("phone_number").unique(),
   image: text("image"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -168,6 +176,9 @@ export const user = sqliteTable("user", {
   banned: integer("banned", { mode: "boolean" }).default(false),
   banReason: text("ban_reason"),
   banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
+  displayUsername: text("display_username"),
+  emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
+  phoneNumberVerified: integer("phone_number_verified", { mode: "boolean" }),
 });
 
 export const session = sqliteTable(

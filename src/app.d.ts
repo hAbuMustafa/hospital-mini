@@ -1,5 +1,5 @@
 import type { drugs, narcoticsDispensed, patients_view } from "$lib/server/db/schema";
-import type { Session, User } from "better-auth";
+import type { authClient } from "$lib/auth-client";
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
@@ -7,8 +7,8 @@ declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      user: User | null;
-      session: Session | null;
+      user: typeof authClient.$Infer.Session.user | null;
+      session: typeof authClient.$Infer.Session.session | null;
     }
     // interface PageData {}
     // interface PageState {}

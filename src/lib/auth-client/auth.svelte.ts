@@ -1,9 +1,8 @@
-import type { Session, User } from "better-auth";
 import { authClient } from ".";
 
 class AuthState {
-  session: Session | null = $state(null);
-  user: User | null = $state(null);
+  session: typeof authClient.$Infer.Session.session | null = $state(null);
+  user: typeof authClient.$Infer.Session.user | null = $state(null);
   loading = $state(true);
 
   constructor() {

@@ -2,12 +2,19 @@
   import { enhance } from "$app/forms";
   import { authState } from "$lib/auth-client/auth.svelte";
   import { goto } from "$app/navigation";
-  import { triadicArabicName } from "$lib/utils/patterns";
+  import {
+    triadicArabicName,
+    egyptianPhoneNumber,
+    usernamePattern,
+  } from "$lib/utils/patterns";
   import { toast } from "svelte-sonner";
 
   $effect(() => {
     if (authState.isAuthenticated) goto("/");
   });
+
+  let nameOfUser = $state("");
+  let displayName = $derived(nameOfUser.split(" ")[0]);
 </script>
 
 <h1>إنشاء حساب</h1>
@@ -33,10 +40,44 @@
     pattern={`${triadicArabicName.source} ?`}
     title="اسم ثلاثي على الأقل"
     required
+    bind:value={nameOfUser}
+  />
+
+  <label for="display-name">الاسم المختصر</label>
+  <input
+    type="text"
+    id="display-name"
+    name="display-name"
+    dir="auto"
+    required
+    value={displayName}
   />
 
   <label for="email">البريد الإلكتروني</label>
   <input type="email" id="email" name="email" dir="auto" required />
+
+  <label for="phone">رقم الموبايل</label>
+  <input
+    type="text"
+    id="phone"
+    name="phone"
+    dir="auto"
+    pattern={egyptianPhoneNumber.source}
+    required
+  />
+
+  <label for="username">اسم المستخدم</label>
+  <input
+    type="text"
+    id="username"
+    name="username"
+    dir="auto"
+    title="حروف إنجليزية وأرقام و underscore فقط"
+    pattern={usernamePattern.source}
+    required
+  />
+
+  <hr />
 
   <label for="password">كلمة المرور</label>
   <input type="password" id="password" name="password" required />
@@ -69,5 +110,10 @@
       border-radius: 4px;
       border: var(--main-border);
     }
+  }
+
+  hr {
+    width: 100%;
+    grid-column: 1 / -1;
   }
 </style>

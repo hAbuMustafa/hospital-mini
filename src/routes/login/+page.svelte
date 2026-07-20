@@ -2,6 +2,12 @@
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { authState } from "$lib/auth-client/auth.svelte";
+  import {
+    egyptianPhoneNumber,
+    emailPattern,
+    triadicArabicName,
+    usernamePattern,
+  } from "$lib/utils/patterns";
 
   let error = $state("");
 </script>
@@ -21,8 +27,16 @@
     };
   }}
 >
-  <label for="email">البريد الإلكتروني</label>
-  <input type="email" id="email" name="email" dir="auto" required />
+  <label for="identifier">معرف الدخول</label>
+  <input
+    type="text"
+    id="identifier"
+    name="identifier"
+    dir="auto"
+    pattern="({usernamePattern.source})|({emailPattern.source})({egyptianPhoneNumber.source})"
+    placeholder="بريد إلكتروني / اسم مستخدم / موبايل"
+    required
+  />
 
   <label for="password">كلمة المرور</label>
   <input type="password" id="password" name="password" dir="auto" required />

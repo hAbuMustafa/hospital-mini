@@ -40,7 +40,7 @@
       <li>
         <SyncAll />
       </li>
-      <li>أهلا، <a href="/account">{authState.user!.name.split(" ")[0]}</a>!</li>
+      <li>أهلا يا <a href="/account">{authState.user!.displayUsername}</a>!</li>
       <li>
         <button
           type="button"

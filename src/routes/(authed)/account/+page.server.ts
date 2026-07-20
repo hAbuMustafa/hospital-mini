@@ -1,6 +1,13 @@
+import { db } from "$lib/server/db/index.js";
+import { otp } from "$lib/server/db/schema.js";
 import { auth } from "$lib/server/utils/auth";
-import { triadicArabicName } from "$lib/utils/patterns";
+import {
+  egyptianPhoneNumber,
+  triadicArabicName,
+  usernamePattern,
+} from "$lib/utils/patterns";
 import { fail } from "@sveltejs/kit";
+import { eq } from "drizzle-orm";
 
 export const actions = {
   change_name: async ({ request, locals }) => {
@@ -30,6 +37,31 @@ export const actions = {
     }
   },
 
+  change_display_name: async ({ request, locals }) => {
+    const data = await request.formData();
+
+    const displayName = data.get("display-name") as string;
+
+    if (!displayName) return fail(400, { message: "لم يتم كتابة الاسم المختصر" });
+
+    if (displayName === locals.user?.displayUsername)
+      return fail(400, { message: "لم يتم كتابة اسم مختصر مختلف" });
+
+    try {
+      const result = await auth.api.updateUser({
+        body: {
+          displayUsername: displayName,
+        },
+        headers: request.headers,
+      });
+    } catch (e) {
+      console.error(e);
+      return fail(500, {
+        message: "فشل تعديل الاسم المختصر",
+      });
+    }
+  },
+
   change_email: async ({ request, locals }) => {
     const data = await request.formData();
 
@@ -55,7 +87,74 @@ export const actions = {
     }
   },
 
-  change_password: async ({ request, locals }) => {
+  change_phone: async ({ request, locals }) => {
+    const data = await request.formData();
+
+    const phoneNumber = data.get("phone-number") as string;
+
+    if (!phoneNumber) return fail(400, { message: "لم يتم كتابة رقم موبايل" });
+    if (!egyptianPhoneNumber.test(phoneNumber))
+      return fail(400, { message: "رقم موبايل غير صحيح" });
+
+    if (phoneNumber === locals.user?.phoneNumber)
+      return fail(400, { message: "لم يتم كتابة رقم موبايل مختلف" });
+
+    try {
+      const result = await auth.api.sendPhoneNumberOTP({
+        body: {
+          phoneNumber,
+        },
+      });
+
+      const [userOtp] = await db
+        .select()
+        .from(otp)
+        .where(eq(otp.phoneNumber, phoneNumber));
+
+      const updateResult = await auth.api.verifyPhoneNumber({
+        body: {
+          phoneNumber,
+          code: userOtp.otp,
+          updatePhoneNumber: true,
+        },
+        headers: request.headers,
+      });
+    } catch (e) {
+      console.error(e);
+      return fail(500, {
+        message: "فشل تعديل رقم الموبايل",
+      });
+    }
+  },
+
+  change_username: async ({ request, locals }) => {
+    const data = await request.formData();
+
+    const username = data.get("username") as string;
+
+    if (!username) return fail(400, { message: "لم يتم كتابة اسم مستخدم" });
+    if (!usernamePattern.test(username))
+      return fail(400, { message: "اسم مستخدم غير مقبول" });
+
+    if (username === locals.user?.username)
+      return fail(400, { message: "لم يتم كتابة اسم مستخدم مختلف" });
+
+    try {
+      const result = await auth.api.updateUser({
+        body: {
+          username,
+        },
+        headers: request.headers,
+      });
+    } catch (e) {
+      console.error(e);
+      return fail(500, {
+        message: "فشل تعديل اسم المستخدم",
+      });
+    }
+  },
+
+  change_password: async ({ request }) => {
     const data = await request.formData();
 
     const currentPassword = data.get("password") as string;

@@ -1,11 +1,18 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { authState } from "$lib/auth-client/auth.svelte";
-  import { triadicArabicName } from "$lib/utils/patterns";
+  import {
+    egyptianPhoneNumber,
+    triadicArabicName,
+    usernamePattern,
+  } from "$lib/utils/patterns";
   import { toast } from "svelte-sonner";
 
   let name = $state(authState.user?.name);
+  let displayName = $state(authState.user?.displayUsername);
   let email = $state(authState.user?.email);
+  let phoneNumber = $state(authState.user?.phoneNumber);
+  let username = $state(authState.user?.username);
 </script>
 
 <h1>{authState.user?.name}</h1>
@@ -40,6 +47,41 @@
   </form>
 
   <form
+    action="?/change_display_name"
+    method="post"
+    use:enhance={() => {
+      return async ({ result }) => {
+        if (result.type === "success") {
+          await authState.refresh();
+          toast.success(
+            (result.data?.message as string | undefined) ?? "تم تعديل الاسم المختصر"
+          );
+        } else if (result.type === "failure") {
+          toast.error(
+            (result.data?.message as string | undefined) ?? "فشل حفظ الاسم المختصر"
+          );
+        }
+      };
+    }}
+  >
+    <label for="display-name">الاسم المختصر</label>
+    <input
+      type="text"
+      id="display-name"
+      name="display-name"
+      bind:value={displayName}
+      autocomplete="off"
+      required
+    />
+
+    <input
+      type="submit"
+      class:shown={displayName !== authState.user?.displayUsername}
+      value="حفظ"
+    />
+  </form>
+
+  <form
     action="?/change_email"
     method="post"
     use:enhance={() => {
@@ -47,11 +89,11 @@
         if (result.type === "success") {
           await authState.refresh();
           toast.success(
-            (result.data?.message as string | undefined) ?? "تم تعديل البريد الإلكتروني",
+            (result.data?.message as string | undefined) ?? "تم تعديل البريد الإلكتروني"
           );
         } else if (result.type === "failure") {
           toast.error(
-            (result.data?.message as string | undefined) ?? "فشل حفظ البريد الإلكتروني",
+            (result.data?.message as string | undefined) ?? "فشل حفظ البريد الإلكتروني"
           );
         }
       };
@@ -71,6 +113,78 @@
   </form>
 
   <form
+    action="?/change_phone"
+    method="post"
+    use:enhance={() => {
+      return async ({ result }) => {
+        if (result.type === "success") {
+          await authState.refresh();
+          toast.success(
+            (result.data?.message as string | undefined) ?? "تم تعديل رقم الموبايل"
+          );
+        } else if (result.type === "failure") {
+          toast.error(
+            (result.data?.message as string | undefined) ?? "فشل حفظ رقم الموبايل"
+          );
+        }
+      };
+    }}
+  >
+    <label for="phone-number">الموبايل</label>
+    <input
+      type="text"
+      id="phone-number"
+      name="phone-number"
+      bind:value={phoneNumber}
+      pattern={egyptianPhoneNumber.source}
+      autocomplete="off"
+      required
+    />
+
+    <input
+      type="submit"
+      class:shown={phoneNumber !== authState.user?.phoneNumber}
+      value="حفظ"
+    />
+  </form>
+
+  <form
+    action="?/change_username"
+    method="post"
+    use:enhance={() => {
+      return async ({ result }) => {
+        if (result.type === "success") {
+          await authState.refresh();
+          toast.success(
+            (result.data?.message as string | undefined) ?? "تم تعديل اسم المستخدم"
+          );
+        } else if (result.type === "failure") {
+          toast.error(
+            (result.data?.message as string | undefined) ?? "فشل حفظ اسم المستخدم"
+          );
+        }
+      };
+    }}
+  >
+    <label for="username">اسم المستخدم</label>
+    <input
+      type="text"
+      id="username"
+      name="username"
+      bind:value={username}
+      pattern={usernamePattern.source}
+      autocomplete="off"
+      required
+    />
+
+    <input
+      type="submit"
+      class:shown={username !== authState.user?.username}
+      value="حفظ"
+    />
+  </form>
+
+  <form
     action="?/change_password"
     method="post"
     use:enhance={() => {
@@ -78,11 +192,11 @@
         if (result.type === "success") {
           await authState.refresh();
           toast.success(
-            (result.data?.message as string | undefined) ?? "تم تعديل كلمة المرور",
+            (result.data?.message as string | undefined) ?? "تم تعديل كلمة المرور"
           );
         } else if (result.type === "failure") {
           toast.error(
-            (result.data?.message as string | undefined) ?? "فشل تعديل كلمة المرور",
+            (result.data?.message as string | undefined) ?? "فشل تعديل كلمة المرور"
           );
         }
       };
@@ -105,7 +219,7 @@
   .wrapper {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
 
     border: var(--main-border);
     border-radius: 4px;

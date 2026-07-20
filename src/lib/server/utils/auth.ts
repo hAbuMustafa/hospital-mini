@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth/minimal";
-import { admin, customSession } from "better-auth/plugins";
+import { admin, customSession, username, phoneNumber } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "$lib/server/db";
 import { PUBLIC_ORIGIN, PUBLIC_ORIGIN_PROD } from "$env/static/public";
@@ -7,6 +7,9 @@ import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
 import { BETTER_AUTH_SECRET } from "$env/static/private";
 import { dev } from "$app/environment";
+import { egyptianPhoneNumber } from "$lib/utils/patterns";
+import { otp } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 const sessionEndTimes = [8, 14, 20];
 
@@ -58,6 +61,21 @@ export const auth = betterAuth({
           expiresAt: new Date(nextEndTimestamp),
         },
       };
+    }),
+    username({
+      maxUsernameLength: 15,
+    }),
+    phoneNumber({
+      phoneNumberValidator: (phNumber) => egyptianPhoneNumber.test(phNumber),
+      sendOTP: async ({ code, phoneNumber }) => {
+        await db
+          .insert(otp)
+          .values({ phoneNumber, otp: code })
+          .onConflictDoUpdate({
+            target: otp.phoneNumber,
+            set: { otp: code },
+          });
+      },
     }),
     sveltekitCookies(getRequestEvent),
   ],
