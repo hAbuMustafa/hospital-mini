@@ -56,6 +56,8 @@
   }
 
   let drugQuery = $state("");
+
+  let saving = $state(false);
 </script>
 
 {#if patient}
@@ -135,12 +137,14 @@
   <form
     {...postTicket.enhance(async (form) => {
       try {
+        saving = true;
         if (await form.submit()) {
           ticketDrugs = [];
 
           toast.success(`تم تسجيل الطلبية بالرقم ${form.result?.ticketId}`, {
             duration: 5000,
           });
+          // todo: use toast.promise instead
 
           if (form.result?.message) {
             toast.warning(form.result?.message, { duration: Number.POSITIVE_INFINITY });
@@ -154,6 +158,8 @@
       } catch (err) {
         toast.error("حدث خطأ غير متوقع أثناء تسجيل الطلبية");
         console.log(err);
+      } finally {
+        saving = false;
       }
     })}
   >
@@ -249,7 +255,7 @@
     </table>
 
     {#if ticketDrugs.length}
-      <input type="submit" class="btn" value="حفظ الطلبية" />
+      <input type="submit" class="btn" value="حفظ الطلبية" disabled={saving} />
     {/if}
   </form>
 {/if}
