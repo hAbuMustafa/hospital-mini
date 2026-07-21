@@ -26,7 +26,7 @@
   {@render children()}
 </div>
 
-<Toaster position="bottom-left" richColors closeButton />
+<Toaster position="bottom-left" richColors closeButton pauseWhenPageIsHidden />
 
 <style>
   .main-wrapper {
