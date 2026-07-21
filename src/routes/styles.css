@@ -77,6 +77,10 @@ input.btn {
   &:active {
     background-color: hsl(from var(--main-accent-color) h s 40%);
   }
+
+  &:disabled {
+    background-color: hsl(from var(--main-accent-color) h 0% 40%);
+  }
 }
 
 button.link {
