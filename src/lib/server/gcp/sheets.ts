@@ -1,6 +1,11 @@
 import { sheets, type sheets_v4 } from "@googleapis/sheets";
 import { GoogleAuth } from "google-auth-library";
-import { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY } from "$env/static/private";
+import {
+  GOOGLE_CLIENT_EMAIL,
+  GOOGLE_PRIVATE_KEY,
+  narcotics_spreadsheetId,
+} from "$env/static/private";
+import { formatDate } from "$lib/date/utils";
 
 // gather service account key
 const credentials = {
@@ -41,7 +46,6 @@ export async function getSheetRange(spreadsheetId: string, range: string) {
  * Fetch multiple ranges from a specific Google Sheet
  * @param spreadsheetId - The Google Sheet ID
  * @param ranges - Array of ranges like ['Sheet1!A1:B10', 'Sheet2!C1:D20']
- * @param majorDimension - Optional, defaults to 'ROWS'
  * @returns Batch sheet data
  */
 export async function getSheetRanges(spreadsheetId: string, ranges: string[]) {
@@ -61,5 +65,62 @@ export async function getSheetRanges(spreadsheetId: string, ranges: string[]) {
   } catch (error) {
     console.error("Error fetching sheet ranges:", error);
     throw error;
+  }
+}
+
+/**
+ * Appends multiple ranges to a specific Google Sheet
+ * @param spreadsheetId - The Google Sheet ID
+ * @param range - A range to start append after the last occupied cell, like 'Sheet1!A1:B10' or 'Sheet2'
+ * @param values - A 2D array of rows to be insert in the sheet
+ * @returns Batch sheet data
+ */
+export async function appendSheetRow(
+  spreadsheetId: string,
+  range: string,
+  values: any[][]
+) {
+  const rwAPI = sheets({
+    version: "v4",
+    auth: new GoogleAuth({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    }),
+  });
+
+  try {
+    const response = await rwAPI.spreadsheets.values.append({
+      spreadsheetId,
+      range,
+      valueInputOption: "USER_ENTERED",
+      insertDataOption: "INSERT_ROWS",
+      includeValuesInResponse: true,
+      requestBody: {
+        values,
+      },
+    });
+
+    return {
+      updatedRange: response.data.updates?.updatedRange,
+      updatedRows: response.data.updates?.updatedRows,
+      updatedCells: response.data.updates?.updatedCells,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error("Error appending row to sheet:", error);
+    throw error;
+  }
+}
+
+export async function saveNarcoticTicketToGoogleSheet(
+  ticketId: number,
+  row: [Date, string, null, string, number]
+) {
+  try {
+    return await appendSheetRow(narcotics_spreadsheetId, "Dispensed", [
+      [formatDate(row[0], "M/D/YYYY HH:mm:ss"), ...row.slice(1)],
+    ]);
+  } catch (err) {
+    console.error("Ticket", ticketId, "not saved to Google Sheet");
   }
 }

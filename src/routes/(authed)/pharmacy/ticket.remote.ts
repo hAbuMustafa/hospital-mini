@@ -4,10 +4,13 @@ import { db } from "$lib/server/db";
 import {
   drugs,
   patients_view,
+  status,
   transactions,
   transactionTickets,
+  unsyncedNarcotics,
   user,
 } from "$lib/server/db/schema";
+import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
 import { invalid } from "@sveltejs/kit";
 import { and, desc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 import * as v from "valibot";
@@ -60,6 +63,7 @@ export const postTicket = form(
     drugs: v.array(
       v.object({
         item_id: v.number(),
+        item_name: v.string(),
         qty: v.number(),
         unit_price: v.number(),
       })
@@ -86,32 +90,68 @@ export const postTicket = form(
       );
     }
 
-    const ticketId = await db.transaction(async (tx) => {
-      const [ticket] = await tx
-        .insert(transactionTickets)
-        .values({
-          patient_id: data.patientId,
-          store_id: 1, // todo: reset by user's affiliation
-          user_id: getRequestEvent().locals.user?.id!,
-          is_dispense: true,
-        })
-        .returning();
+    const { ticket: insertedTicket, ticketItems: insertedItems } = await db.transaction(
+      async (tx) => {
+        const [ticket] = await tx
+          .insert(transactionTickets)
+          .values({
+            patient_id: data.patientId,
+            store_id: 1, // todo: reset by user's affiliation
+            user_id: getRequestEvent().locals.user?.id!,
+            is_dispense: true,
+          })
+          .returning();
 
-      const ticketItems = await tx
-        .insert(transactions)
-        .values(data.drugs.map((d) => ({ ...d, qty: d.qty * -1, ticket_id: ticket.id })));
+        const ticketItems = await tx
+          .insert(transactions)
+          .values(
+            data.drugs.map((d) => ({ ...d, qty: d.qty * -1, ticket_id: ticket.id }))
+          )
+          .returning();
 
-      return ticket.id;
-    });
+        return { ticket, ticketItems };
+      }
+    );
 
-    /** TODO: If the ticket includes narcotics:
-     * 1. Append to Narcotics Google Sheet.
-     * 2. Update local count on `status` table of narcotics.
-     */
+    if (insertedTicket.id) {
+      const sheetPostResult = await saveNarcoticTicketToGoogleSheet(insertedTicket.id, [
+        insertedTicket.timestamp!,
+        insertedTicket.patient_id!,
+        null,
+        data.drugs[0].item_name,
+        data.drugs[0].qty,
+      ]);
+
+      if (sheetPostResult?.updatedRange) {
+        const [currentNarcoticsCount] = await db
+          .select({ value: status.value })
+          .from(status)
+          .where(eq(status.item, "narcotics_dispensed"));
+
+        await db
+          .update(status)
+          .set({ value: (currentNarcoticsCount.value ?? 0) + 1 })
+          .where(eq(status.item, "narcotics_dispensed"));
+      } else {
+        await db.insert(unsyncedNarcotics).values({
+          ticket_id: insertedTicket.id,
+          ticket_timestamp: insertedTicket.timestamp!,
+          patient_id: insertedTicket.patient_id!,
+          item_name: data.drugs[0].item_name,
+          qty: insertedItems[0].qty,
+        });
+
+        return {
+          success: true,
+          ticketId: insertedTicket.id,
+          message: `لم يتم حفظ التذكرة ${insertedTicket.id} في السجل الأونلاين`,
+        };
+      }
+    }
 
     return {
       success: true,
-      ticketId,
+      ticketId: insertedTicket.id,
     };
   }
 );

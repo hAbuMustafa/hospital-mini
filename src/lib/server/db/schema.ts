@@ -89,6 +89,17 @@ export const transactions = sqliteTable("transactions", {
   ticket_id: int().references(() => transactionTickets.id),
 });
 
+export const unsyncedNarcotics = sqliteTable("unsyncedNarcotics", {
+  id: int().primaryKey({ autoIncrement: true }),
+  ticket_id: int()
+    .notNull()
+    .references(() => transactionTickets.id, { onDelete: "cascade" }),
+  ticket_timestamp: int({ mode: "timestamp" }).notNull(),
+  patient_id: text().notNull(),
+  item_name: text().notNull(),
+  qty: int().notNull(),
+});
+
 export const recentWards_view = sqliteView("recentWards_view", {
   id: int(),
   patient_id: text(),

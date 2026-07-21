@@ -141,6 +141,10 @@
           toast.success(`تم تسجيل الطلبية بالرقم ${form.result?.ticketId}`, {
             duration: 5000,
           });
+
+          if (form.result?.message) {
+            toast.warning(form.result?.message, { duration: Number.POSITIVE_INFINITY });
+          }
         } else {
           toast.error("لم يتم تسجيل الطلبية. راجع الأخطاء المذكورة.");
           postTicket.fields.allIssues()?.forEach((issue) => {
@@ -186,6 +190,9 @@
               </td>
               <td>
                 <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
+                <input
+                  {...postTicket.fields.drugs[i].item_name.as("hidden", drug.name_ar!)}
+                />
                 <label for="amount-{drug.id}" title={drug.tradename_ar}>
                   {drug.name_ar}
                 </label>

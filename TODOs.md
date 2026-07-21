@@ -8,6 +8,8 @@
     - [ ] New sheet in one of the google sheets for sync orders (id,timestamp,sql_order)
     - [ ] Add entry to `status` table with latest synced id.
     - [ ] Add sql execution logic to sync functions.
+  - [ ] On login, after all fetches and writes to local DB, upload all un uploaded narcotic tickets.
+    - [ ] Add a screen to manually upload narcotic tickets.
 
 ## Pages
 
