@@ -2,7 +2,7 @@
 
 ## Sync
 
-- [-] Remote sync flow:
+- [ ] Remote sync flow:
   - [x] Add sync buttons to Nav.
   - [ ] Pull edits from remote:
     - [ ] New sheet in one of the google sheets for sync orders (id,timestamp,sql_order)
@@ -23,6 +23,7 @@
   - [x] Daily requests listing.
 - [ ] Create return flow.
 - [ ] Create exchange with other entities flow (send and receive)
+- [ ] Add `Shallow` component, adds an `<a>` with a dialog that contain target page in it, and pshes state,  and uses `resolve` for links.
 
 ## Security
 
@@ -30,3 +31,7 @@
 - [ ] add Have I Been Pwned support (from Better Auth).
 - [ ] add TOTP support to restore account (Better Auth).
 - [ ] localize Better Auth Errors ([reference](https://better-auth.com/docs/plugins/i18n)).
+
+## Quirks
+
+- [ ] create Better Auth plug-in to login with National ID.
