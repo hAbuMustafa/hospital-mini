@@ -144,7 +144,6 @@
           toast.success(`تم تسجيل الطلبية بالرقم ${form.result?.ticketId}`, {
             duration: 5000,
           });
-          // todo: use toast.promise instead
 
           if (form.result?.message) {
             toast.warning(form.result?.message, { duration: Number.POSITIVE_INFINITY });
@@ -152,11 +151,13 @@
         } else {
           toast.error("لم يتم تسجيل الطلبية. راجع الأخطاء المذكورة.");
           postTicket.fields.allIssues()?.forEach((issue) => {
-            toast.warning(issue.message);
+            toast.warning(issue.message, { duration: Number.POSITIVE_INFINITY });
           });
         }
       } catch (err) {
-        toast.error("حدث خطأ غير متوقع أثناء تسجيل الطلبية");
+        toast.error("حدث خطأ غير متوقع أثناء تسجيل الطلبية", {
+          duration: Number.POSITIVE_INFINITY,
+        });
         console.log(err);
       } finally {
         saving = false;
