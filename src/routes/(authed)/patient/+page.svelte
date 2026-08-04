@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatDate, getTermed } from "$lib/date/utils";
+  import { getFlagEmoji } from "$lib/utils/countries.js";
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
 
@@ -91,11 +92,25 @@
             <a href="/patient/{patient.id}" class="btn">{patient.id}</a>
           </td>
           <td>
-            {#if query}
-              {@html patient.name?.replaceAll(qRegex, (match) => `<mark>${match}</mark>`)}
-            {:else}
-              {patient.name}
-            {/if}
+            <span class="patient-card">
+              <span class="patient-name">
+                {#if query}
+                  {@html patient.name?.replaceAll(
+                    qRegex,
+                    (match) => `<mark>${match}</mark>`
+                  )}
+                {:else}
+                  {patient.name}
+                {/if}
+              </span>
+
+              <span class="patient-tags">
+                {#if patient.nationality !== "EG"}
+                  <span class="nationality flag">{getFlagEmoji(patient.nationality)}</span
+                  >
+                {/if}
+              </span>
+            </span>
           </td>
           <td>{patient.diagnosis}</td>
           <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
@@ -209,6 +224,16 @@
       tr {
         td {
           padding: 0.5rem 0.25rem;
+
+          .patient-card:has(> .patient-tags > :first-child) {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+          }
+
+          .patient-tags:not(:has(> :first-child)) {
+            display: none;
+          }
         }
 
         &.filtered-out {
