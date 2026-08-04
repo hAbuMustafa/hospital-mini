@@ -1,4 +1,3 @@
-import { phoneNumber } from "better-auth/plugins";
 import { relations, sql } from "drizzle-orm";
 import {
   sqliteTable,
