@@ -18,7 +18,7 @@ import { sheetRowToObject } from "$lib/server/gcp/utils";
 export async function initialize() {
   // 1. FETCH
   const fetchedPatient = await getSheetRanges(patients_spreadsheetId, [
-    "Admissions!C:Q",
+    "Admissions!C:T",
     "Transfers!B:E",
     "Discharges!B:E",
   ]);

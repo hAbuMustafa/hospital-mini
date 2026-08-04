@@ -42,6 +42,8 @@ export const patientAdmissions = sqliteTable("patientAdmissions", {
   gender: int({ mode: "boolean" }),
   birthdate: int({ mode: "timestamp" }),
   insured: int({ mode: "boolean" }),
+  nationality: text().default("EG"),
+  referred_from: text(),
 });
 
 export const patientTransfers = sqliteTable("patientTransfers", {
@@ -132,6 +134,8 @@ export const patients_view = sqliteView("patients_view", {
   gender: int({ mode: "boolean" }),
   birthdate: int({ mode: "timestamp" }),
   insured: int({ mode: "boolean" }),
+  nationality: text().notNull(),
+  referred_from: text(),
 }).as(
   sql`
 SELECT 
@@ -148,7 +152,9 @@ SELECT
   a.admission_notes,
   a.gender,
   a.birthdate,
-  a.insured
+  a.insured,
+  a.nationality,
+  a.referred_from
 FROM patientAdmissions a
 LEFT JOIN patientDischarges d ON a.id = d.patient_id
 LEFT JOIN recentWards_view t ON a.id = t.patient_id

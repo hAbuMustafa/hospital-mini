@@ -1,4 +1,5 @@
 import { parseDate } from "$lib/date/utils";
+import { countryMap } from "$lib/utils/countries";
 
 const drugsColumns = [
   "name_ar",
@@ -31,10 +32,13 @@ const AdmissionsColumns = [
   "ward_recent",
   "ward_on_admission",
   "admission_notes",
-  "ininininini",
+  "insurance_text",
   "gender",
   "birthdate",
   "insured",
+  "valid_nat_id",
+  "nationality",
+  "referred_from",
 ] as const;
 
 const TransfersColumns = ["patient_id", "patient_name", "timestamp", "to_ward"] as const;
@@ -98,6 +102,8 @@ export function sheetRowToObject(row: string[], type: SeedType) {
         result[fieldName] = Number(row[i]);
       } else if (fieldName === "item_id" && type === "narcotic_dispense") {
         result[fieldName] = getNarcoticId(row[i]);
+      } else if (type === "admission" && fieldName === "nationality") {
+        result["nationality"] = countryMap.get(row[i]) ?? row[i];
       } else {
         result[fieldName] = row[i];
       }
