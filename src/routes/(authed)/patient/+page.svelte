@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatDate, getTermed } from "$lib/date/utils";
-  import { getFlagEmoji } from "$lib/utils/countries.js";
+  import { countryMap, getFlagEmoji } from "$lib/utils/countries";
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
 
@@ -106,7 +106,10 @@
 
               <span class="patient-tags">
                 {#if patient.nationality !== "EG"}
-                  <span class="nationality flag" title={patient.nationality}>
+                  <span
+                    class="nationality flag"
+                    title={countryMap.get(patient.nationality)}
+                  >
                     {getFlagEmoji(patient.nationality)}
                   </span>
                 {/if}

@@ -2,6 +2,7 @@
   import { page } from "$app/state";
   import Timeline from "$lib/components/Timeline/Timeline.svelte";
   import { formatDate, getDuration, getTermed } from "$lib/date/utils";
+  import { countryMap, getFlagEmoji } from "$lib/utils/countries";
   import {
     getOtherAdmissions,
     getPatientData,
@@ -17,7 +18,15 @@
     : [];
 </script>
 
-<h1>{patient.name}</h1>
+<h1>
+  {patient.name}
+  {#if patient.nationality !== "EG"}<span
+      class="nationality flag"
+      title={countryMap.get(patient.nationality)}
+    >
+      {getFlagEmoji(patient.nationality)}
+    </span>{/if}
+</h1>
 <table class="patient-data">
   <tbody>
     <tr>
