@@ -113,6 +113,9 @@
                     {getFlagEmoji(patient.nationality)}
                   </span>
                 {/if}
+                {#if patient.gender === false}
+                  <span title="أنثى">♀️</span>
+                {/if}
               </span>
             </span>
           </td>
