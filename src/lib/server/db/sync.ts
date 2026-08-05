@@ -41,7 +41,7 @@ export async function syncPatients() {
 
   // 2. FETCH Only what you need
   const fetchedPatientsData = await getSheetRanges(patients_spreadsheetId, [
-    `Admissions!C${latestAdmissionCount + 1}:Q`,
+    `Admissions!C${latestAdmissionCount + 1}:T`,
     `Transfers!B${latestTransferCount + 1}:E`,
     `Discharges!B${latestDischargeCount + 1}:E`,
   ]);
