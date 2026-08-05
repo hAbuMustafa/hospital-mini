@@ -56,9 +56,21 @@ export async function syncPatients() {
     if (fetchedPatientsData.Admissions.values) {
       const seedableAdmissions = fetchedPatientsData.Admissions.values.map((item) =>
         sheetRowToObject(item, "admission")
-      ) as unknown as typeof patientAdmissions.$inferInsert;
+      ) as unknown as (typeof patientAdmissions.$inferInsert & {
+        ward_on_admission: string;
+      })[];
 
-      await tx.insert(patientAdmissions).values(seedableAdmissions);
+      await tx.transaction(async (tx2) => {
+        await tx2.insert(patientTransfers).values(
+          seedableAdmissions.map((p) => ({
+            patient_id: p.id,
+            timestamp: p.admission_date,
+            to_ward: p.ward_on_admission,
+            is_admission: true,
+          }))
+        );
+        await tx2.insert(patientAdmissions).values(seedableAdmissions);
+      });
 
       const [newCount] = await tx
         .update(status)

@@ -1,0 +1,1 @@
+ALTER TABLE `patientAdmissions` DROP COLUMN `ward_on_admission`;

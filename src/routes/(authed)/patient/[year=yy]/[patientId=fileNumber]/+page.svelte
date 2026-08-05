@@ -76,14 +76,7 @@
 {#if transfers.length}
   <h2>التحويلات الداخلية <small>({transfers.length})</small></h2>
   <Timeline
-    events={[
-      {
-        patient_id: patient.id,
-        timestamp: patient.admission_date,
-        to_ward: patient.ward_on_admission,
-      },
-      ...transfers,
-    ]}
+    events={transfers}
     eventTime_name="timestamp"
     eventTitle_name="to_ward"
     dateTimeFormatter={(dt: Date) =>

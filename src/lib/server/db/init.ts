@@ -56,9 +56,7 @@ export async function initialize() {
 
   const seedableAdmissions = fetchedPatient.Admissions.values
     .slice(1)
-    .map((item) =>
-      sheetRowToObject(item, "admission")
-    ) as unknown as (typeof patientAdmissions.$inferInsert)[];
+    .map((item) => sheetRowToObject(item, "admission"));
 
   const seedableDischarges = fetchedPatient.Discharges.values
     .slice(1)
@@ -75,12 +73,33 @@ export async function initialize() {
   // 4. INSERT New data
   try {
     await db.insert(drugs).values(seedableDrugs);
-    seedableAdmissions.forEach(async (v) => await db.insert(patientAdmissions).values(v));
-    seedableTransfers.forEach(async (v) => await db.insert(patientTransfers).values(v));
-    seedableDischarges.forEach(async (v) => await db.insert(patientDischarges).values(v));
-    seedableNarcoticsDispensed.forEach(
-      async (v) => await db.insert(narcoticsDispensed).values(v)
-    );
+
+    for (const admission of seedableAdmissions) {
+      await db.transaction(async (tx) => {
+        await tx.insert(patientTransfers).values({
+          patient_id: admission.id as string,
+          timestamp: admission.admission_date as Date,
+          to_ward: admission.ward_on_admission as string,
+          is_admission: true,
+        });
+
+        await tx
+          .insert(patientAdmissions)
+          .values(admission as unknown as typeof patientAdmissions.$inferInsert);
+      });
+    }
+
+    for (const transfer of seedableTransfers) {
+      await db.insert(patientTransfers).values(transfer);
+    }
+
+    for (const discharge of seedableDischarges) {
+      await db.insert(patientDischarges).values(discharge);
+    }
+
+    for (const narcoticDispense of seedableNarcoticsDispensed) {
+      await db.insert(narcoticsDispensed).values(narcoticDispense);
+    }
   } catch (e) {
     console.error("INSERT FAILED::", e);
   }

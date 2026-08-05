@@ -36,7 +36,6 @@ export const patientAdmissions = sqliteTable("patientAdmissions", {
   id_number: text(),
   diagnosis: text(),
   admission_date: int({ mode: "timestamp" }),
-  ward_on_admission: text(),
   admission_notes: text(),
   gender: int({ mode: "boolean" }),
   birthdate: int({ mode: "timestamp" }),
@@ -50,6 +49,7 @@ export const patientTransfers = sqliteTable("patientTransfers", {
   patient_id: text(),
   timestamp: int({ mode: "timestamp" }),
   to_ward: text(),
+  is_admission: int({ mode: "boolean" }),
 });
 
 export const patientDischarges = sqliteTable("patientDischarges", {
@@ -146,8 +146,8 @@ SELECT
   a.admission_date,
   d.timestamp as discharge_date,
   d.reason as discharge_reason,
-  a.ward_on_admission,
-  t.to_ward as ward_recent,
+  t.to_ward as ward_on_admission,
+  r.to_ward as ward_recent,
   a.admission_notes,
   a.gender,
   a.birthdate,
@@ -155,8 +155,9 @@ SELECT
   a.nationality,
   a.referred_from
 FROM patientAdmissions a
+LEFT JOIN patientTransfers t ON a.id = t.patient_id AND t.is_admission = 1
 LEFT JOIN patientDischarges d ON a.id = d.patient_id
-LEFT JOIN recentWards_view t ON a.id = t.patient_id
+LEFT JOIN recentWards_view r ON a.id = r.patient_id
 `
 );
 
