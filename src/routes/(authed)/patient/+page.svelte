@@ -106,8 +106,9 @@
 
               <span class="patient-tags">
                 {#if patient.nationality !== "EG"}
-                  <span class="nationality flag">{getFlagEmoji(patient.nationality)}</span
-                  >
+                  <span class="nationality flag" title={patient.nationality}>
+                    {getFlagEmoji(patient.nationality)}
+                  </span>
                 {/if}
               </span>
             </span>
