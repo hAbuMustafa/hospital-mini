@@ -1,4 +1,4 @@
-import { query } from "$app/server";
+import { getRequestEvent, query } from "$app/server";
 import { db } from "$lib/server/db";
 import { drugs, transactions, transactionTickets } from "$lib/server/db/schema";
 import { and, eq, gte, isNotNull, lte, sum } from "drizzle-orm";
@@ -21,6 +21,7 @@ export const getDrugsTransactionAmountTotals = query(
       .leftJoin(drugs, eq(transactions.item_id, drugs.id))
       .where(
         and(
+          eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to)
         )
