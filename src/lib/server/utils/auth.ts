@@ -50,7 +50,6 @@ export const auth = betterAuth({
     additionalFields: {
       affiliation: {
         type: "number",
-        defaultValue: 0,
       },
     },
   },
