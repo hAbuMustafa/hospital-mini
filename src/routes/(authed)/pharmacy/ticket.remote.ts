@@ -82,7 +82,9 @@ export const postTicket = form(
       invalid(issue.drugs[hasInvalidQt]("برجاء إدخال كمية صحيحة"));
     }
 
-    if (data.drugs.some((d) => isNarcotic(d.item_id)) && data.drugs.length > 1) {
+    const hasNarcotics = data.drugs.some((d) => isNarcotic(d.item_id));
+
+    if (hasNarcotics && data.drugs.length > 1) {
       invalid(
         issue(
           "لا يمكن كتابة أصناف أخرى مع المخدرات في نفس الطلبية، أو كتابة أكثر من مخدر في نفس الطلبية"
@@ -113,7 +115,7 @@ export const postTicket = form(
       }
     );
 
-    if (insertedTicket.id) {
+    if (hasNarcotics && insertedTicket.id) {
       const sheetPostResult = await saveNarcoticTicketToGoogleSheet(insertedTicket.id, [
         insertedTicket.timestamp!,
         insertedTicket.patient_id!,
