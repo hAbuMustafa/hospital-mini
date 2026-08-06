@@ -48,7 +48,7 @@ export const auth = betterAuth({
   },
   plugins: [
     admin({
-      defaultRole: "e-ph-pharmacist",
+      defaultRole: "user",
       adminRole: "admin",
     }),
     customSession(async ({ session, user }) => {
