@@ -46,6 +46,14 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24,
     updateAge: 0,
   },
+  user: {
+    additionalFields: {
+      affiliation: {
+        type: "number",
+        defaultValue: 0,
+      },
+    },
+  },
   plugins: [
     admin({
       defaultRole: "user",

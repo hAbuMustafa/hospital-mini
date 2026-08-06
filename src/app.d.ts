@@ -1,4 +1,9 @@
-import type { drugs, narcoticsDispensed, patients_view } from "$lib/server/db/schema";
+import type {
+  drugs,
+  narcoticsDispensed,
+  patients_view,
+  user,
+} from "$lib/server/db/schema";
 import type { authClient } from "$lib/auth-client";
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
@@ -7,7 +12,7 @@ declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      user: typeof authClient.$Infer.Session.user | null;
+      user: typeof user.$inferSelect | null;
       session: typeof authClient.$Infer.Session.session | null;
     }
     // interface PageData {}

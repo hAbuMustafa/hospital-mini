@@ -96,7 +96,7 @@ export const postTicket = form(
           .insert(transactionTickets)
           .values({
             patient_id: data.patientId,
-            store_id: 1, // todo: reset by user's affiliation
+            store_id: getRequestEvent().locals.user?.affiliation!,
             user_id: getRequestEvent().locals.user?.id!,
             is_dispense: true,
           })
@@ -178,6 +178,7 @@ export const getTickets = query(
       .from(transactionTickets)
       .where(
         and(
+          eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to),
           isNotNull(transactionTickets.patient_id)
