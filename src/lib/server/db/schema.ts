@@ -101,6 +101,15 @@ export const unsyncedNarcotics = sqliteTable("unsyncedNarcotics", {
   qty: int().notNull(),
 });
 
+export const departments = sqliteTable("departments", {
+  id: int().primaryKey({ autoIncrement: true }),
+  name: text(),
+  has_stock: int({ mode: "boolean" }),
+  is_ward: int({ mode: "boolean" }),
+  floor: int(),
+  room_number: text(),
+});
+
 export const recentWards_view = sqliteView("recentWards_view", {
   id: int(),
   patient_id: text(),
@@ -196,6 +205,9 @@ export const user = sqliteTable("user", {
   displayUsername: text("display_username"),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
   phoneNumberVerified: integer("phone_number_verified", { mode: "boolean" }),
+  affiliation: int()
+    .references(() => departments.id)
+    .default(0),
 });
 
 export const session = sqliteTable(
