@@ -9,7 +9,6 @@ import { BETTER_AUTH_SECRET } from "$env/static/private";
 import { dev } from "$app/environment";
 import { egyptianPhoneNumber } from "$lib/utils/patterns";
 import { otp } from "../db/schema";
-import { eq } from "drizzle-orm";
 
 const sessionEndTimes = [8, 14, 20];
 
