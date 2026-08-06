@@ -74,7 +74,10 @@
 </table>
 
 {#if transfers.length}
-  <h2>التحويلات الداخلية <small>({transfers.length})</small></h2>
+  <h2>
+    التحويلات الداخلية {#if transfers.length - 1}<small>({transfers.length - 1})</small
+      >{/if}
+  </h2>
   <Timeline
     events={transfers}
     eventTime_name="timestamp"
