@@ -205,9 +205,7 @@ export const user = sqliteTable("user", {
   displayUsername: text("display_username"),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
   phoneNumberVerified: integer("phone_number_verified", { mode: "boolean" }),
-  affiliation: int()
-    .references(() => departments.id)
-    .default(0),
+  affiliation: int().references(() => departments.id),
 });
 
 export const session = sqliteTable(
