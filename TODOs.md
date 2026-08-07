@@ -28,6 +28,9 @@
   - [x] Daily requests listing.
 - [ ] Create return flow.
 - [ ] Create exchange with other entities flow (send and receive)
+
+## Components
+
 - [ ] Add `Shallow` component, adds an `<a>` with a dialog that contain target page in it, and pushes state,  and uses `resolve` for links.
 
 ## Security
@@ -40,4 +43,4 @@
 
 ## Quirks
 
-- [ ] create Better Auth plug-in to login with National ID.
+- [ ] create Better Auth plug-in to login with National ID ([reference](https://better-auth.com/docs/concepts/plugins#creating-a-plugin)).
