@@ -11,6 +11,11 @@
   - [ ] On login, after all fetches and writes to local DB, upload all un uploaded narcotic tickets.
     - [ ] Add a screen to manually upload narcotic tickets.
 
+## Schema
+
+- [ ] Change drugs category for narcotic drugs to to have their own dedicated category (like `DANGEROUS` and `ELECTROLYTE` label)
+  - [ ] Change code that uses functions like `isNarcoticDrug()` accordingly
+
 ## Pages
 
 - [x] Complete `invoice/create/yy/id` page.
@@ -23,7 +28,7 @@
   - [x] Daily requests listing.
 - [ ] Create return flow.
 - [ ] Create exchange with other entities flow (send and receive)
-- [ ] Add `Shallow` component, adds an `<a>` with a dialog that contain target page in it, and pshes state,  and uses `resolve` for links.
+- [ ] Add `Shallow` component, adds an `<a>` with a dialog that contain target page in it, and pushes state,  and uses `resolve` for links.
 
 ## Security
 
