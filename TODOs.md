@@ -26,7 +26,7 @@
 - [x] Create reports pages.
   - [x] Daily dispensed.
   - [x] Daily requests listing.
-- [ ] Create return flow.
+- [x] Create return flow.
 - [ ] Create exchange with other entities flow (send and receive)
 
 ## Components

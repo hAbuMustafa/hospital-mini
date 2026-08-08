@@ -12,7 +12,7 @@ import {
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
 import { invalid } from "@sveltejs/kit";
-import { and, desc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
+import { and, desc, eq, gte, isNotNull, gt, lte, isNull, sql } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getPatient = query(v.string(), async (patientId) => {
@@ -192,5 +192,106 @@ export const getTickets = query(
       .leftJoin(user, eq(transactionTickets.user_id, user.id));
 
     return Object.entries(Object.groupBy(tickets, (t) => t.ticket_id));
+  }
+);
+
+export const getTicket = query(v.number(), async (ticketNumber) => {
+  const ticket = await db
+    .select({
+      transaction_id: transactions.id,
+      ticket_id: transactionTickets.id,
+      timestamp: transactionTickets.timestamp,
+      user_name: user.name,
+      patient_id: patients_view.id,
+      patient_name: patients_view.name,
+      item_id: drugs.id,
+      item_name: drugs.name_ar,
+      item_tradename: drugs.tradename_ar,
+      item_unit_price: drugs.price,
+      qty: transactions.qty,
+      qty_returned: transactions.qty_returned,
+      is_dispense: transactionTickets.is_dispense,
+    })
+    .from(transactionTickets)
+    .where(
+      and(
+        eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!),
+        eq(transactionTickets.is_dispense, true),
+        isNull(transactionTickets.return_on_ticket_id),
+        gt(transactionTickets.timestamp, new Date(new Date().getDate() - 2)),
+        eq(transactionTickets.id, ticketNumber),
+        isNotNull(transactionTickets.patient_id)
+      )
+    )
+    .leftJoin(transactions, eq(transactions.ticket_id, transactionTickets.id))
+    .leftJoin(patients_view, eq(transactionTickets.patient_id, patients_view.id))
+    .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+    .leftJoin(user, eq(transactionTickets.user_id, user.id));
+
+  return ticket;
+});
+
+export const returnItems = form(
+  v.object({
+    patientId: v.string(),
+    originalTicketId: v.number(),
+    items: v.array(
+      v.object({
+        itemId: v.number(),
+        itemUnitPrice: v.number(),
+        transactionId: v.number(),
+        returnedAmount: v.number(),
+      })
+    ),
+  }),
+  async (data, issue) => {
+    const returnedItems = data.items.filter((item) => item.returnedAmount > 0);
+
+    if (!returnedItems.length) invalid(issue("لم تقم بكتابة أي كميات للارتجاع"));
+
+    const result = await db.transaction(async (tx) => {
+      try {
+        const [newTicket] = await tx
+          .insert(transactionTickets)
+          .values({
+            is_dispense: false,
+            store_id: getRequestEvent().locals.user?.affiliation!,
+            user_id: getRequestEvent().locals.user?.id!,
+            patient_id: data.patientId,
+            return_on_ticket_id: data.originalTicketId,
+          })
+          .returning();
+
+        await tx.insert(transactions).values(
+          returnedItems.map((item) => ({
+            ticket_id: newTicket.id,
+            item_id: item.itemId,
+            unit_price: item.itemUnitPrice,
+            qty: item.returnedAmount,
+          }))
+        );
+
+        for (const item of returnedItems) {
+          await tx
+            .update(transactions)
+            .set({
+              qty_returned: sql`COALESCE(${transactions.qty_returned}, 0) + ${item.returnedAmount}`,
+            })
+            .where(eq(transactions.id, item.transactionId));
+        }
+
+        return {
+          success: true,
+          ticketId: newTicket.id,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error,
+        };
+      }
+    });
+
+    return result;
   }
 );

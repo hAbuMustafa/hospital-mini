@@ -9,6 +9,10 @@
 
   const ticket = $derived(items?.[0]);
   const isReturn = $derived(!ticket?.is_dispense);
+  const canReturn = $derived(
+    !isReturn &&
+      (new Date().getTime() - ticket.timestamp.getTime()) / (60 * 60 * 24 * 1000) < 2
+  );
 </script>
 
 <div class="ticket" class:return={isReturn}>
@@ -23,6 +27,10 @@
         </span>
         <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
       </span>
+
+      {#if canReturn}
+        <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
+      {/if}
     </h3>
   </div>
 
