@@ -175,6 +175,7 @@ export const getTickets = query(
         item_name: drugs.name_ar,
         item_tradename: drugs.tradename_ar,
         qty: transactions.qty,
+        qty_returned: transactions.qty_returned,
         is_dispense: transactionTickets.is_dispense,
       })
       .from(transactionTickets)

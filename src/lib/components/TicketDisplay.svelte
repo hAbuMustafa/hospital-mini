@@ -39,6 +39,9 @@
       <li>
         <span class="item-qty">{Math.abs(item.qty!)}</span>
         <span class="item-name" title={item.item_tradename}>{item.item_name}</span>
+        {#if item.qty_returned}
+          <span class="returned">(تم ارتجاع {item.qty_returned})</span>
+        {/if}
       </li>
     {/each}
   </ul>
@@ -94,6 +97,10 @@
         color: var(--main-bg-color);
         border-radius: 4px;
         padding: 0.05rem 0.25rem;
+      }
+
+      .returned {
+        color: salmon;
       }
     }
 
