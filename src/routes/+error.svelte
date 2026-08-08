@@ -1,8 +1,12 @@
-<script>
-  let { status, error } = $props();
+<script lang="ts">
+  import { page } from "$app/state";
 </script>
 
-<div class="error-page-wrapper" dir="auto" style="text-align: center; font-size:4rem;">
-  <h1>{status}</h1>
-  <p>{error?.message}</p>
-</div>
+<h1>{page.status}</h1>
+<p>{page.error?.message}</p>
+
+<style>
+  h1 {
+    font-size: 10rem;
+  }
+</style>
