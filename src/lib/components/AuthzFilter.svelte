@@ -31,13 +31,14 @@
 
     return (
       user &&
+      !user.banned &&
       user.role &&
+      !blockDepartment.includes(user?.affiliation) &&
+      !blockRole.includes(user.role) &&
+      !blockUser.includes(user.id) &&
       (allowDepartment.includes(user?.affiliation) ||
         allowRole.includes(user?.role) ||
-        allowUser.includes(user.id)) &&
-      (!blockDepartment.includes(user?.affiliation) ||
-        !blockRole.includes(user.role) ||
-        !blockUser.includes(user.id))
+        allowUser.includes(user.id))
     );
   }
 </script>

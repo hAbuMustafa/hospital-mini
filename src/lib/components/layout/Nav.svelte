@@ -12,14 +12,16 @@
 
   {#if authState.isAuthenticated}
     <ul>
-      <Filter>
+      <Filter allowDepartment={[1, 2, 3, 4]}>
         <li>
           <button popovertarget="patient-nav-list" interestfor="patient-nav-list"
             >المرضى</button
           >
           <ul id="patient-nav-list" popover="hint">
             <li><a href="/patient">بيان المرضى بالأقسام</a></li>
-            <li><a href="/invoice/create">إصدار فاتورة</a></li>
+            <Filter allowDepartment={[1, 3]}>
+              <li><a href="/invoice/create">إصدار فاتورة</a></li>
+            </Filter>
           </ul>
         </li>
       </Filter>
