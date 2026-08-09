@@ -117,6 +117,10 @@ export const departments = sqliteTable("departments", {
   department_group_id: int().references(() => department_group.id),
 });
 
+/*
+ * VIEWS
+ */
+
 export const recentWards_view = sqliteView("recentWards_view", {
   id: int(),
   patient_id: text(),
@@ -176,6 +180,10 @@ LEFT JOIN patientDischarges d ON a.id = d.patient_id
 LEFT JOIN recentWards_view r ON a.id = r.patient_id
 `
 );
+
+/*
+ * SPECIAL PURPOSE TABLES
+ */
 
 export const status = sqliteTable("status", {
   id: int().primaryKey({ autoIncrement: true }),
