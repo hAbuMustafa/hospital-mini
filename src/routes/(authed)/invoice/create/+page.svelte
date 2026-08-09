@@ -2,6 +2,7 @@
   import { goto } from "$app/navigation";
   import Combobox from "$lib/components/Combobox.svelte";
   import DateControls from "$lib/components/DateControls.svelte";
+  import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
   import { formatDate } from "$lib/date/utils";
 
   let { data } = $props();
@@ -81,33 +82,9 @@
   placeholder="بحث عن مريض"
 >
   {#snippet itemSnippet(patient: PatientT)}
-    <button
-      class="patient-select"
-      onclick={() => {
-        goto(`create/${patient.id}`);
-      }}
-    >
-      <span>{@render markMatches(patient.id)}</span>
-      <strong>{@render markMatches(patient.name!)}</strong>
-      <span>
-        من <span class="date">{formatDate(patient.admission_date, "YYYY/MM/DD")}</span>
-        {#if patient.discharge_date}
-          إلى <span class="date">{formatDate(patient.discharge_date, "YYYY/MM/DD")}</span>
-        {/if}
-      </span>
-      {#if patient.id_number}
-        <span>{patient.id_type}: {@render markMatches(patient.id_number)}</span>
-      {/if}
-    </button>
+    <SelectItemPatient {patient} query={patientQuery} href={`create/${patient.id}`} />
   {/snippet}
 </Combobox>
-
-{#snippet markMatches(text: string)}
-  {@html text.replaceAll(
-    new RegExp(patientQuery.replaceAll(" ", ".*"), "g"),
-    (match) => `<mark>${match}</mark>`
-  )}
-{/snippet}
 
 <style>
   table {
@@ -133,24 +110,5 @@
   th,
   td {
     padding: 0.5rem;
-  }
-
-  button.patient-select {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    border: none;
-
-    & > span > span.date {
-      border: var(--main-border);
-      padding-inline: 0.25rem;
-      border-radius: 4px;
-    }
-
-    &:focus {
-      border: 3px double var(--main-accent-color);
-      outline: none;
-    }
   }
 </style>
