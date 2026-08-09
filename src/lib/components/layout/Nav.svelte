@@ -2,6 +2,7 @@
   import { goto } from "$app/navigation";
   import { authState } from "$lib/auth-client/auth.svelte";
   import SyncAll from "$lib/components/layout/SyncAll.svelte";
+  import Filter from "$lib/components/AuthzFilter.svelte";
 </script>
 
 <nav>
@@ -11,35 +12,42 @@
 
   {#if authState.isAuthenticated}
     <ul>
-      <li>
-        <button popovertarget="patient-nav-list" interestfor="patient-nav-list"
-          >المرضى</button
-        >
-        <ul id="patient-nav-list" popover="hint">
-          <li><a href="/patient">بيان المرضى بالأقسام</a></li>
-          <li><a href="/invoice/create">إصدار فاتورة</a></li>
-        </ul>
-      </li>
-      <li>
-        <button popovertarget="pharmacy-nav-list" interestfor="pharmacy-nav-list"
-          >الصيدلية</button
-        >
-        <ul id="pharmacy-nav-list" popover="hint">
-          <li><a href="/pharmacy/tickets">عرض تذاكر الصرف</a></li>
-          <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
-          <hr />
-          <li><a href="/stock/transfer">صرف لجهة</a></li>
-          <li><a href="/stock/receive">استلام وارد</a></li>
-        </ul>
-      </li>
+      <Filter>
+        <li>
+          <button popovertarget="patient-nav-list" interestfor="patient-nav-list"
+            >المرضى</button
+          >
+          <ul id="patient-nav-list" popover="hint">
+            <li><a href="/patient">بيان المرضى بالأقسام</a></li>
+            <li><a href="/invoice/create">إصدار فاتورة</a></li>
+          </ul>
+        </li>
+      </Filter>
+
+      <Filter allowDepartment={[1, 2]}>
+        <li>
+          <button popovertarget="pharmacy-nav-list" interestfor="pharmacy-nav-list"
+            >الصيدلية</button
+          >
+          <ul id="pharmacy-nav-list" popover="hint">
+            <li><a href="/pharmacy/tickets">عرض تذاكر الصرف</a></li>
+            <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
+            <hr />
+            <li><a href="/stock/transfer">صرف لجهة</a></li>
+            <li><a href="/stock/receive">استلام وارد</a></li>
+          </ul>
+        </li>
+      </Filter>
     </ul>
   {/if}
 
   <ul>
     {#if authState.isAuthenticated}
-      <li>
-        <SyncAll />
-      </li>
+      <Filter>
+        <li>
+          <SyncAll />
+        </li>
+      </Filter>
       <li>أهلا يا <a href="/account">{authState.user!.displayUsername}</a>!</li>
       <li>
         <button
