@@ -64,6 +64,7 @@ export const postTicket = form(
       v.object({
         item_id: v.number(),
         item_name: v.string(),
+        category: v.string(),
         qty: v.number(),
         unit_price: v.number(),
       })
@@ -82,7 +83,7 @@ export const postTicket = form(
       invalid(issue.drugs[hasInvalidQt]("برجاء إدخال كمية صحيحة"));
     }
 
-    const hasNarcotics = data.drugs.some((d) => isNarcotic(d.item_id));
+    const hasNarcotics = data.drugs.some((d) => isNarcotic(d));
 
     if (hasNarcotics && data.drugs.length > 1) {
       invalid(

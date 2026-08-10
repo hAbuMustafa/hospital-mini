@@ -205,6 +205,9 @@
                 <input
                   {...postTicket.fields.drugs[i].item_name.as("hidden", drug.name_ar!)}
                 />
+                <input
+                  {...postTicket.fields.drugs[i].category.as("hidden", drug.category!)}
+                />
                 <label for="amount-{drug.id}" title={drug.tradename_ar}>
                   {drug.name_ar}
                 </label>

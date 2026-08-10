@@ -13,8 +13,8 @@
 
 ## Schema
 
-- [ ] Change drugs category for narcotic drugs to to have their own dedicated category (like `DANGEROUS` and `ELECTROLYTE` label)
-  - [ ] Change code that uses functions like `isNarcoticDrug()` accordingly
+- [x] Change drugs category for narcotic drugs to to have their own dedicated category (like `DANGEROUS` and `ELECTROLYTE` label)
+  - [x] Change code that uses functions like `isNarcoticDrug()` accordingly
 
 ## Pages
 

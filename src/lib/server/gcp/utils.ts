@@ -114,7 +114,6 @@ export function sheetRowToObject(row: string[], type: SeedType) {
 }
 
 const narcotics = new Map<string, number>();
-narcotics.set("أتراكوريوم بيسيلات 0.5 ملجم أمبول", 54);
 narcotics.set("ميدازولام 5 ملجم أمبول", 116);
 narcotics.set("كيتامين 50 ملجم فيال", 117);
 narcotics.set("فينتانيل 0.05 ملجم أمبول", 119);
