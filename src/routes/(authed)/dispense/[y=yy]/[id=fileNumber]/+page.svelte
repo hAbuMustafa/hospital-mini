@@ -14,6 +14,7 @@
   import { useKeyboardNavigation } from "$lib/attachments";
   import { unacceptedAmount } from "$lib/CONSTANTS";
   import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
+  import { reject } from "lodash-es";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -126,29 +127,42 @@
 
   <form
     {...postTicket.enhance(async (form) => {
+      const { promise, resolve, reject } = Promise.withResolvers();
+
       try {
         saving = true;
-        if (await form.submit()) {
-          ticketDrugs = [];
 
-          toast.success(`تم تسجيل الطلبية بالرقم ${form.result?.ticketId}`, {
-            duration: 5000,
-          });
+        toast.promise(promise, {
+          success: (ticketId) => {
+            ticketDrugs = [];
+            return `تم تسجيل الطلبية بالرقم ${ticketId}`;
+          },
+          error: () => {
+            postTicket.fields.allIssues()?.forEach((issue) => {
+              toast.warning(issue.message, { duration: Number.POSITIVE_INFINITY });
+            });
+            return "لم يتم تسجيل الطلبية. راجع الأخطاء المذكورة.";
+          },
+          loading: "جار حفظ تذكرة الصرف...",
+          duration: 5000,
+        });
 
+        await form.submit();
+
+        if (form.result?.success) {
           if (form.result?.message) {
             toast.warning(form.result?.message, { duration: Number.POSITIVE_INFINITY });
           }
+          resolve(form.result.ticketId);
         } else {
-          toast.error("لم يتم تسجيل الطلبية. راجع الأخطاء المذكورة.");
-          postTicket.fields.allIssues()?.forEach((issue) => {
-            toast.warning(issue.message, { duration: Number.POSITIVE_INFINITY });
-          });
+          reject(form.result?.message);
         }
       } catch (err) {
         toast.error("حدث خطأ غير متوقع أثناء تسجيل الطلبية", {
           duration: Number.POSITIVE_INFINITY,
         });
         console.log(err);
+        reject();
       } finally {
         saving = false;
       }
