@@ -182,7 +182,7 @@ export const getTickets = query(
       .from(transactionTickets)
       .where(
         and(
-          eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!),
+          eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!), // fix: if admin, show all tickets
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to),
           isNotNull(transactionTickets.patient_id)
