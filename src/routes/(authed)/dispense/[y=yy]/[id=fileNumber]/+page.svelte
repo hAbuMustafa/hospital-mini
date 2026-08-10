@@ -14,7 +14,7 @@
   import { useKeyboardNavigation } from "$lib/attachments";
   import { unacceptedAmount } from "$lib/CONSTANTS";
   import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
-  import { reject } from "lodash-es";
+  import Dialog from "$lib/components/Dialog.svelte";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -195,6 +195,7 @@
                   onclick={() => {
                     ticketDrugs = ticketDrugs.filter((d) => d.id !== drug.id);
                   }}
+                  class="delete-item"
                 >
                   {i + 1}
                 </button>
@@ -221,19 +222,44 @@
                 />
               </td>
               <td>
-                {#if drug.lastDispensed}
-                  <span class="old-amount">
-                    {Math.abs(drug.lastDispensed.qty!)}
-                  </span>
-                  {drug.unit}
-                  <span
-                    class="old-amount-time"
-                    title={formatDate(drug.lastDispensed.timestamp!, "hh:mm A")
-                      .replace("AM", "ص")
-                      .replace("PM", "م")}
+                {#if drug.lastDispensed?.length}
+                  <button
+                    type="button"
+                    command="show-modal"
+                    commandfor="item-{drug.id}-dialog"
                   >
-                    {formatDate(drug.lastDispensed.timestamp!, "MM/DD")}
-                  </span>
+                    <span class="old-amount">
+                      {-drug.lastDispensed[0].qty!}
+                    </span>
+                    {drug.unit}
+                    <span
+                      class="old-amount-time"
+                      title={formatDate(drug.lastDispensed[0].timestamp!, "hh:mm A")
+                        .replace("AM", "ص")
+                        .replace("PM", "م")}
+                    >
+                      {formatDate(drug.lastDispensed[0].timestamp!, "MM/DD")}
+                    </span>
+                  </button>
+
+                  <Dialog id="item-{drug.id}-dialog">
+                    <h4>{patient.name ?? patient.id}</h4>
+                    <h5>{drug.name_ar}</h5>
+
+                    <ul>
+                      {#each drug.lastDispensed as dispense, dd (dispense.ticketId)}
+                        <li>
+                          <span class="old-amount">{-dispense.qty!}</span>
+                          <span class="old-amount-time"
+                            >{formatDate(dispense.timestamp!, "YYYY/MM/DD hh:mm:ss A")
+                              .replace("AM", "ص")
+                              .replace("PM", "م")}</span
+                          >
+                          <span>(#{dispense.ticketId})</span>
+                        </li>
+                      {/each}
+                    </ul>
+                  </Dialog>
                 {/if}
               </td>
             </tr>
@@ -355,7 +381,7 @@
           }
         }
 
-        &:has(> button) {
+        &:has(> .delete-item) {
           padding: 0;
 
           & > button {

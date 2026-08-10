@@ -36,7 +36,7 @@ export const getItemLastDispensed = query(
     itemId: v.number(),
   }),
   async ({ patientId, itemId }) => {
-    const [lastDispense] = await db
+    const lastDispense = await db
       .select({
         ticketId: transactionTickets.id,
         timestamp: transactionTickets.timestamp,
