@@ -246,7 +246,7 @@
                   </button>
 
                   <Dialog id="item-{drug.id}-dialog">
-                    <h4>{patient.name ?? patient.id}</h4>
+                    <h4>{"name" in patient ? patient.name : patient.id}</h4>
                     <h5>{drug.name_ar}</h5>
 
                     <ul>
