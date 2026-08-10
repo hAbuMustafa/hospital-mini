@@ -13,6 +13,7 @@
   import { scale } from "svelte/transition";
   import { useKeyboardNavigation } from "$lib/attachments";
   import { unacceptedAmount } from "$lib/CONSTANTS";
+  import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -114,25 +115,14 @@
     onSelect={(drug: DrugT) => selectDrug(drug)}
   >
     {#snippet itemSnippet(drug: DrugT)}
-      <button
-        type="button"
-        class="drug-select"
-        class:already-selected={ticketDrugs.findIndex((item) => item.id === drug.id) > -1}
-        onclick={() => selectDrug(drug as DrugT)}
-      >
-        <strong class="name-ar">{@render markMatches(drug.name_ar!)}</strong>
-        <span class="name">{@render markMatches(drug.tradename_ar!)}</span>
-        <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
-      </button>
+      <SelectItemDrug
+        {drug}
+        query={drugQuery}
+        isSelected={ticketDrugs.findIndex((item) => item.id === drug.id) > -1}
+        onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+      />
     {/snippet}
   </Combobox>
-
-  {#snippet markMatches(text: string)}
-    {@html text.replaceAll(
-      new RegExp(drugQuery.replaceAll(" ", ".*"), "g"),
-      (match) => `<mark>${match}</mark>`
-    )}
-  {/snippet}
 
   <form
     {...postTicket.enhance(async (form) => {
@@ -318,22 +308,6 @@
   .not-yet-registered {
     text-decoration: line-through;
     color: light-dark(maroon, salmon);
-  }
-
-  button.drug-select {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    border: none;
-
-    &:focus {
-      border: 3px double var(--main-accent-color);
-      outline: none;
-    }
-
-    &.already-selected {
-      background-color: green;
-    }
   }
 
   form {
