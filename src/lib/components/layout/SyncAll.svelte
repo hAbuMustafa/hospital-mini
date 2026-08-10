@@ -3,7 +3,11 @@
   import PersonIcon from "@lucide/svelte/icons/user-pen";
   import DrugIcon from "@lucide/svelte/icons/pill";
 
-  let loading = $state(false);
+  let AllIsLoading = $state(false);
+  let patientsIsLoading = $state(false);
+  let drugsIsLoading = $state(false);
+
+  let loading = $derived(AllIsLoading || patientsIsLoading || drugsIsLoading);
 </script>
 
 <div class="sync-buttons-wrapper">
@@ -12,15 +16,15 @@
     aria-label="تحديث جميع البيانات"
     title="تحديث جميع البيانات"
     disabled={loading}
-    class:loading
+    class:AllIsLoading
     onclick={() => {
-      loading = true;
+      AllIsLoading = true;
 
       fetch("/api/v1/sync/all")
         .then((r) => r.json())
         .then((d) => {
           console.log(d);
-          loading = false;
+          AllIsLoading = false;
         })
         .catch((e) => console.error(e));
     }}
@@ -33,15 +37,15 @@
     aria-label="تحديث بيانات المرضى"
     title="تحديث بيانات المرضى"
     disabled={loading}
-    class:loading
+    class:loading={patientsIsLoading}
     onclick={() => {
-      loading = true;
+      patientsIsLoading = true;
 
       fetch("/api/v1/sync/patients")
         .then((r) => r.json())
         .then((d) => {
           console.log(d);
-          loading = false;
+          patientsIsLoading = false;
         })
         .catch((e) => console.error(e));
     }}
@@ -57,15 +61,15 @@
     aria-label="تحديث بيانات الأدوية"
     title="تحديث بيانات الأدوية"
     disabled={loading}
-    class:loading
+    class:loading={drugsIsLoading}
     onclick={() => {
-      loading = true;
+      drugsIsLoading = true;
 
       fetch("/api/v1/sync/drugs")
         .then((r) => r.json())
         .then((d) => {
           console.log(d);
-          loading = false;
+          drugsIsLoading = false;
         })
         .catch((e) => console.error(e));
     }}
