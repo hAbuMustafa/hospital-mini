@@ -22,6 +22,8 @@
             <Filter allowDepartment={[1, 3]}>
               <li><a href="/invoice/create">إصدار فاتورة</a></li>
             </Filter>
+            <hr />
+            <li><a href="/patient/lookup">بحث عن مريض</a></li>
           </ul>
         </li>
       </Filter>
