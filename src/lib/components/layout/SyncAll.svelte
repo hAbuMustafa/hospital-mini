@@ -24,9 +24,11 @@
         .then((r) => r.json())
         .then((d) => {
           console.log(d);
-          AllIsLoading = false;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => console.error(e))
+        .finally(() => {
+          AllIsLoading = false;
+        });
     }}
   >
     <RefreshCwIcon size="2rem" />
@@ -45,9 +47,11 @@
         .then((r) => r.json())
         .then((d) => {
           console.log(d);
-          patientsIsLoading = false;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => console.error(e))
+        .finally(() => {
+          patientsIsLoading = false;
+        });
     }}
   >
     <RefreshCwIcon size="2rem" />
@@ -69,9 +73,11 @@
         .then((r) => r.json())
         .then((d) => {
           console.log(d);
-          drugsIsLoading = false;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => console.error(e))
+        .finally(() => {
+          drugsIsLoading = false;
+        });
     }}
   >
     <RefreshCwIcon size="2rem" />
