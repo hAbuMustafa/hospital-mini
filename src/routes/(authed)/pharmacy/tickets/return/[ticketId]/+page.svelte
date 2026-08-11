@@ -135,6 +135,10 @@
     }
   }
 
+  button[type="submit"] {
+    inline-size: 100%;
+  }
+
   .no-return {
     color: salmon;
   }
