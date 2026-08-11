@@ -6,6 +6,8 @@
   const ticketId = Number(page.params.ticketId);
   const ticketItems = getTicket(ticketId);
 
+  let items = $derived(await ticketItems);
+
   let saving = $state(false);
 </script>
 
@@ -47,45 +49,41 @@
     }
   })}
 >
-  {#await ticketItems}
-    <p>جاري جلب أصناف التذكرة...</p>
-  {:then items}
-    <input {...returnItems.fields.originalTicketId.as("hidden", ticketId)} />
-    <ul>
-      {#each items as item, i (item.item_id)}
-        {@const remaining = -item.qty! - (item.qty_returned ?? 0)}
-        <li>
-          <span title={item.item_tradename}>{item.item_name}</span>
-          <input {...returnItems.fields.items[i].itemId.as("hidden", item.item_id!)} />
+  <input {...returnItems.fields.originalTicketId.as("hidden", ticketId)} />
+  <ul>
+    {#each items as item, i (item.item_id)}
+      {@const remaining = -item.qty! - (item.qty_returned ?? 0)}
+      <li>
+        <span title={item.item_tradename}>{item.item_name}</span>
+        <input {...returnItems.fields.items[i].itemId.as("hidden", item.item_id!)} />
+        <input
+          {...returnItems.fields.items[i].itemUnitPrice.as(
+            "hidden",
+            item.item_unit_price!
+          )}
+        />
+        <input
+          {...returnItems.fields.items[i].transactionId.as(
+            "hidden",
+            item.transaction_id!
+          )}
+          value={item.transaction_id}
+        />
+        {#if remaining > 0}
           <input
-            {...returnItems.fields.items[i].itemUnitPrice.as(
-              "hidden",
-              item.item_unit_price!
-            )}
+            {...returnItems.fields.items[i].returnedAmount.as("number")}
+            min="0"
+            max={remaining}
+            value="0"
           />
-          <input
-            {...returnItems.fields.items[i].transactionId.as(
-              "hidden",
-              item.transaction_id!
-            )}
-            value={item.transaction_id}
-          />
-          {#if remaining > 0}
-            <input
-              {...returnItems.fields.items[i].returnedAmount.as("number")}
-              min="0"
-              max={remaining}
-              value="0"
-            />
-            <small>(متبقي {remaining} من {-item.qty!})</small>
-          {:else}
-            <span class="no-return">(صرف {-item.qty!} وتم ارتجاع الكمية كاملة)</span>
-          {/if}
-        </li>
-      {/each}
-    </ul>
-    <button type="submit" class="btn" disabled={saving}>حفظ المرتجع</button>
-  {/await}
+          <small>(متبقي {remaining} من {-item.qty!})</small>
+        {:else}
+          <span class="no-return">(صرف {-item.qty!} وتم ارتجاع الكمية كاملة)</span>
+        {/if}
+      </li>
+    {/each}
+  </ul>
+  <button type="submit" class="btn" disabled={saving}>حفظ المرتجع</button>
 </form>
 
 <style>
