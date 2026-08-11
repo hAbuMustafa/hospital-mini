@@ -10,6 +10,8 @@ export const getDrugsTransactionAmountTotals = query(
     to: v.date(),
   }),
   async (data) => {
+    const currentUser = getRequestEvent().locals.user;
+
     const totals = await db
       .select({
         item_name: drugs.name_ar,
@@ -21,7 +23,9 @@ export const getDrugsTransactionAmountTotals = query(
       .leftJoin(drugs, eq(transactions.item_id, drugs.id))
       .where(
         and(
-          eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!),
+          currentUser?.role === "admin"
+            ? isNotNull(transactionTickets.store_id)
+            : eq(transactionTickets.store_id, currentUser?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to)
         )

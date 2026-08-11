@@ -50,7 +50,6 @@
   {#await ticketItems}
     <p>جاري جلب أصناف التذكرة...</p>
   {:then items}
-    <input {...returnItems.fields.patientId.as("hidden", items[0].patient_id!)} />
     <input {...returnItems.fields.originalTicketId.as("hidden", ticketId)} />
     <ul>
       {#each items as item, i (item.item_id)}

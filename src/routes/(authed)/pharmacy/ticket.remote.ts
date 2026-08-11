@@ -93,14 +93,16 @@ export const postTicket = form(
       );
     }
 
+    const currentUser = getRequestEvent().locals.user;
+
     const { ticket: insertedTicket, ticketItems: insertedItems } = await db.transaction(
       async (tx) => {
         const [ticket] = await tx
           .insert(transactionTickets)
           .values({
             patient_id: data.patientId,
-            store_id: getRequestEvent().locals.user?.affiliation!,
-            user_id: getRequestEvent().locals.user?.id!,
+            store_id: currentUser?.affiliation!,
+            user_id: currentUser?.id!,
             is_dispense: true,
           })
           .returning();
@@ -165,6 +167,8 @@ export const getTickets = query(
     to: v.date(),
   }),
   async (data) => {
+    const currentUser = getRequestEvent().locals.user;
+
     const tickets = await db
       .select({
         ticket_id: transactionTickets.id,
@@ -182,7 +186,9 @@ export const getTickets = query(
       .from(transactionTickets)
       .where(
         and(
-          eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!), // fix: if admin, show all tickets
+          currentUser?.role === "admin"
+            ? isNotNull(transactionTickets.store_id)
+            : eq(transactionTickets.store_id, currentUser?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to),
           isNotNull(transactionTickets.patient_id)
@@ -198,6 +204,8 @@ export const getTickets = query(
 );
 
 export const getTicket = query(v.number(), async (ticketNumber) => {
+  const currentUser = getRequestEvent().locals.user;
+
   const ticket = await db
     .select({
       transaction_id: transactions.id,
@@ -217,7 +225,9 @@ export const getTicket = query(v.number(), async (ticketNumber) => {
     .from(transactionTickets)
     .where(
       and(
-        eq(transactionTickets.store_id, getRequestEvent().locals.user?.affiliation!),
+        currentUser?.role === "admin"
+          ? isNotNull(transactionTickets.store_id)
+          : eq(transactionTickets.store_id, currentUser?.affiliation!),
         eq(transactionTickets.is_dispense, true),
         isNull(transactionTickets.return_on_ticket_id),
         gt(transactionTickets.timestamp, new Date(new Date().getDate() - 2)),
@@ -235,7 +245,6 @@ export const getTicket = query(v.number(), async (ticketNumber) => {
 
 export const returnItems = form(
   v.object({
-    patientId: v.string(),
     originalTicketId: v.number(),
     items: v.array(
       v.object({
@@ -247,6 +256,15 @@ export const returnItems = form(
     ),
   }),
   async (data, issue) => {
+    const currentUser = getRequestEvent().locals.user;
+
+    const [originalTicket] = await db
+      .select()
+      .from(transactionTickets)
+      .where(eq(transactionTickets.id, data.originalTicketId));
+
+    if (!originalTicket) invalid(issue("رقم التذكرة غير صحيح"));
+
     const returnedItems = data.items.filter((item) => item.returnedAmount > 0);
 
     if (!returnedItems.length) invalid(issue("لم تقم بكتابة أي كميات للارتجاع"));
@@ -257,10 +275,10 @@ export const returnItems = form(
           .insert(transactionTickets)
           .values({
             is_dispense: false,
-            store_id: getRequestEvent().locals.user?.affiliation!,
-            user_id: getRequestEvent().locals.user?.id!,
-            patient_id: data.patientId,
-            return_on_ticket_id: data.originalTicketId,
+            store_id: originalTicket.store_id,
+            user_id: currentUser?.id!,
+            patient_id: originalTicket.patient_id,
+            return_on_ticket_id: originalTicket.id,
           })
           .returning();
 
