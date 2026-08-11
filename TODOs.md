@@ -9,7 +9,7 @@
     - [ ] Add entry to `status` table with latest synced id.
     - [ ] Add sql execution logic to sync functions.
   - [ ] On login, after all fetches and writes to local DB, upload all un uploaded narcotic tickets.
-    - [ ] Add a screen to manually upload narcotic tickets.
+    - [x] Add a screen to manually upload narcotic tickets.
 
 ## Schema
 

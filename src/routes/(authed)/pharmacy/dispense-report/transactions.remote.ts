@@ -1,8 +1,16 @@
-import { getRequestEvent, query } from "$app/server";
+import { form, getRequestEvent, query } from "$app/server";
 import { PUBLIC_store_id } from "$env/static/public";
 import { db } from "$lib/server/db";
-import { drugs, transactions, transactionTickets } from "$lib/server/db/schema";
-import { and, eq, gte, isNotNull, lte, sum } from "drizzle-orm";
+import {
+  drugs,
+  patientAdmissions,
+  transactions,
+  transactionTickets,
+  unsyncedNarcotics,
+} from "$lib/server/db/schema";
+import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
+import { invalid } from "@sveltejs/kit";
+import { and, eq, getTableColumns, gte, isNotNull, lte, sum } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getDrugsTransactionAmountTotals = query(
@@ -35,5 +43,41 @@ export const getDrugsTransactionAmountTotals = query(
       .orderBy(drugs.category);
 
     return totals;
+  }
+);
+
+export const getNotUploadedNarcoticTickets = query(async () => {
+  return await db
+    .select({
+      ...getTableColumns(unsyncedNarcotics),
+      patient_name: patientAdmissions.name,
+    })
+    .from(unsyncedNarcotics)
+    .leftJoin(patientAdmissions, eq(unsyncedNarcotics.patient_id, patientAdmissions.id));
+});
+
+export const retryNarcoticUpload = form(
+  v.object({ id: v.number() }),
+  async (data, issue) => {
+    const [item] = await db
+      .select()
+      .from(unsyncedNarcotics)
+      .where(eq(unsyncedNarcotics.id, data.id));
+
+    if (!item) invalid(issue("تذكرة غير موجودة أو تم رفعها بالفعل"));
+
+    const appendResult = await saveNarcoticTicketToGoogleSheet(item.id, [
+      item.ticket_timestamp,
+      item.patient_id,
+      null,
+      item.item_name,
+      -item.qty,
+    ]);
+
+    if (!appendResult) invalid(issue("خطأ في رفع التذكرة"));
+
+    await db.delete(unsyncedNarcotics).where(eq(unsyncedNarcotics.id, data.id));
+
+    return { success: true };
   }
 );
