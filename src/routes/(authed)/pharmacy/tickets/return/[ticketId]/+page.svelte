@@ -106,7 +106,7 @@
   {#if canReturn && items.some((item) => -item.qty! - (item.qty_returned ?? 0) > 0)}
     <button type="submit" class="btn" disabled={saving}>حفظ المرتجع</button>
   {:else}
-    <span class="no-return">(التذكرة غير قابلة للارتجاع)</span>
+    <span class="no-return spanned">(التذكرة غير قابلة للارتجاع)</span>
   {/if}
 </form>
 
@@ -144,5 +144,11 @@
 
   .no-return {
     color: salmon;
+
+    &.spanned {
+      display: inline-block;
+      inline-size: 100%;
+      text-align: center;
+    }
   }
 </style>
