@@ -17,7 +17,7 @@
   <div class="ticket-data">
     <h3>
       {ticket?.patient_name} ({ticket?.patient_id})
-      {#if canReturn}
+      {#if canReturn && items.some((item) => -item.qty! - (item.qty_returned ?? 0) > 0)}
         <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
       {/if}
       <span class="ticket-numbers">
