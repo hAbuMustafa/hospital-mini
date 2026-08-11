@@ -17,6 +17,9 @@
   <div class="ticket-data">
     <h3>
       {ticket?.patient_name} ({ticket?.patient_id})
+      {#if canReturn}
+        <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
+      {/if}
       <span class="ticket-numbers">
         <span class="ticket-time">
           {dateOnly
@@ -25,10 +28,6 @@
         </span>
         <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
       </span>
-
-      {#if canReturn}
-        <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
-      {/if}
     </h3>
   </div>
 
@@ -54,7 +53,21 @@
     border-radius: 4px;
 
     &.return {
-      background-color: hsl(from salmon h s 40%);
+      background-color: light-dark(hsl(from salmon h s 80%), hsl(from salmon h s 10%));
+      position: relative;
+
+      &::after {
+        content: "مرتجع";
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-end: 95%;
+        padding: 0.25rem 0.5rem;
+        background-color: orange;
+        color: var(--main-bg-dark);
+        font-weight: bolder;
+        transform: rotate(45deg);
+        border-radius: 4px;
+      }
     }
 
     h3 {
