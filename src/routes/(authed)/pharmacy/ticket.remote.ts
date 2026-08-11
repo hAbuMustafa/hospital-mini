@@ -14,6 +14,7 @@ import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
 import { invalid } from "@sveltejs/kit";
 import { and, desc, eq, gte, isNotNull, gt, lte, isNull, sql } from "drizzle-orm";
 import * as v from "valibot";
+import { isReturnable } from "./utils";
 
 export const getPatient = query(v.string(), async (patientId) => {
   const [patient] = await db
@@ -256,14 +257,17 @@ export const returnItems = form(
     ),
   }),
   async (data, issue) => {
-    const currentUser = getRequestEvent().locals.user;
-
     const [originalTicket] = await db
       .select()
       .from(transactionTickets)
       .where(eq(transactionTickets.id, data.originalTicketId));
 
-    if (!originalTicket) invalid(issue("رقم التذكرة غير صحيح"));
+    if (!originalTicket) return invalid(issue("رقم التذكرة غير صحيح"));
+
+    if (!isReturnable(originalTicket.timestamp!))
+      return invalid(issue("التذكرة غير قابلة للارتجاع"));
+
+    const currentUser = getRequestEvent().locals.user;
 
     const returnedItems = data.items.filter((item) => item.returnedAmount > 0);
 
