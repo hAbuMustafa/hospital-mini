@@ -1,4 +1,5 @@
 import { getRequestEvent, query } from "$app/server";
+import { PUBLIC_store_id } from "$env/static/public";
 import { db } from "$lib/server/db";
 import { drugs, transactions, transactionTickets } from "$lib/server/db/schema";
 import { and, eq, gte, isNotNull, lte, sum } from "drizzle-orm";
@@ -25,7 +26,7 @@ export const getDrugsTransactionAmountTotals = query(
         and(
           currentUser?.role === "admin"
             ? isNotNull(transactionTickets.store_id)
-            : eq(transactionTickets.store_id, currentUser?.affiliation!),
+            : eq(transactionTickets.store_id, Number(PUBLIC_store_id)),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to)
         )
