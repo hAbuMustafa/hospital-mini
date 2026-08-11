@@ -2,14 +2,26 @@
   import { page } from "$app/state";
   import { toast } from "svelte-sonner";
   import { getTicket, returnItems } from "../../../ticket.remote";
+  import { isReturnable } from "../../../utils";
+  import { formatDate } from "$lib/date/utils";
 
   const ticketId = Number(page.params.ticketId);
   const ticketItems = getTicket(ticketId);
 
   let items = $derived(await ticketItems);
 
+  const canReturn = $derived(isReturnable(items[0].timestamp!));
+
   let saving = $state(false);
 </script>
+
+<h1>
+  ارتجاع
+  <small class="ticket-number">
+    (#{items[0].ticket_id})
+  </small>: {items[0].patient_name ?? items[0].patient_id}
+</h1>
+<h2>{formatDate(items[0].timestamp!, "YYYY/MM/DD (HH:mm)")}</h2>
 
 <form
   {...returnItems.enhance(async (form) => {
@@ -69,7 +81,7 @@
           )}
           value={item.transaction_id}
         />
-        {#if remaining > 0}
+        {#if canReturn && remaining > 0}
           <input
             {...returnItems.fields.items[i].returnedAmount.as("number")}
             min="0"
@@ -77,16 +89,38 @@
             value="0"
           />
           <small>(متبقي {remaining} من {-item.qty!})</small>
-        {:else}
+        {:else if canReturn && remaining === 0}
           <span class="no-return">(صرف {-item.qty!} وتم ارتجاع الكمية كاملة)</span>
+        {:else if !canReturn}
+          <span>({-item.qty!})</span>
+          {#if -item.qty! !== remaining}
+            <span>(المتبقي على التذكرة {-item.qty!})</span>
+          {/if}
         {/if}
       </li>
     {/each}
   </ul>
-  <button type="submit" class="btn" disabled={saving}>حفظ المرتجع</button>
+  {#if canReturn}
+    <button type="submit" class="btn" disabled={saving}>حفظ المرتجع</button>
+  {:else}
+    <span class="no-return">(التذكرة غير قابلة للارتجاع)</span>
+  {/if}
 </form>
 
 <style>
+  .ticket-number {
+    color: gray;
+    vertical-align: middle;
+  }
+
+  h1 {
+    margin-block-end: 0;
+  }
+
+  h2 {
+    margin-block-start: 0;
+  }
+
   ul {
     list-style: none;
     padding-inline: 0;

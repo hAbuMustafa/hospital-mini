@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatDate } from "$lib/date/utils";
+  import { isReturnable } from "../../routes/(authed)/pharmacy/utils";
 
   type PropsT = {
     items: any[];
@@ -9,10 +10,7 @@
 
   const ticket = $derived(items?.[0]);
   const isReturn = $derived(!ticket?.is_dispense);
-  const canReturn = $derived(
-    !isReturn &&
-      (new Date().getTime() - ticket.timestamp.getTime()) / (60 * 60 * 24 * 1000) < 2
-  );
+  const canReturn = $derived(!isReturn && isReturnable(ticket.timestamp));
 </script>
 
 <div class="ticket" class:return={isReturn}>
