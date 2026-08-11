@@ -54,6 +54,9 @@
             form.result?.error ??
             ""
         );
+        form.fields.allIssues()?.forEach((iss) => {
+          toast.warning(iss.message);
+        });
       }
     } catch (error) {
     } finally {
