@@ -4,13 +4,14 @@ import { db } from "$lib/server/db";
 import {
   drugs,
   patientAdmissions,
+  status,
   transactions,
   transactionTickets,
   unsyncedNarcotics,
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
 import { invalid } from "@sveltejs/kit";
-import { and, eq, getTableColumns, gte, isNotNull, lte, sum } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, isNotNull, lte, sql, sum } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getDrugsTransactionAmountTotals = query(
@@ -77,6 +78,10 @@ export const retryNarcoticUpload = form(
     if (!appendResult) invalid(issue("خطأ في رفع التذكرة"));
 
     await db.delete(unsyncedNarcotics).where(eq(unsyncedNarcotics.id, data.id));
+    await db
+      .update(status)
+      .set({ value: sql`${status.value} + 1` })
+      .where(eq(status.item, "narcotics_dispensed"));
 
     return { success: true };
   }
