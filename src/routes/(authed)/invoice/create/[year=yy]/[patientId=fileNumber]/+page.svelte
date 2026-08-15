@@ -13,7 +13,7 @@
   import debounce from "lodash-es/debounce";
   import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
-  import { narcoticsIds, nonDivisibleBoxes } from "$lib/CONSTANTS";
+  import { isNarcotic, nonDivisibleBoxes } from "$lib/CONSTANTS";
   import { useKeyboardNavigation } from "$lib/attachments";
   import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
 
@@ -201,9 +201,7 @@
 <Combobox
   bind:query={drugQuery}
   filterFn={(d: DrugT) =>
-    d.is_used !== "لاغي" &&
-    !d.is_used?.includes("فواتير") &&
-    narcoticsIds.every((id) => id !== d.id)}
+    d.is_used !== "لاغي" && !d.is_used?.includes("فواتير") && !isNarcotic(d)}
   endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '\\%'))}"
   placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
   className="hide-in-print"
