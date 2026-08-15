@@ -12,6 +12,15 @@
 
   {#if authState.isAuthenticated}
     <ul>
+      <Filter>
+        <button popovertarget="admin-nav-list" interestfor="admin-nav-list"
+          >الإدارة</button
+        >
+        <ul id="admin-nav-list" popover="hint">
+          <li><a href="/admin/users">المستخدمين</a></li>
+        </ul>
+      </Filter>
+
       <Filter allowDepartment={[1, 2, 3, 4]}>
         <li>
           <button popovertarget="patient-nav-list" interestfor="patient-nav-list"
