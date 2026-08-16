@@ -15,6 +15,7 @@
   import { unacceptedAmount } from "$lib/CONSTANTS";
   import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
+  import TopPicks from "$lib/components/Dispense/TopPicks.svelte";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -107,23 +108,27 @@
     </div>
   </div>
 
-  <Combobox
-    bind:query={drugQuery}
-    filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
-    endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '\\%'))}"
-    placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-    className="hide-in-print"
-    onSelect={(drug: DrugT) => selectDrug(drug)}
-  >
-    {#snippet itemSnippet(drug: DrugT)}
-      <SelectItemDrug
-        {drug}
-        query={drugQuery}
-        isSelected={ticketDrugs.findIndex((item) => item.id === drug.id) > -1}
-        onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
-      />
-    {/snippet}
-  </Combobox>
+  <div class="item-controls-wrapper">
+    <Combobox
+      bind:query={drugQuery}
+      filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
+      endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
+      placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+      className="hide-in-print"
+      onSelect={(drug: DrugT) => selectDrug(drug)}
+    >
+      {#snippet itemSnippet(drug: DrugT)}
+        <SelectItemDrug
+          {drug}
+          query={drugQuery}
+          isSelected={ticketDrugs.findIndex((item) => item.id === drug.id) > -1}
+          onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+        />
+      {/snippet}
+    </Combobox>
+
+    <TopPicks onSelect={selectDrug} />
+  </div>
 
   <form
     {...postTicket.enhance(async (form) => {
@@ -351,6 +356,15 @@
   .not-yet-registered {
     text-decoration: line-through;
     color: light-dark(maroon, salmon);
+  }
+
+  .item-controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+
+    margin-block-end: 1rem;
   }
 
   form {
