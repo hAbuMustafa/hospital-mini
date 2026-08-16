@@ -37,3 +37,23 @@ export const changeAffiliation = form(
     }
   }
 );
+
+export const changeRole = form(
+  v.object({
+    userId: v.string(),
+    role: v.string(),
+  }),
+  async (data) => {
+    console.log(data);
+    try {
+      await db.update(user).set({ role: data.role }).where(eq(user.id, data.userId));
+
+      return { success: true };
+    } catch (err) {
+      console.error(err);
+      return {
+        error: err,
+      };
+    }
+  }
+);

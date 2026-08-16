@@ -1,6 +1,11 @@
 <script lang="ts">
   import { toast } from "svelte-sonner";
-  import { changeAffiliation, getDepartments, getUsers } from "../../admin.remote";
+  import {
+    changeAffiliation,
+    changeRole,
+    getDepartments,
+    getUsers,
+  } from "../../admin.remote";
 
   let departments = await getDepartments();
   let usersGetter = getUsers();
@@ -24,8 +29,34 @@
           <td>{user.username}</td>
           <td>{user.name}</td>
           <td>
-            <form>
-              <input />
+            <form
+              {...changeRole.for(user.username!).enhance(async (form) => {
+                const { promise, resolve, reject } = Promise.withResolvers();
+
+                toast.promise(promise, {
+                  success: () => {
+                    usersGetter.refresh();
+
+                    return `تم تغيير صلاحيات ${user.displayUsername}`;
+                  },
+                  error: (err) => (err as unknown as { message: string }).message,
+                  loading: `جار تعديل صلاحيات ل${user.displayUsername}...`,
+                });
+
+                if (await form.submit()) {
+                  resolve(form.result);
+                } else {
+                  reject(form.result?.error);
+                }
+              })}
+            >
+              <input
+                {...changeRole.for(user.username!).fields.userId.as("hidden", user.id!)}
+              />
+              <input
+                dir="ltr"
+                {...changeRole.for(user.username!).fields.role.as("text", user.role!)}
+              />
             </form>
           </td>
           <td>
