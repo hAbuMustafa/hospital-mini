@@ -11,7 +11,7 @@ import {
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
 import { invalid } from "@sveltejs/kit";
-import { and, eq, getTableColumns, gte, isNotNull, lte, sql, sum } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getDrugsTransactionAmountTotals = query(
@@ -41,6 +41,7 @@ export const getDrugsTransactionAmountTotals = query(
         )
       )
       .groupBy(transactions.item_id)
+      .having(ne(sum(transactions.qty), 0))
       .orderBy(drugs.category);
 
     return totals;
