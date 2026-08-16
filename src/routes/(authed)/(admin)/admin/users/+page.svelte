@@ -30,31 +30,38 @@
           </td>
           <td>
             {#if user.role !== "admin"}
-              <form
-                {...changeAffiliation.for(user.username!).enhance(async (form) => {
-                  const { promise, resolve, reject } = Promise.withResolvers();
-
-                  toast.promise(promise, {
-                    success: () => {
-                      usersGetter.refresh();
-
-                      return `تم تغيير الجهة`;
-                    },
-                    error: (err) => (err as unknown as { message: string }).message,
-                    loading: "جار تعديل جهة العمل للمستخدم...",
-                  });
-
-                  if (await form.submit()) {
-                    resolve(form.result);
-                  } else {
-                    reject(form.result?.error);
-                  }
-                })}
-              >
+              <form {...changeAffiliation.for(user.username!)}>
+                <input
+                  {...changeAffiliation
+                    .for(user.username!)
+                    .fields.userId.as("hidden", user.id)}
+                />
                 <select
                   {...changeAffiliation
                     .for(user.username!)
-                    .fields.departmentId.as("select", user.affiliation!)}
+                    .fields.departmentId.as("select")}
+                  value={user.affiliation}
+                  onchange={async () => {
+                    const form = changeAffiliation.for(user.username!);
+
+                    const { promise, resolve, reject } = Promise.withResolvers();
+
+                    toast.promise(promise, {
+                      success: () => {
+                        usersGetter.refresh();
+
+                        return `تم تغيير جهة عمل ${user.displayUsername}`;
+                      },
+                      error: (err) => (err as unknown as { message: string }).message,
+                      loading: `جار تعديل جهة العمل ل${user.displayUsername}...`,
+                    });
+
+                    if (await form.submit()) {
+                      resolve(form.result);
+                    } else {
+                      reject(form.result?.error);
+                    }
+                  }}
                 >
                   {#each departments as dep, j (j)}
                     <option value={dep.id}>{dep.name}</option>
