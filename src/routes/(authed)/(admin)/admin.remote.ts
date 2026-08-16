@@ -44,7 +44,6 @@ export const changeRole = form(
     role: v.string(),
   }),
   async (data) => {
-    console.log(data);
     try {
       await db.update(user).set({ role: data.role }).where(eq(user.id, data.userId));
 
