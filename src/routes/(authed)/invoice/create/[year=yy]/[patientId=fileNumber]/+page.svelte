@@ -198,24 +198,26 @@
   </h2>
 </header>
 
-<Combobox
-  bind:query={drugQuery}
-  filterFn={(d: DrugT) =>
-    d.is_used !== "لاغي" && !d.is_used?.includes("فواتير") && !isNarcotic(d)}
-  endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '\\%'))}"
-  placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-  className="hide-in-print"
-  onSelect={(drug: InvoiceSelectedDrugT) => selectDrug(drug)}
->
-  {#snippet itemSnippet(drug: DrugT)}
-    <SelectItemDrug
-      {drug}
-      query={drugQuery}
-      isSelected={selectedDrugs.findIndex((item) => item.id === drug.id) > -1}
-      onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
-    />
-  {/snippet}
-</Combobox>
+<div class="item-select-wrapper hide-in-print">
+  <Combobox
+    bind:query={drugQuery}
+    filterFn={(d: DrugT) =>
+      d.is_used !== "لاغي" && !d.is_used?.includes("فواتير") && !isNarcotic(d)}
+    endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
+    placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+    className="hide-in-print"
+    onSelect={(drug: InvoiceSelectedDrugT) => selectDrug(drug)}
+  >
+    {#snippet itemSnippet(drug: DrugT)}
+      <SelectItemDrug
+        {drug}
+        query={drugQuery}
+        isSelected={selectedDrugs.findIndex((item) => item.id === drug.id) > -1}
+        onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+      />
+    {/snippet}
+  </Combobox>
+</div>
 
 <table class="invoice-items">
   <colgroup>
@@ -411,6 +413,14 @@
         }
       }
     }
+  }
+
+  h2 {
+    margin-block-end: 0.5rem;
+  }
+
+  .item-select-wrapper {
+    margin-block-end: 1rem;
   }
 
   table.invoice-items {
