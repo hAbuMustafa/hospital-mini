@@ -70,4 +70,9 @@
 {/if}
 
 <style>
+  th,
+  td {
+    padding: 0.25rem 0.5rem;
+    border: var(--main-border);
+  }
 </style>
