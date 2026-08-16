@@ -51,14 +51,25 @@
 
 <style>
   .totals {
-    width: 80vw;
     list-style: none;
-    margin: 0;
+    margin-block: 0;
+    margin-inline: 25vw;
     padding: 1rem 0;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
     align-items: start;
+  }
+
+  li {
+    display: flex;
+    gap: 1rem;
+    padding-block: 0.35rem;
+    align-items: center;
+    width: 100%;
+
+    &:not(:first-of-type) {
+      border-block-start: 1px dashed var(--main-text-color);
+    }
   }
 
   .item-qty {
