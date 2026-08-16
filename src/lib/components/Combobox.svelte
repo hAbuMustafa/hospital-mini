@@ -76,7 +76,6 @@
       font-size: 2rem;
       text-align: center;
       anchor-name: --drug-lookup-input;
-      margin-block-end: 2rem;
 
       &::placeholder {
         font-size: 1rem;
