@@ -19,8 +19,9 @@
       to.getMinutes() === 59
   );
 
-  // svelte-ignore state_referenced_locally
-  const totals = await getDrugsTransactionAmountTotals({ from, to });
+  const totalsGetter = getDrugsTransactionAmountTotals({ from, to });
+
+  let totals = await totalsGetter;
 
   let useTradeName = $state(false);
 </script>
