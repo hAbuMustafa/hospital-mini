@@ -12,16 +12,21 @@ export const getUsers = query(async () => {
   return await db.select().from(user);
 });
 
+const departmentsIds = await db
+  .select()
+  .from(departments)
+  .then((deps) => deps.map((dep) => String(dep.id)));
+
 export const changeAffiliation = form(
   v.object({
     userId: v.string(),
-    departmentId: v.number(),
+    departmentId: v.picklist(departmentsIds),
   }),
   async (data) => {
     try {
       await db
         .update(user)
-        .set({ affiliation: data.departmentId })
+        .set({ affiliation: Number(data.departmentId) })
         .where(eq(user.id, data.userId));
       return { success: true };
     } catch (err) {
