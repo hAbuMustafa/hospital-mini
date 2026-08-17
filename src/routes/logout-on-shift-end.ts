@@ -4,6 +4,8 @@ import { authState } from "$lib/auth-client/auth.svelte";
 import { toast } from "svelte-sonner";
 
 export function signOutOnShiftEnd() {
+  if (authState.user?.role === "admin") return;
+
   if (browser) {
     const sessionEndTimes = [8, 14, 20];
     const thePreviousHours = sessionEndTimes.map((h) => h - 1);

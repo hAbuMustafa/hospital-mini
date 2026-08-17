@@ -39,7 +39,7 @@
 - [ ] add Have I Been Pwned support (from Better Auth).
 - [ ] add TOTP support to restore account (Better Auth).
 - [ ] localize Better Auth Errors ([reference](https://better-auth.com/docs/plugins/i18n)).
-- [ ] Do not auto sign-out yourself.
+- [x] Do not auto sign-out yourself.
 
 ## Quirks
 

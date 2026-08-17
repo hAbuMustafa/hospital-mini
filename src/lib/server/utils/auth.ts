@@ -59,6 +59,8 @@ export const auth = betterAuth({
       adminRole: "admin",
     }),
     customSession(async ({ session, user }) => {
+      if (getRequestEvent().locals.user?.role === "admin") return { user, session };
+
       const nextEndTimestamp = getNextExpiration();
       return {
         user,
@@ -91,6 +93,8 @@ export const auth = betterAuth({
     session: {
       create: {
         before: async (session) => {
+          if (getRequestEvent().locals.user?.role === "admin") return { data: session };
+
           const nextEndTimestamp = getNextExpiration();
           return {
             data: {
@@ -102,6 +106,8 @@ export const auth = betterAuth({
       },
       update: {
         before: async (session) => {
+          if (getRequestEvent().locals.user?.role === "admin") return { data: session };
+
           const nextEndTimestamp = getNextExpiration();
           return {
             data: {

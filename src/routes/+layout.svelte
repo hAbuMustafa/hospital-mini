@@ -10,9 +10,10 @@
   $effect(() => {
     const signOutInterval = signOutOnShiftEnd();
 
-    return () => {
-      window.clearInterval(signOutInterval);
-    };
+    if (signOutInterval)
+      return () => {
+        window.clearInterval(signOutInterval);
+      };
   });
 </script>
 
