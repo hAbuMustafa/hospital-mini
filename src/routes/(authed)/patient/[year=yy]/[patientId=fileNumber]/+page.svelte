@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import Timeline from "$lib/components/Timeline/Timeline.svelte";
-  import { formatDate, getDuration, getTermed } from "$lib/date/utils";
+  import { formatDate, getDuration, getTermed, getAge } from "$lib/date/utils";
   import { countryMap, getFlagEmoji } from "$lib/utils/countries";
   import {
     getOtherAdmissions,
@@ -18,14 +18,25 @@
     : [];
 </script>
 
-<h1>
-  {patient.name}
-  {#if patient.nationality !== "EG"}<span
-      class="nationality flag"
-      title={countryMap.get(patient.nationality)}
-    >
+<h1 class:insured={patient.insured}>
+  {#if typeof patient.gender === "boolean"}
+    <span class="patient_gender">
+      {patient.gender !== false ? "♂️" : "♀️"}
+    </span>
+  {/if}
+  <span class="patient_name">
+    {patient.name}
+  </span>
+  {#if patient.birthdate}
+    <span class="patient_age">
+      ({patient.birthdate ? getTermed(getAge(patient.birthdate), "عام", "أعوام") : ""})
+    </span>
+  {/if}
+  {#if patient.nationality !== "EG"}
+    <span class="patient_nationality flag" title={countryMap.get(patient.nationality)}>
       {getFlagEmoji(patient.nationality)}
-    </span>{/if}
+    </span>
+  {/if}
 </h1>
 <table class="patient-data">
   <tbody>
@@ -133,6 +144,26 @@
 {/if}
 
 <style>
+  h1 {
+    position: relative;
+    margin-block-start: 0;
+
+    &.insured::after {
+      content: "مؤمن عليه";
+      font-size: 1rem;
+      position: absolute;
+      inset-inline-start: 100%;
+      inset-block-start: 0;
+      rotate: -45deg;
+      white-space: nowrap;
+
+      background-color: orange;
+      color: contrast-color(orange);
+      border-radius: 4px;
+      padding: 0.25rem 0.2rem;
+    }
+  }
+
   table.patient-data {
     th {
       text-align: end;

@@ -16,6 +16,7 @@
   import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
   import TopPicks from "$lib/components/Dispense/TopPicks.svelte";
+  import { countryMap, getFlagEmoji } from "$lib/utils/countries";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -82,6 +83,14 @@
             ({patient.birthdate
               ? getTermed(getAge(patient.birthdate), "عام", "أعوام")
               : ""})
+          </span>
+        {/if}
+        {#if patient.nationality !== "EG"}
+          <span
+            class="patient_nationality flag"
+            title={countryMap.get(patient.nationality)}
+          >
+            {getFlagEmoji(patient.nationality)}
           </span>
         {/if}
       {:else}
