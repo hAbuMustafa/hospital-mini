@@ -3,6 +3,7 @@
 
   type PropsT = {
     eventTitle: string;
+    eventSubtitle?: string | null;
     eventTime: Date;
 
     direction: boolean;
@@ -16,6 +17,7 @@
 
   let {
     eventTitle,
+    eventSubtitle,
     eventTime,
     direction = true,
     isEndEvent = false,
@@ -28,8 +30,12 @@
   <span
     class="event-title"
     title={duration ? `المدة ${getTermed(duration, "يوم", "أيام")}` : null}
-    >{eventTitle}</span
   >
+    {eventTitle}
+    {#if eventSubtitle}
+      <span class="event-subtitle">({eventSubtitle})</span>
+    {/if}
+  </span>
   <span class="dot" class:end={isEndEvent}></span>
   <small class="event-time">{dateTimeFormatter?.(eventTime) ?? eventTime}</small>
 </div>

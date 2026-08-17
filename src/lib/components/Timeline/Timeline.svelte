@@ -11,6 +11,7 @@
     eventTitle_name: string;
     eventTime_name: string;
     endEvent_label?: string;
+    endEvent_subtitle?: string | null;
     endEvent_time?: Date | null;
 
     alternate?: boolean;
@@ -26,6 +27,7 @@
     eventTime_name,
     endEvent_time,
     endEvent_label,
+    endEvent_subtitle,
     alternate = true,
     dateTimeFormatter,
     unifiedSeparators = $bindable(true),
@@ -77,6 +79,7 @@
     {#if endEvent_time}
       <Event
         eventTitle={endEvent_label ?? events.at(-1)[eventTitle_name]}
+        eventSubtitle={endEvent_subtitle}
         eventTime={endEvent_time}
         direction={alternate ? events.length % 2 === 1 : false}
         isEndEvent={true}

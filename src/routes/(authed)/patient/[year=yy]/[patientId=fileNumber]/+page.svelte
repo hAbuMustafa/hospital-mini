@@ -97,6 +97,7 @@
       formatDate(dt, "YYYY/MM/DD (hh:mm A)").replace("AM", "ص").replace("PM", "م")}
     endEvent_label="خروج"
     endEvent_time={patient.discharge_date}
+    endEvent_subtitle={patient.discharge_reason}
   />
 {:else}
   <h2>التحويلات الداخلية</h2>
