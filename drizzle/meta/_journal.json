@@ -134,6 +134,13 @@
       "when": 1786270416131,
       "tag": "0018_military_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1786927305406,
+      "tag": "0019_ordinary_black_panther",
+      "breakpoints": true
     }
   ]
 }

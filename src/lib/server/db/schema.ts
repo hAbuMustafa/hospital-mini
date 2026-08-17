@@ -88,7 +88,7 @@ export const transactions = sqliteTable("transactions", {
   qty: int().notNull(),
   qty_returned: int(),
   unit_price: numeric({ mode: "number" }).notNull(),
-  ticket_id: int().references(() => transactionTickets.id),
+  ticket_id: int().references(() => transactionTickets.id, { onDelete: "cascade" }),
 });
 
 export const unsyncedNarcotics = sqliteTable("unsyncedNarcotics", {
