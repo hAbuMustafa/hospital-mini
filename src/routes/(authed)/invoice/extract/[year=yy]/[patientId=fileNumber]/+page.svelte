@@ -13,6 +13,11 @@
   import { useKeyboardNavigation } from "$lib/attachments";
   import { getDispenses, getPatient } from "./invoice.remote";
   import { page } from "$app/state";
+  import { goto } from "$app/navigation";
+  import { encodeObjectToUrl } from "../../../encoding";
+  import { PUBLIC_System_Started_Since } from "$env/static/public";
+  import { browser } from "$app/env";
+  import { isNarcotic } from "$lib/CONSTANTS";
 
   const today = getToday();
   setToEndOfDay(today);
@@ -164,8 +169,25 @@
       </tbody>
     </table>
   </div>
+
+  {#if new Date(PUBLIC_System_Started_Since) > fromDate}
+    <div class="warning hide-in-print">
+      {periodSameAsStay ? "المريض دخل" : "فترة التسعير تبدأ"} في فترة تسبق بداية تشغيل المنظومة،
+      برجاء استخراج فاتورة يدوية
+    </div>
+  {/if}
+
   <h2>
     سداد فاتورة {#if isCashPricing}نقدي{/if}
+    <button
+      class="btn hide-in-print"
+      onclick={() => {
+        if (browser)
+          goto(
+            `/invoice/create/${patient.id}?items=${encodeObjectToUrl(invoiceDrugs.filter((item) => !isNarcotic(item as { category: string })))}`
+          );
+      }}>استخراج فاتورة يدوية</button
+    >
   </h2>
 </header>
 
@@ -473,5 +495,15 @@
         vertical-align: top;
       }
     }
+  }
+
+  .warning {
+    background-color: light-dark(maroon, salmon);
+    border: 1px solid light-dark(red, maroon);
+    color: var(--main-bg-color);
+    text-align: center;
+    border-radius: 8px;
+    margin: 1rem 0;
+    padding: 0.5rem;
   }
 </style>

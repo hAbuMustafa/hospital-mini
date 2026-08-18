@@ -16,6 +16,9 @@
   import { isNarcotic, nonDivisibleBoxes } from "$lib/CONSTANTS";
   import { useKeyboardNavigation } from "$lib/attachments";
   import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
+  import { page } from "$app/state";
+  import { decodeObjectFromUrl } from "../../../encoding";
+  import { onMount } from "svelte";
 
   const today = getToday();
   setToEndOfDay(today);
@@ -56,7 +59,7 @@
         if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
 
         staleData = (await fetch(
-          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString)}`
+          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString ? toDateString : new Date())}`
         ).then((d) => d.json())) as StaleData;
 
         if (staleData.narcotics.length) {
@@ -93,7 +96,7 @@
       return;
     }
 
-    item.amount = 1;
+    if (!item.amount) item.amount = 1;
     item.total = () =>
       item.amount *
       (isCashPricing && item.editable ? item.cashPrice : (item.price_resale ?? 0));
@@ -101,6 +104,29 @@
     item.cashPrice = 0;
     selectedDrugs.push(item);
   }
+
+  onMount(() => {
+    const encodedItems = page.url.searchParams.get("items");
+
+    // fix: why these items are not reactive when cashPrice or amount change?
+    let handedOverDrugs: InvoiceSelectedDrugT[];
+
+    if (encodedItems) {
+      const decodedItems = decodeObjectFromUrl(encodedItems);
+
+      if (Array.isArray(decodedItems)) {
+        handedOverDrugs = decodedItems;
+      } else {
+        handedOverDrugs = [];
+      }
+    } else {
+      handedOverDrugs = [];
+    }
+
+    for (const d of handedOverDrugs) {
+      selectDrug(d);
+    }
+  });
 
   let drugQuery = $state("");
 
