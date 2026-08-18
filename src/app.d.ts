@@ -30,12 +30,14 @@ declare global {
     editable: boolean;
   };
 
-  type InvoiceNarcoticDrugT = DrugT & {
+  type InvoiceDrugT = DrugT & {
     amount: number;
     cashPrice?: number;
     total: number;
     editable?: boolean;
   };
+
+  type InvoiceNarcoticDrugT = InvoiceDrugT;
 }
 
 export {};
