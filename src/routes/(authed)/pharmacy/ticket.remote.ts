@@ -60,6 +60,7 @@ export const getItemLastDispensed = query(
 );
 
 export const postTicket = form(
+  // fix: why narcotics are added to both narcoticsDispensed table and transactions table
   v.object({
     patientId: v.pipe(v.string(), v.nonEmpty()),
     drugs: v.array(
