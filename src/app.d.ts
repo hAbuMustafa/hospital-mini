@@ -32,7 +32,7 @@ declare global {
 
   type InvoiceNarcoticDrugT = DrugT & {
     amount: number;
-    cashPrice: number;
+    cashPrice?: number;
     total: number;
     editable?: boolean;
   };
