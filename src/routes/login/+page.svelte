@@ -10,6 +10,18 @@
   } from "$lib/utils/patterns";
 
   let error = $state("");
+
+  let identifier = $state("");
+
+  let validators = $derived.by(() => {
+    if (usernamePattern.test(identifier)) {
+      return { type: "text", pattern: usernamePattern.source };
+    } else if (emailPattern.test(identifier)) {
+      return { type: "email" };
+    } else {
+      return { type: "text", pattern: egyptianPhoneNumber.source };
+    }
+  });
 </script>
 
 <h1>تسجيل الدخول</h1>
@@ -29,13 +41,13 @@
 >
   <label for="identifier">معرف الدخول</label>
   <input
-    type="text"
     id="identifier"
     name="identifier"
+    bind:value={identifier}
     dir="auto"
-    pattern="({usernamePattern.source})|({emailPattern.source})({egyptianPhoneNumber.source})"
     placeholder="بريد إلكتروني / اسم مستخدم / موبايل"
     required
+    {...validators}
   />
 
   <label for="password">كلمة المرور</label>
