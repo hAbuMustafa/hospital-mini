@@ -41,7 +41,7 @@
             <td>{dispense.patient_id}</td>
             <td>{dispense.patient_name}</td>
             <td>{dispense.item_name}</td>
-            <td>{-dispense.qty}</td>
+            <td>{dispense.qty}</td>
             <td>
               <form
                 {...retryNarcoticUpload.enhance(async (form) => {

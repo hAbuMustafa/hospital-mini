@@ -17,14 +17,14 @@
   <div class="ticket-data">
     <h3>
       {ticket?.patient_name} ({ticket?.patient_id})
-      {#if canReturn && items.some((item) => -item.qty! - (item.qty_returned ?? 0) > 0)}
+      {#if canReturn && items.some((item) => item.qty - (item.qty_returned ?? 0) > 0)}
         <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
       {/if}
       <span class="ticket-numbers">
         <span class="ticket-time">
           {dateOnly
-            ? formatDate(ticket?.timestamp!, "HH:mm")
-            : formatDate(ticket?.timestamp!, "YYYY/MM/DD (HH:mm)")}
+            ? formatDate(ticket?.timestamp, "HH:mm")
+            : formatDate(ticket?.timestamp, "YYYY/MM/DD (HH:mm)")}
         </span>
         <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
       </span>
@@ -34,7 +34,7 @@
   <ul class="items">
     {#each items as item, j (item.item_id)}
       <li>
-        <span class="item-qty">{Math.abs(item.qty!)}</span>
+        <span class="item-qty">{item.qty}</span>
         <span class="item-name" title={item.item_tradename}>{item.item_name}</span>
         {#if item.qty_returned}
           <span class="returned">(تم ارتجاع {item.qty_returned})</span>

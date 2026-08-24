@@ -10,6 +10,7 @@ import {
   unsyncedNarcotics,
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
+import { totalAndAmount } from "$lib/utils/query";
 import { invalid } from "@sveltejs/kit";
 import { and, eq, getTableColumns, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import * as v from "valibot";
@@ -26,7 +27,7 @@ export const getDrugsTransactionAmountTotals = query(
       .select({
         item_name: drugs.name_ar,
         item_tradename: drugs.tradename_ar,
-        amount: sum(transactions.qty),
+        ...totalAndAmount(false),
       })
       .from(transactions)
       .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
@@ -41,7 +42,7 @@ export const getDrugsTransactionAmountTotals = query(
         )
       )
       .groupBy(transactions.item_id)
-      .having(ne(sum(transactions.qty), 0))
+      .having((thisTable) => ne(thisTable.amount, 0))
       .orderBy(drugs.category);
 
     return totals;
@@ -73,7 +74,7 @@ export const retryNarcoticUpload = form(
       item.patient_id,
       null,
       item.item_name,
-      -item.qty,
+      item.qty,
     ]);
 
     if (!appendResult) invalid(issue("خطأ في رفع التذكرة"));

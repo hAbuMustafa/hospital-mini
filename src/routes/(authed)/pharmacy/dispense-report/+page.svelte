@@ -44,7 +44,7 @@
 <ul class="totals">
   {#each totals as item, i (i)}
     <li title={useTradeName ? item.item_name : item.item_tradename}>
-      <span class="item-qty">{-item.amount!}</span>
+      <span class="item-qty">{item.amount}</span>
       <span class="item-name">{useTradeName ? item.item_tradename : item.item_name}</span>
     </li>
   {/each}

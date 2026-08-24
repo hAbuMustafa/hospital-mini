@@ -246,7 +246,7 @@
                     commandfor="item-{drug.id}-dialog"
                   >
                     <span class="old-amount">
-                      {-drug.lastDispensed[0].qty!}
+                      {drug.lastDispensed[0].qty}
                     </span>
                     {drug.unit}
                     <span
@@ -266,7 +266,7 @@
                     <ul>
                       {#each drug.lastDispensed as dispense, dd (dispense.ticketId)}
                         <li>
-                          <span class="old-amount">{-dispense.qty!}</span>
+                          <span class="old-amount">{dispense.qty}</span>
                           <span class="old-amount-time"
                             >{formatDate(dispense.timestamp!, "YYYY/MM/DD hh:mm:ss A")
                               .replace("AM", "ص")

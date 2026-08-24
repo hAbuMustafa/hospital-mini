@@ -8,6 +8,7 @@ import {
   transactions,
   transactionTickets,
 } from "$lib/server/db/schema";
+import { totalAndAmount } from "$lib/utils/query";
 import { and, desc, eq, getTableColumns, gt, gte, lte, sql, sum } from "drizzle-orm";
 import * as v from "valibot";
 
@@ -68,10 +69,7 @@ export const getDispenses = query(
       const dispenses = await db
         .select({
           ...getTableColumns(drugs),
-          amount: sql<number>`${sum(transactions.qty)} * -1`,
-          total: sql<number>`${sum(transactions.qty)} * ${drugs.price_resale} * -1`.as(
-            "total"
-          ),
+          ...totalAndAmount(),
         })
         .from(transactions)
         .innerJoin(drugs, eq(transactions.item_id, drugs.id))

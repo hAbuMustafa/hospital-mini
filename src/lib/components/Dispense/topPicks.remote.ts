@@ -1,7 +1,7 @@
 import { query } from "$app/server";
 import { db } from "$lib/server/db";
 import { drugs, transactions, transactionTickets } from "$lib/server/db/schema";
-import { and, between, count, desc, eq, lt } from "drizzle-orm";
+import { and, between, count, desc, eq, gt } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getTopPicks = query(v.number(), async (n) => {
@@ -17,7 +17,7 @@ export const getTopPicks = query(v.number(), async (n) => {
       .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
       .where(
         and(
-          lt(transactions.qty, 0),
+          gt(transactions.qty, 0),
           between(transactionTickets.timestamp, sevenDaysAgo, now)
         )
       )

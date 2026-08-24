@@ -112,9 +112,7 @@ export const postTicket = form(
 
         const ticketItems = await tx
           .insert(transactions)
-          .values(
-            data.drugs.map((d) => ({ ...d, qty: d.qty * -1, ticket_id: ticket.id }))
-          )
+          .values(data.drugs.map((d) => ({ ...d, ticket_id: ticket.id })))
           .returning();
 
         return { ticket, ticketItems };
