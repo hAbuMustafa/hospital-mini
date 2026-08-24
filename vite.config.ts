@@ -4,10 +4,6 @@ import { sveltekit } from "@sveltejs/kit/vite";
 
 export default defineConfig({
   plugins: [sveltekit()],
-  server: {
-    host: "july23rdhospital.local",
-    allowedHosts: ["july23rdhospital.local"],
-  },
   test: {
     expect: { requireAssertions: true },
     projects: [
