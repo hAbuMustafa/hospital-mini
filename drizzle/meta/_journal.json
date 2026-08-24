@@ -141,6 +141,13 @@
       "when": 1786927305406,
       "tag": "0019_ordinary_black_panther",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1787562998963,
+      "tag": "0020_handy_shape",
+      "breakpoints": true
     }
   ]
 }

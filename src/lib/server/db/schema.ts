@@ -73,7 +73,9 @@ export const stores = sqliteTable("stores", {
 
 export const transactionTickets = sqliteTable("transactionTickets", {
   id: int().primaryKey({ autoIncrement: true }),
-  timestamp: int({ mode: "timestamp" }).$defaultFn(() => new Date()),
+  timestamp: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
   store_id: int().notNull(),
   user_id: text().notNull(),
   patient_id: text(),
