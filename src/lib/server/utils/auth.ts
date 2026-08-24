@@ -6,7 +6,6 @@ import { PUBLIC_ORIGIN, PUBLIC_ORIGIN_PROD } from "$env/static/public";
 import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
 import { BETTER_AUTH_SECRET } from "$env/static/private";
-import { dev } from "$app/environment";
 import { egyptianPhoneNumber } from "$lib/utils/patterns";
 import { otp } from "../db/schema";
 
@@ -34,7 +33,6 @@ function getNextExpiration() {
 }
 
 export const auth = betterAuth({
-  baseURL: dev ? PUBLIC_ORIGIN : PUBLIC_ORIGIN_PROD,
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
@@ -87,7 +85,7 @@ export const auth = betterAuth({
     }),
     sveltekitCookies(getRequestEvent),
   ],
-  trustedOrigins: [PUBLIC_ORIGIN, PUBLIC_ORIGIN_PROD],
+  trustedOrigins: [PUBLIC_ORIGIN, PUBLIC_ORIGIN_PROD, "192.168.*.*"],
   secret: BETTER_AUTH_SECRET,
   databaseHooks: {
     session: {

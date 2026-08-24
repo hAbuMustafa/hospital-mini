@@ -1,3 +1,4 @@
+import { browser } from "$app/env";
 import { authClient } from ".";
 
 class AuthState {
@@ -10,6 +11,8 @@ class AuthState {
   }
 
   async refresh() {
+    if (!browser) return;
+
     this.loading = true;
 
     try {
