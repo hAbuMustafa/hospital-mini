@@ -21,6 +21,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
+import { eq } from "drizzle-orm";
 import { reportSheetFetch, reportSheetMultiFetch } from "./utils";
 
 export async function initialize() {
@@ -60,6 +61,7 @@ export async function initialize() {
   await db.delete(patientAdmissions);
   await db.delete(patientTransfers);
   await db.delete(patientDischarges);
+  await db.delete(transactionTickets).where(eq(transactionTickets.user_id, ""));
   await db.delete(status);
 
   console.info("🧹 Tables Truncated Successfully");
