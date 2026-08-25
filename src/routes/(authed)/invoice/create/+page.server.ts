@@ -1,11 +1,14 @@
 import { formatDate, setToEndOfDay, setToStartOfDay } from "$lib/date/utils";
 import { db } from "$lib/server/db";
 import {
-  narcoticsDispensed,
+  drugs,
   patients_view,
   patientTransfers,
+  transactions,
+  transactionTickets,
 } from "$lib/server/db/schema";
-import { and, gte, inArray, lte, sql } from "drizzle-orm";
+import { totalAndAmount } from "$lib/utils/query";
+import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
 export async function load({ url }) {
   const today = new Date();
@@ -52,19 +55,22 @@ export async function load({ url }) {
 
   const hasNarcotics = await db
     .select({
-      patient_id: narcoticsDispensed.patient_id,
-      amount_dispensed: sql<number>`SUM(${narcoticsDispensed.amount})`.as(
-        "amount_dispensed"
-      ),
+      patient_id: transactionTickets.patient_id,
+      ...totalAndAmount(false),
     })
-    .from(narcoticsDispensed)
+    .from(transactions)
+    .innerJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
+    .innerJoin(drugs, eq(transactions.item_id, drugs.id))
     .where(
-      inArray(
-        narcoticsDispensed.patient_id,
-        fetchedPatients.map((p) => p?.id)
+      and(
+        inArray(
+          transactionTickets.patient_id,
+          fetchedPatients.map((p) => p?.id)
+        ),
+        eq(drugs.category, "مخدرات")
       )
     )
-    .groupBy(narcoticsDispensed.patient_id);
+    .groupBy(transactionTickets.patient_id);
 
   return {
     patients: fetchedPatients,

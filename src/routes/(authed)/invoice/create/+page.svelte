@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
   import Combobox from "$lib/components/Combobox.svelte";
   import DateControls from "$lib/components/DateControls.svelte";
   import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
@@ -37,8 +36,7 @@
   <tbody>
     {#each data.patients as patient, i (patient.id)}
       {@const hasNarcotics =
-        (data.hasNarcotics.find((p) => p.patient_id === patient.id)?.amount_dispensed ??
-          0) > 0}
+        (data.hasNarcotics.find((p) => p.patient_id === patient.id)?.amount ?? 0) > 0}
       {@const patientWards = Array.from(
         new Set([
           patient.ward_on_admission,

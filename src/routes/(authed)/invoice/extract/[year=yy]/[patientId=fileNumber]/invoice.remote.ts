@@ -2,7 +2,6 @@ import { query } from "$app/server";
 import { db } from "$lib/server/db/";
 import {
   drugs,
-  narcoticsDispensed,
   patients_view,
   patientTransfers,
   transactions,
@@ -46,26 +45,6 @@ export const getDispenses = query(
         .orderBy(desc(patientTransfers.id))
         .limit(1);
 
-      const narcotics = await db
-        .select({
-          ...getTableColumns(drugs),
-          amount: sql<number>`${sum(narcoticsDispensed.amount)}`,
-          total:
-            sql<number>`${sum(narcoticsDispensed.amount)} * ${drugs.price_resale}`.as(
-              "total"
-            ),
-        })
-        .from(narcoticsDispensed)
-        .innerJoin(drugs, eq(narcoticsDispensed.item_id, drugs.id))
-        .where(
-          and(
-            eq(narcoticsDispensed.patient_id, data.patientId),
-            gte(narcoticsDispensed.timestamp, data.fromDate),
-            lte(narcoticsDispensed.timestamp, data.toDate)
-          )
-        )
-        .groupBy(narcoticsDispensed.item_id);
-
       const dispenses = await db
         .select({
           ...getTableColumns(drugs),
@@ -86,7 +65,7 @@ export const getDispenses = query(
 
       return {
         ward: periodWard.to_ward ?? patient.ward_on_admission,
-        dispenses: [...narcotics, ...dispenses],
+        dispenses,
       };
     } catch (err) {
       console.error(err);

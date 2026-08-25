@@ -7,13 +7,20 @@ import { db } from "$lib/server/db";
 import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
 import {
   drugs,
-  narcoticsDispensed,
   patientAdmissions,
   patientDischarges,
   patientTransfers,
   status,
+  transactions,
+  transactionTickets,
 } from "$lib/server/db/schema";
-import { sheetRowToObject } from "$lib/server/gcp/utils";
+import {
+  admissionRowToObject,
+  transferRowToObject,
+  dischargeRowToObject,
+  drugRowToObject,
+  narcoticDispenseRowToObject,
+} from "$lib/server/gcp/utils";
 import { eq } from "drizzle-orm";
 
 export async function syncPatients() {
@@ -55,7 +62,7 @@ export async function syncPatients() {
   await db.transaction(async (tx) => {
     if (fetchedPatientsData.Admissions.values) {
       const seedableAdmissions = fetchedPatientsData.Admissions.values.map((item) =>
-        sheetRowToObject(item, "admission")
+        admissionRowToObject(item)
       ) as unknown as (typeof patientAdmissions.$inferInsert & {
         ward_on_admission: string;
       })[];
@@ -89,7 +96,7 @@ export async function syncPatients() {
   await db.transaction(async (tx) => {
     if (fetchedPatientsData.Transfers.values) {
       const seedableTransfers = fetchedPatientsData.Transfers.values.map((item) =>
-        sheetRowToObject(item, "transfer")
+        transferRowToObject(item)
       );
 
       await tx.insert(patientTransfers).values(seedableTransfers);
@@ -109,7 +116,7 @@ export async function syncPatients() {
   await db.transaction(async (tx) => {
     if (fetchedPatientsData.Discharges.values) {
       const seedableDischarges = fetchedPatientsData.Discharges.values.map((item) =>
-        sheetRowToObject(item, "discharge")
+        dischargeRowToObject(item)
       );
 
       await tx.insert(patientDischarges).values(seedableDischarges);
@@ -131,10 +138,28 @@ export async function syncPatients() {
   await db.transaction(async (tx) => {
     if (fetchedNarcoticsDispensed.values) {
       const seedableNarcoticsDispensed = fetchedNarcoticsDispensed.values.map((item) =>
-        sheetRowToObject(item, "narcotic_dispense")
+        narcoticDispenseRowToObject(item)
       );
 
-      await tx.insert(narcoticsDispensed).values(seedableNarcoticsDispensed);
+      for (const narcoticDispense of seedableNarcoticsDispensed) {
+        const [dispTicket] = await tx
+          .insert(transactionTickets)
+          .values({
+            timestamp: narcoticDispense.timestamp,
+            patient_id: narcoticDispense.patient_id,
+            store_id: 1,
+            user_id: "",
+            is_dispense: true,
+          })
+          .returning();
+
+        await tx.insert(transactions).values({
+          ticket_id: dispTicket.id,
+          item_id: narcoticDispense.item_id,
+          qty: narcoticDispense.qty,
+          unit_price: narcoticDispense.unit_price,
+        });
+      }
 
       const [newCount] = await tx
         .update(status)
@@ -164,9 +189,7 @@ export async function syncDrugs() {
   await db.delete(drugs);
 
   // 3. PARSE new data
-  const seedableDrugs = fetchedDrugs.values
-    .slice(1)
-    .map((item) => sheetRowToObject(item, "drug"));
+  const seedableDrugs = fetchedDrugs.values.slice(1).map((item) => drugRowToObject(item));
 
   // 4. INSERT New data
   await db.insert(drugs).values(seedableDrugs);

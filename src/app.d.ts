@@ -1,4 +1,4 @@
-import type { drugs, narcoticsDispensed, patients_view } from "$lib/server/db/schema";
+import type { drugs, patients_view } from "$lib/server/db/schema";
 import type { authClient } from "$lib/auth-client";
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
@@ -20,7 +20,7 @@ declare global {
 
   type StaleData = {
     ward: string;
-    narcotics: InvoiceNarcoticDrugT[];
+    dispenses: InvoiceNarcoticDrugT[];
   };
 
   type InvoiceSelectedDrugT = DrugT & {

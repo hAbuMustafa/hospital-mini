@@ -6,14 +6,21 @@ import {
 import { db } from "$lib/server/db";
 import {
   drugs,
-  narcoticsDispensed,
   patientAdmissions,
   patientDischarges,
   patientTransfers,
   status,
+  transactions,
+  transactionTickets,
 } from "$lib/server/db/schema";
 import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
-import { sheetRowToObject } from "$lib/server/gcp/utils";
+import {
+  admissionRowToObject,
+  transferRowToObject,
+  dischargeRowToObject,
+  drugRowToObject,
+  narcoticDispenseRowToObject,
+} from "$lib/server/gcp/utils";
 
 export async function initialize() {
   // 1. FETCH
@@ -46,29 +53,26 @@ export async function initialize() {
   await db.delete(patientAdmissions);
   await db.delete(patientTransfers);
   await db.delete(patientDischarges);
-  await db.delete(narcoticsDispensed);
   await db.delete(status);
 
   // 3. PARSE new data
-  const seedableDrugs = fetchedDrugs.values
-    .slice(1)
-    .map((item) => sheetRowToObject(item, "drug"));
+  const seedableDrugs = fetchedDrugs.values.slice(1).map((item) => drugRowToObject(item));
 
   const seedableAdmissions = fetchedPatient.Admissions.values
     .slice(1)
-    .map((item) => sheetRowToObject(item, "admission"));
+    .map((item) => admissionRowToObject(item));
 
   const seedableDischarges = fetchedPatient.Discharges.values
     .slice(1)
-    .map((item) => sheetRowToObject(item, "discharge"));
+    .map((item) => dischargeRowToObject(item));
 
   const seedableTransfers = fetchedPatient.Transfers.values
     .slice(1)
-    .map((item) => sheetRowToObject(item, "transfer"));
+    .map((item) => transferRowToObject(item));
 
   const seedableNarcoticsDispensed = fetchedNarcoticsDispensed.values
     .slice(1)
-    .map((item) => sheetRowToObject(item, "narcotic_dispense"));
+    .map((item) => narcoticDispenseRowToObject(item));
 
   // 4. INSERT New data
   try {
@@ -98,7 +102,25 @@ export async function initialize() {
     }
 
     for (const narcoticDispense of seedableNarcoticsDispensed) {
-      await db.insert(narcoticsDispensed).values(narcoticDispense);
+      await db.transaction(async (tx) => {
+        const [dispTicket] = await tx
+          .insert(transactionTickets)
+          .values({
+            timestamp: narcoticDispense.timestamp,
+            patient_id: narcoticDispense.patient_id,
+            store_id: 1,
+            user_id: "",
+            is_dispense: true,
+          })
+          .returning();
+
+        await tx.insert(transactions).values({
+          ticket_id: dispTicket.id,
+          item_id: narcoticDispense.item_id,
+          qty: narcoticDispense.qty,
+          unit_price: narcoticDispense.unit_price,
+        });
+      });
     }
   } catch (e) {
     console.error("INSERT FAILED::", e);

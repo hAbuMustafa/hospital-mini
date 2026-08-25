@@ -2,9 +2,10 @@ import { formatDate, setToEndOfDay } from "$lib/date/utils";
 import { db } from "$lib/server/db/";
 import {
   drugs,
-  narcoticsDispensed,
   patients_view,
   patientTransfers,
+  transactions,
+  transactionTickets,
 } from "$lib/server/db/schema";
 import { json } from "@sveltejs/kit";
 import dayjs from "dayjs";
@@ -44,27 +45,26 @@ export async function GET({ url }) {
   setToEndOfDay(to);
   to.setDate(to.getDate() + 1); // +1 offset as a days dispensed registration often happens next day
 
-  const narcotics = await db
+  const dispensed = await db
     .select({
       ...getTableColumns(drugs),
-      amount: sql<number>`sum(${narcoticsDispensed.amount})`.as("amount"),
-      total: sql<number>`sum(${narcoticsDispensed.amount}) * ${drugs.price_resale}`.as(
-        "total"
-      ),
+      amount: sql<number>`sum(${transactions.qty})`.as("amount"),
+      total: sql<number>`sum(${transactions.qty}) * ${drugs.price_resale}`.as("total"),
     })
-    .from(narcoticsDispensed)
-    .innerJoin(drugs, eq(narcoticsDispensed.item_id, drugs.id))
+    .from(transactions)
+    .innerJoin(drugs, eq(transactions.item_id, drugs.id))
+    .innerJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
     .where(
       and(
-        eq(narcoticsDispensed.patient_id, patient_id),
-        gte(narcoticsDispensed.timestamp, from),
-        lte(narcoticsDispensed.timestamp, to)
+        eq(transactionTickets.patient_id, patient_id),
+        gte(transactionTickets.timestamp, from),
+        lte(transactionTickets.timestamp, to)
       )
     )
-    .groupBy(narcoticsDispensed.item_id);
+    .groupBy(transactions.item_id);
 
   return json({
     ward: periodWard?.to_ward ?? patient.ward_on_admission,
-    narcotics,
+    dispensed,
   });
 }

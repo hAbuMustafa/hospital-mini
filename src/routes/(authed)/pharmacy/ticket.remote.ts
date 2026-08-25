@@ -60,7 +60,6 @@ export const getItemLastDispensed = query(
 );
 
 export const postTicket = form(
-  // fix: why narcotics are added to both narcoticsDispensed table and transactions table
   v.object({
     patientId: v.pipe(v.string(), v.nonEmpty()),
     drugs: v.array(
@@ -129,14 +128,9 @@ export const postTicket = form(
       ]);
 
       if (sheetPostResult?.updatedRange) {
-        const [currentNarcoticsCount] = await db
-          .select({ value: status.value })
-          .from(status)
-          .where(eq(status.item, "narcotics_dispensed"));
-
         await db
           .update(status)
-          .set({ value: (currentNarcoticsCount.value ?? 0) + 1 })
+          .set({ value: sql`${status.value ?? 0} + 1` })
           .where(eq(status.item, "narcotics_dispensed"));
       } else {
         await db.insert(unsyncedNarcotics).values({
