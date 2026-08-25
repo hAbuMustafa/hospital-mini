@@ -1,6 +1,7 @@
 <script lang="ts">
   import { authState } from "$lib/auth-client/auth.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
+  import Combobox from "$lib/components/Combobox.svelte";
   import {
     formatDate,
     getDuration,
@@ -9,54 +10,125 @@
     setToEndOfDay,
   } from "$lib/date/utils";
 
+  import debounce from "lodash-es/debounce";
+  import { toast } from "svelte-sonner";
   import { scale } from "svelte/transition";
+  import { isNarcotic, nonDivisibleBoxes } from "$lib/CONSTANTS";
   import { useKeyboardNavigation } from "$lib/attachments";
-  import { getDispenses, getPatient } from "../../../invoice.remote";
+  import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
   import { page } from "$app/state";
-  import { goto } from "$app/navigation";
-  import { encodeObjectToUrl } from "../../../encoding";
-  import { PUBLIC_System_Started_Since } from "$env/static/public";
-  import { browser } from "$app/env";
-  import { isNarcotic } from "$lib/CONSTANTS";
+  import { decodeObjectFromUrl } from "../../../encoding";
+  import { onMount } from "svelte";
 
   const today = getToday();
   setToEndOfDay(today);
 
-  const patient = await getPatient(`${page.params.year}/${page.params.patientId}`);
+  let { data } = $props();
 
-  let fromDate = $derived(patient.admission_date);
-  let toDate = $derived(patient.discharge_date ?? new Date());
+  const { patient } = $derived(data);
+  const stringifiedAdmissionDate = $derived(formatDate(patient.admission_date));
+  const stringifiedDischargeDate = $derived(
+    patient.discharge_date ? formatDate(patient.discharge_date) : ""
+  );
+
+  let fromDateString = $derived(stringifiedAdmissionDate);
+  let toDateString = $derived(stringifiedDischargeDate);
 
   let periodSameAsStay = $derived(
-    fromDate === patient.admission_date && toDate === patient.discharge_date
+    fromDateString === stringifiedAdmissionDate &&
+      toDateString === stringifiedDischargeDate
   );
-
-  let dispensesGetter = $derived(
-    getDispenses({ patientId: patient.id, fromDate, toDate })
-  );
-
-  let staleData = $derived(await dispensesGetter);
-
-  let invoiceDrugs: InvoiceDrugT[] = $derived.by(() => {
-    const arr: InvoiceDrugT[] = $state([]);
-
-    for (const d of staleData.dispenses) {
-      arr.push(d);
-    }
-    return arr;
-  });
 
   const pricingDuration = $derived(
-    getTermed(getDuration(fromDate, toDate) || 1, "يوم", "أيام")
+    getTermed(
+      getDuration(new Date(fromDateString), new Date(toDateString) || today) || 1,
+      "يوم",
+      "أيام"
+    )
   );
+
+  let staleData = $derived(data.staleData);
+
+  let fromInput: HTMLInputElement;
+  let toInput: HTMLInputElement;
+
+  function updateStaleDataOnInput(node: HTMLInputElement) {
+    node.addEventListener(
+      "change",
+      debounce(async () => {
+        if (!fromInput.reportValidity() || !toInput.reportValidity()) return;
+
+        staleData = (await fetch(
+          `/api/v1/patient/getStaleData?patient_id=${patient.id}&f=${formatDate(fromDateString)}&t=${formatDate(toDateString ? toDateString : new Date())}`
+        ).then((d) => d.json())) as StaleData;
+
+        if (staleData.narcotics.length) {
+          invoiceDrugs
+            .filter((n) => typeof n.total === "function")
+            .unshift(...staleData.narcotics);
+        }
+      }, 1000)
+    );
+  }
+
+  let selectedDrugs: InvoiceSelectedDrugT[] = $state([]);
+
+  let invoiceDrugs: (InvoiceNarcoticDrugT | InvoiceSelectedDrugT)[] = $derived([
+    ...staleData.narcotics,
+    ...selectedDrugs,
+  ]);
 
   let pageTitle = $derived.by(() => {
     if (periodSameAsStay) return patient.name;
 
-    return `${patient.name} (من ${formatDate(fromDate)} إلى ${formatDate(toDate)})`;
+    return `${patient.name} (من ${fromDateString.split("-").reverse().join("-")} إلى ${toDateString.split("-").reverse().join("-")})`;
   });
 
   let isCashPricing = $state(false);
+
+  function selectDrug(item: InvoiceSelectedDrugT) {
+    const foundItemIndexInList = invoiceDrugs.findIndex((d) => d.id === item.id);
+    if (foundItemIndexInList > -1) {
+      invoiceDrugs[foundItemIndexInList].amount++;
+      toast.info(
+        `الصنف مضاف سابقا في السطر ${foundItemIndexInList + 1} تم زيادة الكمية لتصبح ${invoiceDrugs[foundItemIndexInList].amount}`
+      );
+      return;
+    }
+
+    if (!item.amount) item.amount = 1;
+    item.total = () =>
+      item.amount *
+      (isCashPricing && item.editable ? item.cashPrice : (item.price_resale ?? 0));
+    item.editable = true;
+    item.cashPrice = 0;
+    selectedDrugs.push(item);
+  }
+
+  onMount(() => {
+    const encodedItems = page.url.searchParams.get("items");
+
+    // fix: why these items are not reactive when cashPrice or amount change?
+    let handedOverDrugs: InvoiceSelectedDrugT[];
+
+    if (encodedItems) {
+      const decodedItems = decodeObjectFromUrl(encodedItems);
+
+      if (Array.isArray(decodedItems)) {
+        handedOverDrugs = decodedItems;
+      } else {
+        handedOverDrugs = [];
+      }
+    } else {
+      handedOverDrugs = [];
+    }
+
+    for (const d of handedOverDrugs) {
+      selectDrug(d);
+    }
+  });
+
+  let drugQuery = $state("");
 
   let invoiceItemsBody: HTMLElement | undefined = $state();
 </script>
@@ -122,74 +194,58 @@
           <th>من:</th>
           <td>
             <input
-              type="datetime-local"
-              bind:value={
-                () => formatDate(fromDate, "YYYY-MM-DDThh:mm:ss"),
-                (v) => {
-                  const newDate = new Date(v);
-                  if (
-                    !isNaN(newDate.getTime()) &&
-                    newDate >= patient.admission_date &&
-                    newDate <= (patient.discharge_date ?? today)
-                  ) {
-                    fromDate = new Date(v);
-                  }
-                }
-              }
-              min={formatDate(patient.admission_date, "YYYY-MM-DDThh:mm:ss")}
-              max={formatDate(patient.discharge_date ?? today, "YYYY-MM-DDThh:mm:ss")}
-              step="1"
+              type="date"
+              bind:value={fromDateString}
+              min={stringifiedAdmissionDate}
+              max={stringifiedDischargeDate}
+              bind:this={fromInput}
+              use:updateStaleDataOnInput
             />
-            <span class="selected-date">{formatDate(fromDate)}</span>
+            <span class="selected-date">{fromDateString.replaceAll("-", "/")}</span>
           </td>
           <th>إلى:</th>
           <td>
             <input
-              type="datetime-local"
-              bind:value={
-                () => formatDate(toDate, "YYYY-MM-DDThh:mm:ss"),
-                (v) => {
-                  const newDate = new Date(v);
-                  if (
-                    !isNaN(newDate.getTime()) &&
-                    newDate >= fromDate &&
-                    newDate <= (patient.discharge_date ?? today)
-                  ) {
-                    fromDate = new Date(v);
-                  }
-                }
-              }
-              min={formatDate(fromDate, "YYYY-MM-DDThh:mm:ss")}
-              max={formatDate(patient.discharge_date ?? today, "YYYY-MM-DDThh:mm:ss")}
-              step="1"
+              type="date"
+              bind:value={toDateString}
+              min={fromDateString}
+              max={stringifiedDischargeDate}
+              bind:this={toInput}
+              use:updateStaleDataOnInput
             />
-            <span class="selected-date">{formatDate(toDate)}</span>
+            <span class="selected-date">{toDateString.replaceAll("-", "/")}</span>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-
-  {#if new Date(PUBLIC_System_Started_Since) > fromDate}
-    <div class="warning hide-in-print">
-      {periodSameAsStay ? "المريض دخل" : "فترة التسعير تبدأ"} في فترة تسبق بداية تشغيل المنظومة،
-      برجاء استخراج فاتورة يدوية
-    </div>
-  {/if}
-
   <h2>
     سداد فاتورة {#if isCashPricing}نقدي{/if}
-    <button
-      class="btn hide-in-print"
-      onclick={() => {
-        if (browser)
-          goto(
-            `/invoice/create/${patient.id}?items=${encodeObjectToUrl(invoiceDrugs.filter((item) => !isNarcotic(item as { category: string })))}`
-          );
-      }}>استخراج فاتورة يدوية</button
-    >
   </h2>
 </header>
+
+<div class="item-select-wrapper hide-in-print">
+  <Combobox
+    bind:query={drugQuery}
+    filterFn={(d: DrugT) =>
+      d.is_used !== "لاغي" &&
+      !d.is_used?.includes("فواتير") &&
+      !isNarcotic(d as { category: string })}
+    endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
+    placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+    className="hide-in-print"
+    onSelect={(drug: InvoiceSelectedDrugT) => selectDrug(drug)}
+  >
+    {#snippet itemSnippet(drug: DrugT)}
+      <SelectItemDrug
+        {drug}
+        query={drugQuery}
+        isSelected={selectedDrugs.findIndex((item) => item.id === drug.id) > -1}
+        onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+      />
+    {/snippet}
+  </Combobox>
+</div>
 
 <table class="invoice-items">
   <colgroup>
@@ -216,37 +272,66 @@
   </thead>
   {#if invoiceDrugs.length}
     <tbody bind:this={invoiceItemsBody}>
-      {#each invoiceDrugs as drug, i (drug.id!)}
-        <tr class:hide-in-print={drug.total === 0} transition:scale>
-          <td>{i + 1}</td>
+      {#each invoiceDrugs as drug, i (drug.id)}
+        <tr
+          class:hide-in-print={typeof drug.total === "number"
+            ? drug.total === 0
+            : drug.total() === 0}
+          class:amount-not-allowed={nonDivisibleBoxes
+            .map((item) => item.id)
+            .some((id) => id === drug.id) &&
+            drug.amount % nonDivisibleBoxes.find((item) => item.id === drug.id)?.min! > 0}
+          transition:scale
+        >
+          <td>
+            {#if !drug.editable}
+              {i + 1}
+            {:else}
+              <button
+                onclick={() => {
+                  selectedDrugs = selectedDrugs.filter((d) => d.id !== drug.id);
+                }}
+              >
+                {i + 1}
+              </button>
+            {/if}
+          </td>
           {#if !patient.insured}
             <td>{drug.smc_code}</td>
           {/if}
           <td>{drug.name_ar}</td>
-          <td>{drug.amount}</td>
           <td>
-            {#if isCashPricing}
+            {#if !drug.editable}
+              {drug.amount}
+            {:else}
+              <input
+                type="number"
+                name="amount-{drug.id}"
+                id="amount-{drug.id}"
+                min="0"
+                bind:value={drug.amount}
+                {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
+              />
+            {/if}
+          </td>
+          <td
+            >{#if isCashPricing && drug.editable}
               <input
                 type="number"
                 name="price-{drug.id}"
                 id="price-{drug.id}"
                 min="0"
                 step="0.01"
-                bind:value={
-                  () => drug.cashPrice ?? 0,
-                  (v) => {
-                    drug.cashPrice = v;
-                  }
-                }
+                bind:value={drug.cashPrice}
                 {@attach useKeyboardNavigation("price", invoiceItemsBody)}
               />
             {:else}{drug.price_resale?.toFixed(2)}{/if}</td
           >
           <td>
-            {#if !isCashPricing}
+            {#if typeof drug.total === "number"}
               {drug.total.toFixed(2)}
             {:else}
-              {((drug.cashPrice ?? 0) * drug.amount).toFixed(2)}
+              {drug.total().toFixed(2)}
             {/if}
           </td>
         </tr>
@@ -258,10 +343,10 @@
         <td colspan="3">
           {invoiceDrugs
             .reduce((acc, curr) => {
-              if (!isCashPricing) {
+              if (typeof curr.total === "number") {
                 return acc + curr.total;
               } else {
-                return acc + (curr.cashPrice ?? 0) * curr.amount;
+                return acc + curr.total();
               }
             }, 0)
             .toFixed(2)}
@@ -336,7 +421,7 @@
         border: var(--main-border);
       }
 
-      input[type="datetime-local"] {
+      input[type="date"] {
         width: 80%;
         text-align: center;
         font-size: inherit;
@@ -347,7 +432,7 @@
       }
 
       @media print {
-        input[type="datetime-local"] {
+        input[type="date"] {
           display: none;
         }
 
@@ -360,6 +445,10 @@
 
   h2 {
     margin-block-end: 0.5rem;
+  }
+
+  .item-select-wrapper {
+    margin-block-end: 1rem;
   }
 
   table.invoice-items {
@@ -433,6 +522,43 @@
               }
             }
           }
+
+          &:has(> button) {
+            padding: 0;
+
+            & > button {
+              all: unset;
+              cursor: pointer;
+              position: relative;
+              width: 100%;
+
+              &:is(:hover, :focus-within)::after {
+                content: "❌";
+                position: absolute;
+                inset: 0;
+                padding: 0;
+                pointer-events: none;
+
+                @media print {
+                  display: none;
+                }
+              }
+
+              &:focus-within {
+                outline: 2px double var(--main-accent-color);
+              }
+            }
+          }
+        }
+
+        &.amount-not-allowed {
+          background-color: salmon;
+          text-decoration: line-through;
+
+          @media print {
+            background-color: unset;
+            text-decoration: unset;
+          }
         }
       }
     }
@@ -495,15 +621,5 @@
         vertical-align: top;
       }
     }
-  }
-
-  .warning {
-    background-color: light-dark(maroon, salmon);
-    border: 1px solid light-dark(red, maroon);
-    color: var(--main-bg-color);
-    text-align: center;
-    border-radius: 8px;
-    margin: 1rem 0;
-    padding: 0.5rem;
   }
 </style>

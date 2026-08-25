@@ -17,7 +17,12 @@ export const getPatient = query(v.string(), async (patientId) => {
     .from(patients_view)
     .where(eq(patients_view.id, patientId));
 
-  return patient;
+  const transfers = await db
+    .select()
+    .from(patientTransfers)
+    .where(eq(patientTransfers.patient_id, patientId));
+
+  return { ...patient, transfers };
 });
 
 export const getDispenses = query(
