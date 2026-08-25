@@ -7,7 +7,10 @@
 
   const patient = await patientGetter;
 
-  let range = $state({ from: 0, to: 0 });
+  let from = $state(0);
+  let to = $state(0);
+
+  let lastTransferIndex = patient.transfers.length - 1;
 
   function getDate(date: Date | null) {
     return formatDate(date!, "YYYY/MM/DD (HH:mm)").replace(" (00:00)", "");
@@ -34,18 +37,37 @@
             name={stay.id + ""}
             id={stay.id + ""}
             bind:checked={
-              () => range.from <= i && range.to >= i,
+              () => from <= i && to >= i,
               (v) => {
-                console.log(v);
-                console.log(range);
+                if (v === true) {
+                  if (i >= to) {
+                    to = i;
+                  } else {
+                    from = i;
+                  }
+                } else if (v === false) {
+                  if (i > from) {
+                    if (i < lastTransferIndex) {
+                      from = i + 1;
+                    } else {
+                      from = i;
+                    }
+                  } else {
+                    if (i > 0) {
+                      to = i - 1;
+                    } else {
+                      to = i;
+                    }
+                  }
+                }
               }
             }
           />
         </td>
         <td>{stay.to_ward}</td>
-        <td>{getDate(stay.timestamp)}</td>
-        <td
-          >{#if i === patient.transfers.length - 1}
+        <td class:from={i === from}>{getDate(stay.timestamp)}</td>
+        <td class:to={i === to}>
+          {#if i === lastTransferIndex}
             {#if patient.discharge_date}
               {getDate(patient.discharge_date)}
             {:else}
@@ -53,12 +75,21 @@
             {/if}
           {:else}
             {getDate(patient.transfers[i + 1]?.timestamp)}
-          {/if}</td
-        >
+          {/if}
+        </td>
       </tr>
     {/each}
   </tbody>
 </table>
+
+<p>
+  تسعير من <span class="from">{getDate(patient.transfers[from].timestamp)}</span> إلى
+  <span class="to">
+    {#if to < lastTransferIndex}
+      {getDate(patient.transfers[to + 1].timestamp)}
+    {:else if patient.discharge_date}{getDate(patient.discharge_date)}{:else}الآن{/if}
+  </span>
+</p>
 
 <style>
   table {
@@ -70,5 +101,19 @@
     border: var(--main-border);
 
     padding: 0.25rem 0.5rem;
+  }
+
+  span.from,
+  span.to {
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .from {
+    background-color: hsla(from green h s l / 0.5);
+  }
+
+  .to {
+    background-color: hsla(from red h s l / 0.5);
   }
 </style>
