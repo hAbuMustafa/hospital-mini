@@ -21,6 +21,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
+import { reportSheetFetch, reportSheetMultiFetch } from "./utils";
 
 export async function initialize() {
   // 1. FETCH
@@ -30,12 +31,18 @@ export async function initialize() {
     "Discharges!B:E",
   ]);
 
+  reportSheetMultiFetch(fetchedPatient);
+
   const fetchedNarcoticsDispensed = await getSheetRange(
     narcotics_spreadsheetId,
     "Dispensed!A:E"
   );
 
+  reportSheetFetch(fetchedNarcoticsDispensed);
+
   const fetchedDrugs = await getSheetRange(drugs_spreadsheetId, "الأدوية!A:P");
+
+  reportSheetFetch(fetchedDrugs);
 
   if (
     !fetchedPatient.Admissions.values ||
@@ -54,6 +61,8 @@ export async function initialize() {
   await db.delete(patientTransfers);
   await db.delete(patientDischarges);
   await db.delete(status);
+
+  console.info("🧹 Tables Truncated Successfully");
 
   // 3. PARSE new data
   const seedableDrugs = fetchedDrugs.values.slice(1).map((item) => drugRowToObject(item));
@@ -74,9 +83,13 @@ export async function initialize() {
     .slice(1)
     .map((item) => narcoticDispenseRowToObject(item));
 
+  console.info("🧮 Processed values");
+
   // 4. INSERT New data
   try {
     await db.insert(drugs).values(seedableDrugs);
+
+    console.info("💊✔️ Drugs Inserted Successfully");
 
     for (const admission of seedableAdmissions) {
       await db.transaction(async (tx) => {
@@ -93,13 +106,19 @@ export async function initialize() {
       });
     }
 
+    console.info("🏥✔️ Admissions Inserted Successfully");
+
     for (const transfer of seedableTransfers) {
       await db.insert(patientTransfers).values(transfer);
     }
 
+    console.info("🛌🏻✔️ Ward Transfers Inserted Successfully");
+
     for (const discharge of seedableDischarges) {
       await db.insert(patientDischarges).values(discharge);
     }
+
+    console.info("👋🏻✔️ Patient Discharges Inserted Successfully");
 
     for (const narcoticDispense of seedableNarcoticsDispensed) {
       await db.transaction(async (tx) => {
@@ -122,8 +141,11 @@ export async function initialize() {
         });
       });
     }
+
+    console.info("⚕️✔️ Dispensed Narcotics Replaced Successfully");
   } catch (e) {
     console.error("INSERT FAILED::", e);
+    process.exit(1);
   }
 
   await db.insert(status).values([

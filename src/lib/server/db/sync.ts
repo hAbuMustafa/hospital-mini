@@ -22,6 +22,7 @@ import {
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
 import { eq } from "drizzle-orm";
+import { reportSheetMultiFetch, reportSheetFetch } from "./utils";
 
 export async function syncPatients() {
   // 1. Get your numbers ready
@@ -43,6 +44,9 @@ export async function syncPatients() {
     !latestNarcoticsDispensedCount
   ) {
     console.error("⚠️ DATABASE is out of sync. Probably not initialized.");
+    for (const { item, value } of latestRows) {
+      console.info(item + ":", value);
+    }
     return;
   }
 
@@ -53,10 +57,14 @@ export async function syncPatients() {
     `Discharges!B${latestDischargeCount + 1}:E`,
   ]);
 
+  reportSheetMultiFetch(fetchedPatientsData);
+
   const fetchedNarcoticsDispensed = await getSheetRange(
     narcotics_spreadsheetId,
     `Dispensed!A${latestNarcoticsDispensedCount + 1}:E`
   );
+
+  reportSheetFetch(fetchedNarcoticsDispensed);
 
   // 3. PARSE AND INSERT new data
   await db.transaction(async (tx) => {
@@ -180,6 +188,8 @@ export async function syncDrugs() {
   // 1. FETCH
   const fetchedDrugs = await getSheetRange(drugs_spreadsheetId, "الأدوية!A:P");
 
+  reportSheetFetch(fetchedDrugs);
+
   if (!fetchedDrugs.values) {
     console.error("⚠️♻️ Database Sync Error. Couldn't fetch drugs.");
     return;
@@ -189,8 +199,11 @@ export async function syncDrugs() {
   await db.delete(drugs);
 
   // 3. PARSE new data
+  console.info("🧮 Processing Drugs");
   const seedableDrugs = fetchedDrugs.values.slice(1).map((item) => drugRowToObject(item));
 
   // 4. INSERT New data
   await db.insert(drugs).values(seedableDrugs);
+
+  console.info(`♻️✔️ Synced ${fetchedDrugs.values.length} drugs.`);
 }
