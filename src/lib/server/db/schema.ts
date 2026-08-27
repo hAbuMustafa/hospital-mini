@@ -107,6 +107,7 @@ export const invoices = sqliteTable("invoices", {
     .references(() => patientAdmissions.id),
   from: int({ mode: "timestamp" }).notNull(),
   to: int({ mode: "timestamp" }).notNull(),
+  period_ward: text().notNull(),
   issued_by: text()
     .notNull()
     .references(() => user.id),

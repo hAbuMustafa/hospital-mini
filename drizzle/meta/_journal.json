@@ -169,6 +169,13 @@
       "when": 1787835783419,
       "tag": "0023_uneven_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1787838730379,
+      "tag": "0024_slim_grandmaster",
+      "breakpoints": true
     }
   ]
 }
