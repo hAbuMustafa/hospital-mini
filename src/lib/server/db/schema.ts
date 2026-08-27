@@ -100,6 +100,41 @@ export const departments = sqliteTable("departments", {
   department_group_id: int().references(() => department_group.id),
 });
 
+export const invoices = sqliteTable("invoices", {
+  id: int().primaryKey({ autoIncrement: true }),
+  patient_id: text()
+    .notNull()
+    .references(() => patientAdmissions.id),
+  from: int({ mode: "timestamp" }).notNull(),
+  to: int({ mode: "timestamp" }).notNull(),
+  issued_by: text()
+    .notNull()
+    .references(() => user.id),
+  issuing_department: int()
+    .notNull()
+    .references(() => departments.id),
+  issued_at: int({ mode: "timestamp" }).notNull(),
+  is_closed: int({ mode: "boolean" }).notNull(),
+  is_cancelled: int({ mode: "boolean" }),
+});
+
+export const invoiceExtraItems = sqliteTable("invoiceExtraItems", {
+  id: int().primaryKey({ autoIncrement: true }),
+  invoice_id: int()
+    .notNull()
+    .references(() => invoices.id, { onDelete: "cascade" }),
+  item_id: int()
+    .notNull()
+    .references(() => drugs.id),
+  qty: int().notNull(),
+  unit_price: int().notNull(),
+
+  added_by: text()
+    .notNull()
+    .references(() => user.id),
+  added_at: int({ mode: "timestamp" }).notNull(),
+});
+
 /*
  * VIEWS
  */
