@@ -1,4 +1,4 @@
-import { parseDate } from "$lib/date/utils";
+import { parseDate, setToEndOfDay } from "$lib/date/utils";
 import { countryMap } from "$lib/utils/countries";
 import {
   drugs,
@@ -39,9 +39,12 @@ export function transferRowToObject(row: string[]): typeof patientTransfers.$inf
 export function dischargeRowToObject(
   row: string[]
 ): typeof patientDischarges.$inferInsert {
+  const discharge_date = parseDate(row[2]);
+  setToEndOfDay(discharge_date!);
+
   return {
     patient_id: row[0],
-    timestamp: parseDate(row[2]),
+    timestamp: discharge_date,
     reason: row[3],
   };
 }
