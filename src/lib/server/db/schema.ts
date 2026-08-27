@@ -113,8 +113,10 @@ export const invoices = sqliteTable("invoices", {
   issuing_department: int()
     .notNull()
     .references(() => departments.id),
-  issued_at: int({ mode: "timestamp" }).notNull(),
-  is_closed: int({ mode: "boolean" }).notNull(),
+  issued_at: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  is_closed: int({ mode: "boolean" }),
   is_cancelled: int({ mode: "boolean" }),
 });
 
