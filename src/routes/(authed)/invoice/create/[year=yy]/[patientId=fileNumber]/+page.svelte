@@ -1,16 +1,34 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { PUBLIC_System_Started_Since } from "$env/static/public";
   import { formatDate } from "$lib/date/utils";
-  import { getPatient } from "../../../invoice.remote";
+  import Eye from "@lucide/svelte/icons/eye";
+  import { createInvoice, getPatient } from "../../../invoice.remote";
+  import { toast } from "svelte-sonner";
+  import { goto } from "$app/navigation";
 
   const patientGetter = getPatient([page.params.year, page.params.patientId].join("/"));
 
   const patient = await patientGetter;
 
-  let from = $state(0);
-  let to = $state(0);
-
   let lastTransferIndex = patient.transfers.length - 1;
+
+  let from = $state(0);
+  let to = $state(lastTransferIndex);
+
+  let fromDateString = $derived(
+    formatDate(patient.transfers[from].timestamp!, "YYYY-MM-DDTHH:mm:ss")
+  );
+  let toDateString = $derived(
+    formatDate(
+      to < lastTransferIndex
+        ? patient.transfers[to + 1].timestamp!
+        : (patient.discharge_date ?? new Date()),
+      "YYYY-MM-DDTHH:mm:ss"
+    )
+  );
+
+  let saving = $state(false);
 
   function getDate(date: Date | null) {
     return formatDate(date!, "YYYY/MM/DD (HH:mm)").replace(" (00:00)", "");
@@ -83,13 +101,85 @@
 </table>
 
 <p>
-  تسعير من <span class="from">{getDate(patient.transfers[from].timestamp)}</span> إلى
+  من <span class="from">{getDate(patient.transfers[from].timestamp)}</span> إلى
   <span class="to">
     {#if to < lastTransferIndex}
       {getDate(patient.transfers[to + 1].timestamp)}
     {:else if patient.discharge_date}{getDate(patient.discharge_date)}{:else}الآن{/if}
   </span>
+  <button type="button" class="btn get-period-items" title="معاينة">
+    🔍
+    <!-- todo: list all items dispensed in the selected range in a modal -->
+  </button>
 </p>
+
+<form
+  {...createInvoice.enhance(async (form) => {
+    const { promise, resolve, reject } = Promise.withResolvers();
+
+    try {
+      saving = true;
+
+      toast.promise(promise, {
+        success: (result: Awaited<typeof form.result>) => {
+          goto(`/invoice/${result?.addItems ? "patch" : "get"}/${result?.invoiceId}`);
+          return `تم إنشاء الفاتورة رقم ${result?.invoiceId}.${result?.addItems ? " يمكنك الآن إضافة أصناف للفاتورة." : ""}`;
+        },
+        error: () => {
+          createInvoice.fields.allIssues()?.forEach((issue) => {
+            toast.warning(issue.message, { duration: Number.POSITIVE_INFINITY });
+          });
+          return "لم يتم إنشاء الفاتورة. راجع الأخطاء المذكورة.";
+        },
+        loading: "جار إنشاء الفاتورة...",
+        duration: 5000,
+      });
+
+      await form.submit();
+
+      if (form.result?.success) {
+        resolve(form.result);
+      } else {
+        reject(form.result);
+      }
+    } catch (err) {
+      toast.error("حدث خطأ غير متوقع أثناء إنشاء الفاتورة", {
+        duration: Number.POSITIVE_INFINITY,
+      });
+      console.log(err);
+      reject();
+    } finally {
+      saving = false;
+    }
+  })}
+>
+  <input readonly {...createInvoice.fields.patientId.as("hidden", patient.id)} />
+
+  <input
+    readonly
+    step="1"
+    {...createInvoice.fields.fromTimestamp.as("hidden", fromDateString)}
+  />
+
+  <input
+    readonly
+    step="1"
+    {...createInvoice.fields.toTimestamp.as("hidden", toDateString)}
+  />
+
+  {#if new Date(PUBLIC_System_Started_Since) > patient.transfers[from].timestamp!}
+    <label
+      title="هذا الاختيار يظهر فقط في حال كانت الفاتورة تبدأ من فترة تسبق فترة تشغيل المنظومة"
+    >
+      <input {...createInvoice.fields.keepOpen.as("checkbox", true)} />
+      إضافة أصناف للفاتورة
+    </label>
+  {/if}
+
+  <input type="submit" class="btn" value="إنشاء فاتورة" disabled={saving} />
+</form>
+
+<!-- todo: list all other invoices for patient -->
 
 <style>
   table {
@@ -115,5 +205,10 @@
 
   .to {
     background-color: hsla(from red h s l / 0.5);
+  }
+
+  form {
+    display: grid;
+    gap: 1rem;
   }
 </style>

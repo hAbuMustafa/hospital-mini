@@ -1,13 +1,16 @@
-import { query } from "$app/server";
+import { form, getRequestEvent, query } from "$app/server";
+import { parseDate } from "$lib/date/utils";
 import { db } from "$lib/server/db/";
 import {
   drugs,
+  invoices,
   patients_view,
   patientTransfers,
   transactions,
   transactionTickets,
 } from "$lib/server/db/schema";
 import { totalAndAmount } from "$lib/utils/query";
+import { invalid, redirect } from "@sveltejs/kit";
 import { and, desc, eq, getTableColumns, gt, gte, lte, sql, sum } from "drizzle-orm";
 import * as v from "valibot";
 
@@ -80,6 +83,69 @@ export const getDispenses = query(
         dispenses: [],
         error: err,
       };
+    }
+  }
+);
+
+export const createInvoice = form(
+  v.object({
+    patientId: v.string(),
+    fromTimestamp: v.string(),
+    toTimestamp: v.string(),
+    keepOpen: v.optional(v.boolean()),
+  }),
+  async (data, issue) => {
+    const [patient] = await db
+      .select()
+      .from(patients_view)
+      .where(eq(patients_view.id, data.patientId));
+
+    if (!patient) invalid(issue.patientId("لا يوجد مريض مسجل برقم الملف المطلوب"));
+
+    const from = parseDate(data.fromTimestamp)!;
+    const to = parseDate(data.toTimestamp)!;
+
+    if (from < patient.admission_date)
+      invalid(issue.fromTimestamp("تاريخ بداية الفترة يسبق تاريخ الدخول"));
+
+    if (patient.discharge_date && to > patient.discharge_date)
+      invalid(issue.toTimestamp("تاريخ نهاية الفترة بعد تاريخ الخروج"));
+
+    const transfers = await db
+      .select()
+      .from(patientTransfers)
+      .where(
+        and(
+          eq(patientTransfers.patient_id, data.patientId),
+          gte(patientTransfers.timestamp, from),
+          lte(patientTransfers.timestamp, to)
+        )
+      );
+
+    const issued_by = getRequestEvent().locals.user?.id!;
+    const issuing_department = getRequestEvent().locals.user?.affiliation!;
+
+    try {
+      const [newInvoice] = await db
+        .insert(invoices)
+        .values({
+          patient_id: data.patientId,
+          from,
+          to,
+          period_ward: transfers.map((p) => p.to_ward).join(" - "),
+          issued_by,
+          issuing_department,
+          is_closed: !data.keepOpen,
+        })
+        .returning();
+
+      return {
+        success: true,
+        invoiceId: newInvoice.id,
+        addItems: !newInvoice.is_closed,
+      };
+    } catch (error) {
+      console.error(error);
     }
   }
 );
