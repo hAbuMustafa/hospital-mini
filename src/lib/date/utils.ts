@@ -21,7 +21,7 @@ export function getAge(birthdate: number | Date | string) {
 export function getDuration(
   start: Date,
   end: Date,
-  unit: QUnitType | OpUnitType = "days",
+  unit: QUnitType | OpUnitType = "days"
 ) {
   return dayjs(end).diff(dayjs(start), unit);
 }
@@ -35,7 +35,7 @@ export function getDuration(
 export function parseDate(
   dateString: string,
   dateStringFormat = "MM/DD/YYYY",
-  strict = true,
+  strict = true
 ) {
   const date = dayjs(dateString, dateStringFormat, strict);
 
@@ -50,6 +50,8 @@ export function setToEndOfDay(date: Date) {
   date.setMinutes(59);
   date.setSeconds(59);
   date.setMilliseconds(999);
+
+  return date;
 }
 
 export function setToStartOfDay(date: Date) {
@@ -57,6 +59,8 @@ export function setToStartOfDay(date: Date) {
   date.setMinutes(0);
   date.setSeconds(0);
   date.setMilliseconds(0);
+
+  return date;
 }
 
 export function getTermed(number: number, term: string, termPlural: string) {
