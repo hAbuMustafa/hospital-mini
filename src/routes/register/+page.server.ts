@@ -1,3 +1,4 @@
+import { formatDate } from "$lib/date/utils";
 import { auth } from "$lib/server/utils/auth";
 import { fail } from "@sveltejs/kit";
 import type { BetterAuthError } from "better-auth";
@@ -36,7 +37,7 @@ export const actions = {
 
       return { message: "تم التسجيل بنجاح" };
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(400, {
         message: (e as BetterAuthError).message,
       });

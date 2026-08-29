@@ -25,6 +25,6 @@ export const getTopPicks = query(v.number(), async (n) => {
       .orderBy(desc(count(drugs.id)))
       .limit(n);
   } catch (err) {
-    console.error(err);
+    console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), err);
   }
 });

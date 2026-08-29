@@ -23,6 +23,7 @@ import {
 } from "$lib/server/gcp/utils";
 import { eq } from "drizzle-orm";
 import { reportSheetFetch, reportSheetMultiFetch } from "./utils";
+import { formatDate } from "$lib/date/utils";
 
 export async function initialize() {
   // 1. FETCH
@@ -52,7 +53,10 @@ export async function initialize() {
     !fetchedNarcoticsDispensed.values ||
     !fetchedDrugs.values
   ) {
-    console.error("⚠️⏬ Database initialization Error. No data could be fetched.");
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "⚠️⏬ Database initialization Error. No data could be fetched."
+    );
     process.exit(1);
   }
 
@@ -64,7 +68,10 @@ export async function initialize() {
   await db.delete(transactionTickets).where(eq(transactionTickets.user_id, ""));
   await db.delete(status);
 
-  console.info("🧹 Tables Truncated Successfully");
+  console.info(
+    formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+    "🧹 Tables Truncated Successfully"
+  );
 
   // 3. PARSE new data
   const seedableDrugs = fetchedDrugs.values.slice(1).map((item) => drugRowToObject(item));
@@ -85,13 +92,16 @@ export async function initialize() {
     .slice(1)
     .map((item) => narcoticDispenseRowToObject(item));
 
-  console.info("🧮 Processed values");
+  console.info(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), "🧮 Processed values");
 
   // 4. INSERT New data
   try {
     await db.insert(drugs).values(seedableDrugs);
 
-    console.info("💊✔️ Drugs Inserted Successfully");
+    console.info(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "💊✔️ Drugs Inserted Successfully"
+    );
 
     for (const admission of seedableAdmissions) {
       await db.transaction(async (tx) => {
@@ -108,19 +118,28 @@ export async function initialize() {
       });
     }
 
-    console.info("🏥✔️ Admissions Inserted Successfully");
+    console.info(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "🏥✔️ Admissions Inserted Successfully"
+    );
 
     for (const transfer of seedableTransfers) {
       await db.insert(patientTransfers).values(transfer);
     }
 
-    console.info("🛌🏻✔️ Ward Transfers Inserted Successfully");
+    console.info(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "🛌🏻✔️ Ward Transfers Inserted Successfully"
+    );
 
     for (const discharge of seedableDischarges) {
       await db.insert(patientDischarges).values(discharge);
     }
 
-    console.info("👋🏻✔️ Patient Discharges Inserted Successfully");
+    console.info(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "👋🏻✔️ Patient Discharges Inserted Successfully"
+    );
 
     for (const narcoticDispense of seedableNarcoticsDispensed) {
       await db.transaction(async (tx) => {
@@ -144,9 +163,12 @@ export async function initialize() {
       });
     }
 
-    console.info("⚕️✔️ Dispensed Narcotics Replaced Successfully");
+    console.info(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "⚕️✔️ Dispensed Narcotics Replaced Successfully"
+    );
   } catch (e) {
-    console.error("INSERT FAILED::", e);
+    console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), "INSERT FAILED::", e);
     process.exit(1);
   }
 

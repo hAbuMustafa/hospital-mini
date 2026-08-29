@@ -1,5 +1,5 @@
 import { form, getRequestEvent, query } from "$app/server";
-import { parseDate } from "$lib/date/utils";
+import { formatDate, parseDate } from "$lib/date/utils";
 import { db } from "$lib/server/db/";
 import {
   drugs,
@@ -76,7 +76,7 @@ export const getDispenses = query(
         dispenses,
       };
     } catch (err) {
-      console.error(err);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), err);
 
       return {
         ward: patient.ward_on_admission,
@@ -145,7 +145,7 @@ export const createInvoice = form(
         addItems: !newInvoice.is_closed,
       };
     } catch (error) {
-      console.error(error);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), error);
     }
   }
 );

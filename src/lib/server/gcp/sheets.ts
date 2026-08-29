@@ -37,7 +37,11 @@ export async function getSheetRange(spreadsheetId: string, range: string) {
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching sheet range:", error);
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "Error fetching sheet range:",
+      error
+    );
     throw error;
   }
 }
@@ -63,7 +67,11 @@ export async function getSheetRanges(spreadsheetId: string, ranges: string[]) {
 
     return result;
   } catch (error) {
-    console.error("Error fetching sheet ranges:", error);
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "Error fetching sheet ranges:",
+      error
+    );
     throw error;
   }
 }
@@ -107,7 +115,11 @@ export async function appendSheetRow(
       data: response.data,
     };
   } catch (error) {
-    console.error("Error appending row to sheet:", error);
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "Error appending row to sheet:",
+      error
+    );
     throw error;
   }
 }
@@ -121,6 +133,11 @@ export async function saveNarcoticTicketToGoogleSheet(
       [formatDate(row[0], "M/D/YYYY HH:mm:ss"), ...row.slice(1)],
     ]);
   } catch (err) {
-    console.error("Ticket", ticketId, "not saved to Google Sheet");
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "Ticket",
+      ticketId,
+      "not saved to Google Sheet"
+    );
   }
 }

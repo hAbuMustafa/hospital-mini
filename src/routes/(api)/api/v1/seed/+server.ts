@@ -1,13 +1,14 @@
 import { json } from "@sveltejs/kit";
 import { seed_pw } from "$env/static/private";
 import { initialize } from "$lib/server/db/init";
+import { formatDate } from "$lib/date/utils";
 
 export async function GET({ url }) {
   const pw = url.searchParams.get("pw");
 
   if (!pw || pw !== seed_pw) return json("SURE THING! All seeding is skipped 🫡");
 
-  console.log("🌱 Seeding Started!");
+  console.log(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), "🌱 Seeding Started!");
 
   console.time("💠 Seeding");
   await initialize();

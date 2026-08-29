@@ -23,6 +23,7 @@ import {
 } from "$lib/server/gcp/utils";
 import { eq } from "drizzle-orm";
 import { reportSheetMultiFetch, reportSheetFetch } from "./utils";
+import { formatDate } from "$lib/date/utils";
 
 export async function syncPatients() {
   // 1. Get your numbers ready
@@ -43,9 +44,12 @@ export async function syncPatients() {
     !latestDischargeCount ||
     !latestNarcoticsDispensedCount
   ) {
-    console.error("⚠️ DATABASE is out of sync. Probably not initialized.");
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "⚠️ DATABASE is out of sync. Probably not initialized."
+    );
     for (const { item, value } of latestRows) {
-      console.info(item + ":", value);
+      console.info(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), item + ":", value);
     }
     return;
   }
@@ -96,6 +100,7 @@ export async function syncPatients() {
         .returning();
 
       console.log(
+        formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
         `♻️✔️ Synced ${fetchedPatientsData.Admissions.values.length} Admissions. Current count is ${newCount.value}`
       );
     }
@@ -116,6 +121,7 @@ export async function syncPatients() {
         .returning();
 
       console.log(
+        formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
         `♻️✔️ Synced ${fetchedPatientsData.Transfers.values.length} Transfers. Current count is ${newCount.value}`
       );
     }
@@ -138,6 +144,7 @@ export async function syncPatients() {
         .returning();
 
       console.log(
+        formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
         `♻️✔️ Synced ${fetchedPatientsData.Discharges.values.length} Discharges. Current count is ${newCount.value}`
       );
     }
@@ -178,6 +185,7 @@ export async function syncPatients() {
         .returning();
 
       console.log(
+        formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
         `♻️✔️ Synced ${fetchedNarcoticsDispensed.values.length} narcotic dispenses. Current count is ${newCount.value}`
       );
     }
@@ -191,7 +199,10 @@ export async function syncDrugs() {
   reportSheetFetch(fetchedDrugs);
 
   if (!fetchedDrugs.values) {
-    console.error("⚠️♻️ Database Sync Error. Couldn't fetch drugs.");
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "⚠️♻️ Database Sync Error. Couldn't fetch drugs."
+    );
     return;
   }
 
@@ -199,11 +210,14 @@ export async function syncDrugs() {
   await db.delete(drugs);
 
   // 3. PARSE new data
-  console.info("🧮 Processing Drugs");
+  console.info(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), "🧮 Processing Drugs");
   const seedableDrugs = fetchedDrugs.values.slice(1).map((item) => drugRowToObject(item));
 
   // 4. INSERT New data
   await db.insert(drugs).values(seedableDrugs);
 
-  console.info(`♻️✔️ Synced ${fetchedDrugs.values.length} drugs.`);
+  console.info(
+    formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+    `♻️✔️ Synced ${fetchedDrugs.values.length} drugs.`
+  );
 }

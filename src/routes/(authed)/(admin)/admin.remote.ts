@@ -1,4 +1,5 @@
 import { form, query } from "$app/server";
+import { formatDate } from "$lib/date/utils";
 import { db } from "$lib/server/db";
 import { departments, user } from "$lib/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -30,7 +31,7 @@ export const changeAffiliation = form(
         .where(eq(user.id, data.userId));
       return { success: true };
     } catch (err) {
-      console.error(err);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), err);
       return {
         error: err,
       };
@@ -49,7 +50,7 @@ export const changeRole = form(
 
       return { success: true };
     } catch (err) {
-      console.error(err);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), err);
       return {
         error: err,
       };

@@ -1,3 +1,4 @@
+import { formatDate } from "$lib/date/utils";
 import { syncDrugs, syncPatients } from "$lib/server/db/sync";
 import { auth } from "$lib/server/utils/auth";
 import { egyptianPhoneNumber, emailPattern, usernamePattern } from "$lib/utils/patterns";
@@ -72,15 +73,21 @@ export const actions = {
 
       Promise.all([syncDrugs(), syncPatients()]).then(
         () => {
-          console.log("✔️ Sync on login Success");
+          console.log(
+            formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+            "✔️ Sync on login Success"
+          );
         },
         (e) => {
-          console.error("⚠️ Error in sync at login:");
-          console.error(e);
+          console.error(
+            formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+            "⚠️ Error in sync at login:"
+          );
+          console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
         }
       );
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
 
       return fail(400, "المستخدم غير موجود");
     }

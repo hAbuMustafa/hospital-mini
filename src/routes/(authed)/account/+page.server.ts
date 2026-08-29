@@ -1,3 +1,4 @@
+import { formatDate } from "$lib/date/utils";
 import { db } from "$lib/server/db/index.js";
 import { otp } from "$lib/server/db/schema.js";
 import { auth } from "$lib/server/utils/auth";
@@ -30,7 +31,7 @@ export const actions = {
         headers: request.headers,
       });
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(500, {
         message: "فشل تعديل الاسم",
       });
@@ -55,7 +56,7 @@ export const actions = {
         headers: request.headers,
       });
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(500, {
         message: "فشل تعديل الاسم المختصر",
       });
@@ -80,7 +81,7 @@ export const actions = {
         headers: request.headers,
       });
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(500, {
         message: "فشل تعديل البريد الإلكتروني",
       });
@@ -120,7 +121,7 @@ export const actions = {
         headers: request.headers,
       });
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(500, {
         message: "فشل تعديل رقم الموبايل",
       });
@@ -147,7 +148,7 @@ export const actions = {
         headers: request.headers,
       });
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(500, {
         message: "فشل تعديل اسم المستخدم",
       });
@@ -176,7 +177,7 @@ export const actions = {
         headers: request.headers,
       });
     } catch (e) {
-      console.error(e);
+      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
       return fail(500, {
         message: "فشل تعديل كلمة المرور",
       });
