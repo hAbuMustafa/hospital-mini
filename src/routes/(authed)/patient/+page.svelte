@@ -116,6 +116,12 @@
                 {#if patient.gender === false}
                   <span title="أنثى">♀️</span>
                 {/if}
+                {#if patient.admission_notes?.includes("مسجون")}
+                  <span title="مسجون">⛓️‍💥</span>
+                {/if}
+                {#if patient.admission_notes?.includes("طالب")}
+                  <span title="طالب">🧑🏻‍🎓</span>
+                {/if}
               </span>
             </span>
           </td>
