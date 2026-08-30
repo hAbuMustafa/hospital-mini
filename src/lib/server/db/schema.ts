@@ -104,7 +104,7 @@ export const invoices = sqliteTable("invoices", {
   id: int().primaryKey({ autoIncrement: true }),
   patient_id: text()
     .notNull()
-    .references(() => patientAdmissions.id),
+    .references(() => patientAdmissions.id, { onDelete: "cascade" }),
   from: int({ mode: "timestamp" }).notNull(),
   to: int({ mode: "timestamp" }).notNull(),
   period_ward: text().notNull(),
