@@ -10,8 +10,8 @@ import {
   transactionTickets,
 } from "$lib/server/db/schema";
 import { totalAndAmount } from "$lib/utils/query";
-import { invalid, redirect } from "@sveltejs/kit";
-import { and, desc, eq, getTableColumns, gt, gte, lte, sql, sum } from "drizzle-orm";
+import { invalid } from "@sveltejs/kit";
+import { and, desc, eq, getTableColumns, gt, gte, lte } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getPatient = query(v.string(), async (patientId) => {
