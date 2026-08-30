@@ -121,8 +121,8 @@
     try {
       saving = true;
 
-      toast.promise(promise, {
-        success: (result: Awaited<typeof form.result>) => {
+      toast.promise(promise as Promise<typeof form.result>, {
+        success: (result) => {
           goto(`/invoice/${result?.addItems ? "patch" : "get"}/${result?.invoiceId}`);
           return `تم إنشاء الفاتورة رقم ${result?.invoiceId}.${result?.addItems ? " يمكنك الآن إضافة أصناف للفاتورة." : ""}`;
         },
