@@ -3,7 +3,7 @@
   import Mic from "@lucide/svelte/icons/mic";
   import MicOff from "@lucide/svelte/icons/mic-off";
 
-  let recording = $state(Boolean(localStorage.getItem("recording") ?? false));
+  let recording = $state(Boolean(browser ? localStorage.getItem("recording") : false));
 
   $effect(() => {
     document.body.classList.toggle("recording", recording);
