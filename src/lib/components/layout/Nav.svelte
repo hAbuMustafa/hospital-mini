@@ -4,6 +4,7 @@
   import SyncAll from "$lib/components/layout/SyncAll.svelte";
   import Filter from "$lib/components/AuthzFilter.svelte";
   import Recording from "./Recording.svelte";
+  import ThemeSelect from "./ThemeSelect.svelte";
 </script>
 
 <nav>
@@ -56,6 +57,9 @@
   {/if}
 
   <ul>
+    <li>
+      <ThemeSelect />
+    </li>
     {#if authState.isAuthenticated}
       <Filter>
         <li>

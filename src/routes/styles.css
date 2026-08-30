@@ -32,6 +32,14 @@
   font-family: serif;
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 body {
   background-color: var(--main-bg-color);
   color: var(--main-text-color);
