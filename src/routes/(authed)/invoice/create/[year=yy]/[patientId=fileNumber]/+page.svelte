@@ -2,7 +2,6 @@
   import { page } from "$app/state";
   import { PUBLIC_System_Started_Since } from "$env/static/public";
   import { formatDate } from "$lib/date/utils";
-  import Eye from "@lucide/svelte/icons/eye";
   import { createInvoice, getPatient } from "../../../invoice.remote";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
@@ -31,7 +30,9 @@
   let saving = $state(false);
 
   function getDate(date: Date | null) {
-    return formatDate(date!, "YYYY/MM/DD (HH:mm)").replace(" (00:00)", "");
+    return formatDate(date!, "YYYY/MM/DD (HH:mm)")
+      .replace(" (00:00)", "")
+      .replace(" (23:59)", "");
   }
 </script>
 
