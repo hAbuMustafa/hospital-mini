@@ -17,6 +17,8 @@
   import Dialog from "$lib/components/Dialog.svelte";
   import TopPicks from "$lib/components/Dispense/TopPicks.svelte";
   import { countryMap, getFlagEmoji } from "$lib/utils/countries";
+  import Female from "@lucide/svelte/icons/venus";
+  import Male from "@lucide/svelte/icons/mars";
 
   const patient = await getPatient(`${page.params.y}/${page.params.id}`);
 
@@ -70,7 +72,11 @@
       {#if isRegisteredPatient}
         {#if typeof patient.gender === "boolean"}
           <span class="patient_gender">
-            {patient.gender !== false ? "♂️" : "♀️"}
+            {#if patient.gender !== false}
+              <Male color="royalblue" />
+            {:else}
+              <Female color="pink"></Female>
+            {/if}
           </span>
         {/if}
         <span class="patient_name">

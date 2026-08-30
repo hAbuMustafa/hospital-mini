@@ -1,6 +1,9 @@
 <script lang="ts">
   import { formatDate, getTermed } from "$lib/date/utils";
   import { countryMap, getFlagEmoji } from "$lib/utils/countries";
+  import Female from "@lucide/svelte/icons/venus";
+  import Inmate from "@lucide/svelte/icons/tally-5";
+  import Student from "@lucide/svelte/icons/graduation-cap";
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
 
@@ -114,13 +117,19 @@
                   </span>
                 {/if}
                 {#if patient.gender === false}
-                  <span title="أنثى">♀️</span>
+                  <span title="أنثى">
+                    <Female color="pink" />
+                  </span>
                 {/if}
                 {#if patient.admission_notes?.includes("مسجون")}
-                  <span title="مسجون">⛓️‍💥</span>
+                  <span title="مسجون">
+                    <Inmate />
+                  </span>
                 {/if}
                 {#if patient.admission_notes?.includes("طالب")}
-                  <span title="طالب">🧑🏻‍🎓</span>
+                  <span title="طالب">
+                    <Student />
+                  </span>
                 {/if}
               </span>
             </span>

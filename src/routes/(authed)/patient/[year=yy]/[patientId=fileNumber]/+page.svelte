@@ -8,6 +8,8 @@
     getPatientData,
     getPatientTransfers,
   } from "./getPatientHistory.remote";
+  import Female from "@lucide/svelte/icons/venus";
+  import Male from "@lucide/svelte/icons/mars";
 
   const patientId = [page.params.year, page.params.patientId].join("/");
 
@@ -21,7 +23,11 @@
 <h1 class:insured={patient.insured}>
   {#if typeof patient.gender === "boolean"}
     <span class="patient_gender">
-      {patient.gender !== false ? "♂️" : "♀️"}
+      {#if patient.gender !== false}
+        <Male color="royalblue" />
+      {:else}
+        <Female color="pink"></Female>
+      {/if}
     </span>
   {/if}
   <span class="patient_name pii">
