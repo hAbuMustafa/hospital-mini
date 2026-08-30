@@ -118,17 +118,17 @@
                 {/if}
                 {#if patient.gender === false}
                   <span title="أنثى">
-                    <Female color="pink" />
+                    <Female color="pink" size="1em" />
                   </span>
                 {/if}
                 {#if patient.admission_notes?.includes("مسجون")}
                   <span title="مسجون">
-                    <Inmate />
+                    <Inmate size="1em" />
                   </span>
                 {/if}
                 {#if patient.admission_notes?.includes("طالب")}
                   <span title="طالب">
-                    <Student />
+                    <Student size="1em" />
                   </span>
                 {/if}
               </span>
