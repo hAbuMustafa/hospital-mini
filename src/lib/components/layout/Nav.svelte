@@ -3,7 +3,7 @@
   import { authState } from "$lib/auth-client/auth.svelte";
   import SyncAll from "$lib/components/layout/SyncAll.svelte";
   import Filter from "$lib/components/AuthzFilter.svelte";
-  import Recording from "../Recording.svelte";
+  import Recording from "./Recording.svelte";
 </script>
 
 <nav>
