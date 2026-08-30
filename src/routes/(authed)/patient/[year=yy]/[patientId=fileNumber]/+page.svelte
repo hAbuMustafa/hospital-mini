@@ -24,7 +24,7 @@
       {patient.gender !== false ? "♂️" : "♀️"}
     </span>
   {/if}
-  <span class="patient_name">
+  <span class="patient_name pii">
     {patient.name}
   </span>
   {#if patient.birthdate}
@@ -42,10 +42,10 @@
   <tbody>
     <tr>
       <th>رقم القيد:</th>
-      <td>{patient.id}</td>
+      <td class="pii">{patient.id}</td>
 
       <th>{patient.id_type}:</th>
-      <td>{patient.id_number}</td>
+      <td class="pii">{patient.id_number}</td>
     </tr>
     <tr>
       <th>قسم الدخول:</th>
@@ -123,7 +123,7 @@
       {#each otherAdmissions as p (p.id)}
         <tr>
           <td>
-            <a href="/patient/{p.id}" class="btn" data-sveltekit-reload>{p.id}</a>
+            <a href="/patient/{p.id}" class="btn pii" data-sveltekit-reload>{p.id}</a>
           </td>
           <td>{formatDate(p.admission_date, "YYYY/MM/DD")}</td>
           <td>

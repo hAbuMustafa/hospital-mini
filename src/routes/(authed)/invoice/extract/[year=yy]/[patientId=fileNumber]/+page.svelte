@@ -71,7 +71,7 @@
     <tbody>
       <tr>
         <th>رقم القيد:</th>
-        <td>{patient.id}</td>
+        <td class="pii">{patient.id}</td>
 
         <th>مدة الإقامة:</th>
         <td>
@@ -80,10 +80,10 @@
       </tr>
       <tr>
         <th>اسم المريض:</th>
-        <td>{patient.name}</td>
+        <td class="pii">{patient.name}</td>
 
         <th>{patient.id_type}:</th>
-        <td>{patient.id_number}</td>
+        <td class="pii">{patient.id_number}</td>
       </tr>
       <tr>
         <th>القسم:</th>

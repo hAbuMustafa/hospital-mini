@@ -35,7 +35,7 @@
   }
 </script>
 
-<h1>{patient.name}</h1>
+<h1 class="pii">{patient.name}</h1>
 
 <table>
   <thead>

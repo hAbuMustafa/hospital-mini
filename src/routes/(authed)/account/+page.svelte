@@ -15,7 +15,7 @@
   let username = $state(authState.user?.username);
 </script>
 
-<h1>{authState.user?.name}</h1>
+<h1 class="pii">{authState.user?.name}</h1>
 
 <div class="wrapper">
   <form
@@ -37,6 +37,7 @@
       type="text"
       id="name"
       name="name"
+      class="pii"
       bind:value={name}
       pattern={triadicArabicName.source}
       autocomplete="off"
@@ -104,6 +105,7 @@
       type="email"
       id="email"
       name="email"
+      class="pii"
       bind:value={email}
       autocomplete="off"
       required
@@ -135,6 +137,7 @@
       type="text"
       id="phone-number"
       name="phone-number"
+      class="pii"
       bind:value={phoneNumber}
       pattern={egyptianPhoneNumber.source}
       autocomplete="off"

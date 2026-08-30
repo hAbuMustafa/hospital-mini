@@ -18,8 +18,8 @@
     goto(href);
   }}
 >
-  <span><Highlight text={patient.id} {query} /></span>
-  <strong><Highlight text={patient.name!} {query} /></strong>
+  <span class="pii"><Highlight text={patient.id} {query} /></span>
+  <strong class="pii"><Highlight text={patient.name!} {query} /></strong>
   <span>
     من <span class="date">{formatDate(patient.admission_date, "YYYY/MM/DD")}</span>
     {#if patient.discharge_date}
@@ -27,7 +27,12 @@
     {/if}
   </span>
   {#if patient.id_number}
-    <span>{patient.id_type}: <Highlight text={patient.id_number!} {query} /></span>
+    <span>
+      <span class="id-type">{patient.id_type}:</span>
+      <span class="id-number pii">
+        <Highlight text={patient.id_number!} {query} />
+      </span>
+    </span>
   {/if}
 </button>
 

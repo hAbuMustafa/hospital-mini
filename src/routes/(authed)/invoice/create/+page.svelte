@@ -52,9 +52,9 @@
           )}
       >
         <td>
-          <a href="/patient/{patient.id}" class="btn">{patient.id}</a>
+          <a href="/patient/{patient.id}" class="btn pii">{patient.id}</a>
         </td>
-        <td>{patient.name}</td>
+        <td class="pii">{patient.name}</td>
         <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
         <td>
           {#if patient.discharge_date}

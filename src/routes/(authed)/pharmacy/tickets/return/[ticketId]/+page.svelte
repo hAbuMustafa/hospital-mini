@@ -19,7 +19,7 @@
   ارتجاع
   <small class="ticket-number">
     (#{items[0].ticket_id})
-  </small>: {items[0].patient_name ?? items[0].patient_id}
+  </small>: <span class="pii">{items[0].patient_name ?? items[0].patient_id}</span>
 </h1>
 <h2>{formatDate(items[0].timestamp!, "YYYY/MM/DD (HH:mm)")}</h2>
 

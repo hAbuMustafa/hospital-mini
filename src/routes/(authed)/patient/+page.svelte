@@ -89,11 +89,11 @@
       {#each patientsList as patient (patient.id)}
         <tr class:filtered-out={!qRegex.test(patient.name!)}>
           <td>
-            <a href="/patient/{patient.id}" class="btn">{patient.id}</a>
+            <a href="/patient/{patient.id}" class="btn pii">{patient.id}</a>
           </td>
           <td>
             <span class="patient-card">
-              <span class="patient-name">
+              <span class="patient-name pii">
                 {#if query}
                   {@html patient.name?.replaceAll(
                     qRegex,
