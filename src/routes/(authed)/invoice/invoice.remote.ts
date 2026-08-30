@@ -125,6 +125,9 @@ export const createInvoice = form(
     const issued_by = getRequestEvent().locals.user?.id!;
     const issuing_department = getRequestEvent().locals.user?.affiliation!;
 
+    if (!issuing_department)
+      invalid(issue("أنت غير تابع لأي جهة. لا يمكنك تسجيل فواتير"));
+
     try {
       const [newInvoice] = await db
         .insert(invoices)
@@ -146,6 +149,7 @@ export const createInvoice = form(
       };
     } catch (error) {
       console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), error);
+      invalid(issue((error as { message: string }).message));
     }
   }
 );
