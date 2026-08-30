@@ -20,6 +20,15 @@ export const getPatient = query(v.string(), async (patientId) => {
     .from(patients_view)
     .where(eq(patients_view.id, patientId));
 
+  return patient;
+});
+
+export const getPatientWithTransfers = query(v.string(), async (patientId) => {
+  const [patient] = await db
+    .select()
+    .from(patients_view)
+    .where(eq(patients_view.id, patientId));
+
   const transfers = await db
     .select()
     .from(patientTransfers)

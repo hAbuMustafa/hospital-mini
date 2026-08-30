@@ -2,11 +2,13 @@
   import { page } from "$app/state";
   import { PUBLIC_System_Started_Since } from "$env/static/public";
   import { formatDate } from "$lib/date/utils";
-  import { createInvoice, getPatient } from "../../../invoice.remote";
+  import { createInvoice, getPatientWithTransfers } from "../../../invoice.remote";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
 
-  const patientGetter = getPatient([page.params.year, page.params.patientId].join("/"));
+  const patientGetter = getPatientWithTransfers(
+    [page.params.year, page.params.patientId].join("/")
+  );
 
   const patient = await patientGetter;
 
