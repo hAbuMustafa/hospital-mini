@@ -12,7 +12,7 @@ export function reportSheetMultiFetch(
     console.info(
       formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
       "🔻 Fetched",
-      fetchResult[tableName].values?.length,
+      fetchResult[tableName].values?.length ?? 0,
       tableName + "s"
     );
   }
@@ -22,7 +22,7 @@ export function reportSheetFetch(fetchResult: sheets_v4.Schema$ValueRange) {
   console.info(
     formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
     "🔻 Fetched",
-    fetchResult.values?.length,
+    fetchResult.values?.length ?? 0,
     fetchResult.range?.split("!")[0] + "s"
   );
 }
