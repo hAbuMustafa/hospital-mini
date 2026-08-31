@@ -129,7 +129,7 @@ export const invoiceExtraItems = sqliteTable("invoiceExtraItems", {
   item_id: int()
     .notNull()
     .references(() => drugs.id),
-  qty: int().notNull(),
+  qty: int().notNull().default(1),
   unit_price: int().notNull(),
 
   added_by: text()
