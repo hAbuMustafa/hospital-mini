@@ -2,7 +2,19 @@
   import { page } from "$app/state";
   import { PUBLIC_System_Started_Since } from "$env/static/public";
   import { formatDate } from "$lib/date/utils";
-  import { createInvoice, getPatientWithTransfers } from "../../../invoice.remote";
+  import Lock from "@lucide/svelte/icons/lock-keyhole-open";
+  import Locked from "@lucide/svelte/icons/lock";
+  import Cancel from "@lucide/svelte/icons/x";
+  import Copy from "@lucide/svelte/icons/layers-2";
+  import Add from "@lucide/svelte/icons/circle-plus";
+  import {
+    cancelInvoice,
+    closeInvoice,
+    copyInvoice,
+    createInvoice,
+    getPatientInvoices,
+    getPatientWithTransfers,
+  } from "../../../invoice.remote";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
 
@@ -30,6 +42,8 @@
   );
 
   let saving = $state(false);
+
+  let otherInvoices = $derived(await getPatientInvoices(patient.id));
 
   function getDate(date: Date | null) {
     return formatDate(date!, "YYYY/MM/DD (HH:mm)")
@@ -117,6 +131,7 @@
 </p>
 
 <form
+  class="create-invoice"
   {...createInvoice.enhance(async (form) => {
     const { promise, resolve, reject } = Promise.withResolvers();
 
@@ -182,7 +197,118 @@
   <input type="submit" class="btn" value="إنشاء فاتورة" disabled={saving} />
 </form>
 
-<!-- todo: list all other invoices for patient -->
+{#if otherInvoices.length}
+  <h2>فواتير أخرى</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2">رقم الفاتورة</th>
+        <th rowspan="2">الأقسام</th>
+        <th colspan="2">الفترة</th>
+        <th rowspan="2">أنشأها</th>
+        <th rowspan="2">تاريخ الإنشاء</th>
+        <th colspan="4">إجراءات</th>
+      </tr>
+      <tr>
+        <th>من</th>
+        <th>إلى</th>
+        <th>إضافة أصناف</th>
+        <th>نسخ الأصناف</th>
+        <th>إقفال</th>
+        <th>إلغاء الفاتورة</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each otherInvoices as invoice, i (invoice.id)}
+        <tr class:cancelled={invoice.is_cancelled}>
+          <td>{invoice.id}</td>
+          <td>{invoice.period_ward}</td>
+          <td>{getDate(invoice.from)}</td>
+          <td>{getDate(invoice.to)}</td>
+          <td>{invoice.user_name}</td>
+          <td>{getDate(invoice.issued_at)}</td>
+          <td>
+            {#if !invoice.is_closed}
+              <button
+                type="button"
+                class="btn add"
+                title="إضافة أصناف"
+                onclick={() => goto(`/invoice/patch/${invoice.id}`)}
+              >
+                <Add />
+              </button>
+            {/if}
+          </td>
+          <td>
+            {#if invoice.is_closed}
+              <form
+                {...copyInvoice.for(invoice.id).enhance(async (form) => {
+                  toast.promise(form.submit(), {
+                    success: (result) => {
+                      goto(`/invoice/patch/${form.result?.newInvoiceId}`);
+                      return "تم نسخ الفاتورة بنجاح";
+                    },
+                    error: "حدث خطأ غير متوقع",
+                    loading: "جار نسخ الفاتورة...",
+                  });
+                })}
+              >
+                <input
+                  {...copyInvoice
+                    .for(invoice.id)
+                    .fields.invoiceId.as("hidden", invoice.id)}
+                />
+
+                <button
+                  type="submit"
+                  class="btn"
+                  title="فاتورة جديدة مفتوحة بنفس الأصناف"
+                >
+                  <Copy />
+                </button>
+              </form>
+            {/if}
+          </td>
+          <td>
+            {#if invoice.is_closed}
+              <button type="button" class="btn" title="مغلقة" disabled>
+                <Locked />
+              </button>
+            {:else}
+              <button
+                type="button"
+                class="btn lock"
+                title="إقفال الفاتورة وعدم السماح بإضافة أصناف إضافية لها للسماح بطباعتها"
+                onclick={async () => {
+                  closeInvoice(invoice.id);
+                }}
+              >
+                <Lock />
+              </button>
+            {/if}
+          </td>
+          <td>
+            {#if !invoice.is_cancelled}
+              <button
+                type="button"
+                class="btn cancel"
+                title="إلغاء الفاتورة وعدم احتسابها ضمن تكاليف إقامة المريض ومنع طباعتها"
+                onclick={async () => {
+                  cancelInvoice(invoice.id);
+                }}
+              >
+                <Cancel />
+              </button>
+            {:else}
+              ملغية
+            {/if}
+          </td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+{/if}
 
 <style>
   table {
@@ -210,8 +336,41 @@
     background-color: hsla(from red h s l / 0.5);
   }
 
-  form {
+  form.create-invoice {
     display: grid;
     gap: 1rem;
+  }
+
+  tr.cancelled {
+    text-decoration: line-through double gray;
+    color: gray;
+  }
+
+  table .btn:not(:disabled) {
+    --bg: var(--main-accent-color);
+    background-color: var(--bg);
+    color: white;
+
+    &:hover,
+    &:focus {
+      background-color: hsl(from var(--bg) h s 30%);
+    }
+
+    &:active {
+      background-color: hsl(from var(--bg) h s 10%);
+    }
+
+    &.add {
+      --bg: green;
+    }
+
+    &.lock {
+      --bg: gold;
+      color: black;
+    }
+
+    &.cancel {
+      --bg: maroon;
+    }
   }
 </style>

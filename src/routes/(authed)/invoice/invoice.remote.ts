@@ -1,13 +1,15 @@
-import { form, getRequestEvent, query } from "$app/server";
+import { command, form, getRequestEvent, query } from "$app/server";
 import { formatDate, parseDate } from "$lib/date/utils";
 import { db } from "$lib/server/db/";
 import {
   drugs,
+  invoiceExtraItems,
   invoices,
   patients_view,
   patientTransfers,
   transactions,
   transactionTickets,
+  user,
 } from "$lib/server/db/schema";
 import { totalAndAmount } from "$lib/utils/query";
 import { invalid } from "@sveltejs/kit";
@@ -162,3 +164,84 @@ export const createInvoice = form(
     }
   }
 );
+
+export const getPatientInvoices = query(v.string(), async (patientId) => {
+  return await db
+    .select({
+      ...getTableColumns(invoices),
+      user_name: user.name,
+    })
+    .from(invoices)
+    .leftJoin(user, eq(invoices.issued_by, user.id))
+    .where(
+      and(
+        eq(invoices.patient_id, patientId),
+        eq(invoices.issuing_department, getRequestEvent().locals.user?.affiliation!)
+      )
+    );
+});
+
+export const copyInvoice = form(
+  v.object({
+    invoiceId: v.number(),
+  }),
+  async (data) => {
+    try {
+      const [oldInvoice] = await db
+        .select()
+        .from(invoices)
+        .where(eq(invoices.id, data.invoiceId));
+
+      const oldInvoiceItems = await db
+        .select()
+        .from(invoiceExtraItems)
+        .where(eq(invoiceExtraItems.invoice_id, data.invoiceId));
+
+      const [newInvoice] = await db
+        .insert(invoices)
+        .values({
+          ...oldInvoice,
+          id: undefined,
+          is_closed: undefined,
+          is_cancelled: undefined,
+          issued_at: undefined,
+          issued_by: getRequestEvent().locals.user?.id!,
+        })
+        .returning();
+
+      await db.insert(invoiceExtraItems).values(
+        oldInvoiceItems.map((item) => ({
+          ...item,
+          id: undefined,
+          invoice_id: newInvoice.id,
+          added_by: newInvoice.issued_by,
+          added_at: newInvoice.issued_at,
+        }))
+      );
+
+      return { newInvoiceId: newInvoice.id };
+    } catch (err) {
+      console.error(err);
+    }
+  }
+);
+
+export const closeInvoice = command(v.number(), async (invoiceNumber) => {
+  const [invoice] = await db
+    .update(invoices)
+    .set({ is_closed: true })
+    .where(eq(invoices.id, invoiceNumber))
+    .returning();
+
+  void getPatientInvoices(invoice.patient_id).refresh();
+});
+
+export const cancelInvoice = command(v.number(), async (invoiceNumber) => {
+  const [invoice] = await db
+    .update(invoices)
+    .set({ is_cancelled: true, is_closed: true })
+    .where(eq(invoices.id, invoiceNumber))
+    .returning();
+
+  void getPatientInvoices(invoice.patient_id).refresh();
+});
