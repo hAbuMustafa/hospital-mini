@@ -135,7 +135,9 @@ export const invoiceExtraItems = sqliteTable("invoiceExtraItems", {
   added_by: text()
     .notNull()
     .references(() => user.id),
-  added_at: int({ mode: "timestamp" }).notNull(),
+  added_at: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 /*
