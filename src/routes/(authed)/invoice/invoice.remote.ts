@@ -12,7 +12,7 @@ import {
   user,
 } from "$lib/server/db/schema";
 import { totalAndAmount } from "$lib/utils/query";
-import { invalid } from "@sveltejs/kit";
+import { error, invalid } from "@sveltejs/kit";
 import { and, desc, eq, getTableColumns, gt, gte, lte } from "drizzle-orm";
 import * as v from "valibot";
 
@@ -38,6 +38,135 @@ export const getPatientWithTransfers = query(v.string(), async (patientId) => {
 
   return { ...patient, transfers };
 });
+
+export const getInvoice = query(v.number(), async (invoiceNumber) => {
+  const [invoice] = await db
+    .select()
+    .from(invoices)
+    .where(eq(invoices.id, invoiceNumber));
+
+  if (!invoice) error(404, { message: "لا توجد فاتورة بالرقم المطلوب" });
+
+  const [patient] = await db
+    .select()
+    .from(patients_view)
+    .where(eq(patients_view.id, invoice.patient_id));
+
+  return { ...invoice, patient };
+});
+
+export const getInvoiceItems = query(v.number(), async (invoiceNumber) => {
+  return await db
+    .select({
+      ...getTableColumns(invoiceExtraItems),
+      user_name: user.displayUsername,
+      item_name: drugs.name_ar,
+      item_tradename: drugs.tradename_ar,
+      item_unit: drugs.unit,
+    })
+    .from(invoiceExtraItems)
+    .where(eq(invoiceExtraItems.invoice_id, invoiceNumber))
+    .leftJoin(user, eq(invoiceExtraItems.added_by, user.id))
+    .leftJoin(drugs, eq(invoiceExtraItems.item_id, drugs.id));
+});
+
+export const getPeriodItems = query(
+  v.object({
+    patientId: v.string(),
+    from: v.date(),
+    to: v.date(),
+  }),
+  async (data) => {
+    return await db
+      .select({
+        id: drugs.id,
+        name: drugs.name_ar,
+        ...totalAndAmount(),
+      })
+      .from(transactions)
+      .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
+      .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+      .where(
+        and(
+          eq(transactionTickets.patient_id, data.patientId),
+          gte(transactionTickets.timestamp, data.from),
+          lte(transactionTickets.timestamp, data.to)
+        )
+      )
+      .groupBy(transactions.item_id);
+  }
+);
+
+export const addInvoiceItem = command(
+  v.object({
+    invoiceId: v.number(),
+    drugId: v.number(),
+    drugUnitPrice: v.number(),
+  }),
+  async (data) => {
+    await db.insert(invoiceExtraItems).values({
+      invoice_id: data.invoiceId,
+      item_id: data.drugId,
+      added_by: getRequestEvent().locals.user?.id!,
+      unit_price: data.drugUnitPrice,
+    });
+
+    void getInvoiceItems(data.invoiceId).refresh();
+  }
+);
+
+export const updateInvoiceItem = form(
+  v.object({ invoiceId: v.number(), itemId: v.number(), amount: v.number() }),
+  async (data) => {
+    await db
+      .update(invoiceExtraItems)
+      .set({ qty: data.amount })
+      .where(
+        and(
+          eq(invoiceExtraItems.invoice_id, data.invoiceId),
+          eq(invoiceExtraItems.id, data.itemId)
+        )
+      );
+
+    void getInvoiceItems(data.invoiceId).refresh();
+  }
+);
+
+export const updateInvoiceItemAmount = command(
+  v.object({ invoiceId: v.number(), itemId: v.number(), amount: v.number() }),
+  async (data) => {
+    await db
+      .update(invoiceExtraItems)
+      .set({ qty: data.amount })
+      .where(
+        and(
+          eq(invoiceExtraItems.invoice_id, data.invoiceId),
+          eq(invoiceExtraItems.id, data.itemId)
+        )
+      );
+
+    void getInvoiceItems(data.invoiceId).refresh();
+  }
+);
+
+export const deleteInvoiceItem = command(
+  v.object({
+    itemId: v.number(),
+    invoiceId: v.number(),
+  }),
+  async (data) => {
+    await db
+      .delete(invoiceExtraItems)
+      .where(
+        and(
+          eq(invoiceExtraItems.invoice_id, data.invoiceId),
+          eq(invoiceExtraItems.id, data.itemId)
+        )
+      );
+
+    void getInvoiceItems(data.invoiceId).refresh();
+  }
+);
 
 export const getDispenses = query(
   v.object({
