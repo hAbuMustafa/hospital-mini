@@ -1,12 +1,16 @@
-export const nonDivisibleBoxes = [
-  { id: 166, min: 30 },
-  { id: 198, min: 60 },
-];
+export const nonDivisibleBoxes = new Map([
+  [166, 30],
+  [198, 60],
+]);
 
 export function isNarcotic(drug: { category: string }) {
   return drug.category === "مخدرات";
 }
 
+export function getMinAmount(drugId: number) {
+  return nonDivisibleBoxes.get(drugId) ?? 1;
+}
+
 export function unacceptedAmount(drugId: number, amount: number) {
-  return nonDivisibleBoxes.some((b) => b.id === drugId && amount % b.min !== 0);
+  return amount % getMinAmount(drugId) !== 0;
 }
