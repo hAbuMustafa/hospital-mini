@@ -7,6 +7,7 @@
   import Cancel from "@lucide/svelte/icons/x";
   import Copy from "@lucide/svelte/icons/layers-2";
   import Add from "@lucide/svelte/icons/circle-plus";
+  import Print from "@lucide/svelte/icons/printer";
   import {
     cancelInvoice,
     closeInvoice,
@@ -208,7 +209,7 @@
         <th colspan="2">الفترة</th>
         <th rowspan="2">أنشأها</th>
         <th rowspan="2">تاريخ الإنشاء</th>
-        <th colspan="4">إجراءات</th>
+        <th colspan="5">إجراءات</th>
       </tr>
       <tr>
         <th>من</th>
@@ -217,6 +218,7 @@
         <th>نسخ الأصناف</th>
         <th>إقفال</th>
         <th>إلغاء الفاتورة</th>
+        <th>طباعة</th>
       </tr>
     </thead>
     <tbody>
@@ -304,6 +306,19 @@
               ملغية
             {/if}
           </td>
+          <td>
+            {#if invoice.is_closed && !invoice.is_cancelled}
+              <button
+                class="btn print"
+                onclick={() => {
+                  goto(`/invoice/print/${invoice.id}`);
+                }}
+                title="طباعة الفاتورة"
+              >
+                <Print />
+              </button>
+            {/if}
+          </td>
         </tr>
       {/each}
     </tbody>
@@ -371,6 +386,11 @@
 
     &.cancel {
       --bg: maroon;
+    }
+
+    &.print {
+      --bg: white;
+      color: black;
     }
   }
 </style>
