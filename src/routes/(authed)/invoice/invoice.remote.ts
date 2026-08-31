@@ -169,7 +169,7 @@ export const getPatientInvoices = query(v.string(), async (patientId) => {
   return await db
     .select({
       ...getTableColumns(invoices),
-      user_name: user.name,
+      user_name: user.displayUsername,
     })
     .from(invoices)
     .leftJoin(user, eq(invoices.issued_by, user.id))
