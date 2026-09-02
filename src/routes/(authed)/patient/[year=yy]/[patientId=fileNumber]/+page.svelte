@@ -87,6 +87,11 @@
         {/if}
       </td>
     </tr>
+    <tr>
+      <td colspan="4">
+        <a class="btn invoice header" href="/invoice/create/{patient.id}">فاتورة</a>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -204,5 +209,10 @@
   a.btn.invoice {
     background-color: gold;
     color: contrast-color(gold);
+
+    &.header {
+      margin-block: 0.5rem;
+      width: 50%;
+    }
   }
 </style>
