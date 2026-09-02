@@ -238,7 +238,7 @@
                 title="إضافة أصناف"
                 onclick={() => goto(`/invoice/patch/${invoice.id}`)}
               >
-                <Add />
+                <Add size="1em" />
               </button>
             {/if}
           </td>
@@ -267,7 +267,7 @@
                   class="btn"
                   title="فاتورة جديدة مفتوحة بنفس الأصناف"
                 >
-                  <Copy />
+                  <Copy size="1em" />
                 </button>
               </form>
             {/if}
@@ -275,7 +275,7 @@
           <td>
             {#if invoice.is_closed}
               <button type="button" class="btn" title="مغلقة" disabled>
-                <Locked />
+                <Locked size="1em" />
               </button>
             {:else}
               <button
@@ -286,7 +286,7 @@
                   closeInvoice(invoice.id);
                 }}
               >
-                <Lock />
+                <Lock size="1em" />
               </button>
             {/if}
           </td>
@@ -300,7 +300,7 @@
                   cancelInvoice(invoice.id);
                 }}
               >
-                <Cancel />
+                <Cancel size="1em" />
               </button>
             {:else}
               ملغية
@@ -315,7 +315,7 @@
                 }}
                 title="طباعة الفاتورة"
               >
-                <Print />
+                <Print size="1em" />
               </button>
             {/if}
           </td>
@@ -335,6 +335,10 @@
     border: var(--main-border);
 
     padding: 0.25rem 0.5rem;
+  }
+
+  th {
+    width: min-content;
   }
 
   span.from,
