@@ -230,8 +230,8 @@ export const getDispenses = query(
 export const createInvoice = form(
   v.object({
     patientId: v.string(),
-    fromTimestamp: v.string(),
-    toTimestamp: v.string(),
+    fromTransferId: v.number(),
+    toTransferId: v.number(),
     keepOpen: v.optional(v.boolean()),
   }),
   async (data, issue) => {
@@ -242,25 +242,22 @@ export const createInvoice = form(
 
     if (!patient) invalid(issue.patientId("لا يوجد مريض مسجل برقم الملف المطلوب"));
 
-    const from = parseDate(data.fromTimestamp)!;
-    const to = parseDate(data.toTimestamp)!;
-
-    if (from < patient.admission_date)
-      invalid(issue.fromTimestamp("تاريخ بداية الفترة يسبق تاريخ الدخول"));
-
-    if (patient.discharge_date && to > patient.discharge_date)
-      invalid(issue.toTimestamp("تاريخ نهاية الفترة بعد تاريخ الخروج"));
-
     const transfers = await db
       .select()
       .from(patientTransfers)
       .where(
         and(
           eq(patientTransfers.patient_id, data.patientId),
-          gte(patientTransfers.timestamp, from),
-          lte(patientTransfers.timestamp, to)
+          gte(patientTransfers.id, data.fromTransferId),
+          lte(patientTransfers.id, data.toTransferId)
         )
-      );
+      )
+      .orderBy(patientTransfers.timestamp);
+
+    if (!transfers.length) invalid(issue("الفترة المختارة خارج فترة إقامة المريض"));
+
+    const from = transfers[0].timestamp!;
+    const to = transfers.at(-1)?.timestamp!;
 
     const issued_by = getRequestEvent().locals.user?.id!;
     const issuing_department = getRequestEvent().locals.user?.affiliation!;
@@ -275,7 +272,13 @@ export const createInvoice = form(
           patient_id: data.patientId,
           from,
           to,
-          period_ward: transfers.map((p) => p.to_ward).join(" - "),
+          period_ward:
+            transfers.length > 1
+              ? transfers
+                  .filter((_, i) => i < transfers.length - 1)
+                  .map((p) => p.to_ward)
+                  .join(" - ")
+              : transfers[0].to_ward!,
           issued_by,
           issuing_department,
           is_closed: !data.keepOpen,

@@ -32,16 +32,11 @@
   let from = $state(0);
   let to = $state(lastTransferIndex);
 
-  let fromDateString = $derived(
-    formatDate(patient.transfers[from].timestamp!, "YYYY-MM-DDTHH:mm:ss")
-  );
-  let toDateString = $derived(
-    formatDate(
-      to < lastTransferIndex
-        ? patient.transfers[to + 1].timestamp!
-        : (patient.discharge_date ?? new Date()),
-      "YYYY-MM-DDTHH:mm:ss"
-    )
+  let fromTransferId = $derived(patient.transfers[from].id);
+  let toTransferId = $derived(
+    to < lastTransferIndex
+      ? patient.transfers[to + 1].id
+      : patient.transfers[lastTransferIndex].id
   );
 
   let saving = $state(false);
@@ -187,13 +182,13 @@
   <input
     readonly
     step="1"
-    {...createInvoice.fields.fromTimestamp.as("hidden", fromDateString)}
+    {...createInvoice.fields.fromTransferId.as("hidden", fromTransferId)}
   />
 
   <input
     readonly
     step="1"
-    {...createInvoice.fields.toTimestamp.as("hidden", toDateString)}
+    {...createInvoice.fields.toTransferId.as("hidden", toTransferId)}
   />
 
   {#if systemFirstDate > patient.admission_date && systemFirstDate > patient.transfers[from].timestamp!}
