@@ -68,26 +68,27 @@ table {
 a.btn,
 button.btn,
 input.btn {
-  color: unset;
+  --bg: var(--main-accent-color);
+  background-color: var(--bg);
+  color: white;
   text-decoration: unset;
   padding: 0.25rem;
   border: var(--main-border);
   border-radius: 4px;
 
   font-weight: bolder;
-  background-color: var(--main-accent-color);
-
-  &:hover,
-  &:focus {
-    background-color: hsl(from var(--main-accent-color) h s 60%);
-  }
-
-  &:active {
-    background-color: hsl(from var(--main-accent-color) h s 40%);
-  }
 
   &:disabled {
     background-color: hsl(from var(--main-accent-color) h 0% 40%);
+  }
+
+  &:hover,
+  &:focus {
+    background-color: hsl(from var(--bg) h s 30%);
+  }
+
+  &:active {
+    background-color: hsl(from var(--bg) h s 10%);
   }
 }
 

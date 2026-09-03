@@ -393,19 +393,6 @@
   }
 
   table .btn:not(:disabled) {
-    --bg: var(--main-accent-color);
-    background-color: var(--bg);
-    color: white;
-
-    &:hover,
-    &:focus {
-      background-color: hsl(from var(--bg) h s 30%);
-    }
-
-    &:active {
-      background-color: hsl(from var(--bg) h s 10%);
-    }
-
     &.add {
       --bg: green;
     }
