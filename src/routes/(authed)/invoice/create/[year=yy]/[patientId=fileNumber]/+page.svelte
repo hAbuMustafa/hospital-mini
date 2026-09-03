@@ -58,7 +58,12 @@
 <table>
   <thead>
     <tr>
-      <th></th>
+      <th colspan="2">تسعير</th>
+      <th colspan="4">الإقامة</th>
+    </tr>
+    <tr>
+      <th>من</th>
+      <th>إلى</th>
       <th>القسم</th>
       <th>من</th>
       <th>إلى</th>
@@ -70,31 +75,32 @@
         <td>
           <input
             type="checkbox"
-            name={stay.id + ""}
-            id={stay.id + ""}
+            id={stay.id + "-to"}
+            class:from={i === from}
             bind:checked={
               () => from <= i && to >= i,
               (v) => {
-                if (v === true) {
-                  if (i >= to) {
-                    to = i;
-                  } else {
-                    from = i;
-                  }
-                } else if (v === false) {
-                  if (i > from) {
-                    if (i < lastTransferIndex) {
-                      from = i + 1;
-                    } else {
-                      from = i;
-                    }
-                  } else {
-                    if (i > 0) {
-                      to = i - 1;
-                    } else {
-                      to = i;
-                    }
-                  }
+                if (i <= to) {
+                  from = i;
+                } else {
+                  return false;
+                }
+              }
+            }
+          />
+        </td>
+        <td>
+          <input
+            type="checkbox"
+            id={stay.id + "-to"}
+            class:to={i === to}
+            bind:checked={
+              () => from <= i && to >= i,
+              (v) => {
+                if (i >= from) {
+                  to = i;
+                } else {
+                  return false;
                 }
               }
             }
@@ -326,6 +332,11 @@
 {/if}
 
 <style>
+  :root {
+    --from-color: hsla(from green h s l / 0.5);
+    --to-color: hsla(from red h s l / 0.5);
+  }
+
   table {
     border-collapse: collapse;
   }
@@ -348,11 +359,23 @@
   }
 
   .from {
-    background-color: hsla(from green h s l / 0.5);
+    background-color: var(--from-color);
   }
 
   .to {
-    background-color: hsla(from red h s l / 0.5);
+    background-color: var(--to-color);
+  }
+
+  td > input[type="checkbox"].from {
+    accent-color: green;
+  }
+
+  td > input[type="checkbox"] {
+    accent-color: gray;
+  }
+
+  td > input[type="checkbox"].to {
+    accent-color: red;
   }
 
   form.create-invoice {
