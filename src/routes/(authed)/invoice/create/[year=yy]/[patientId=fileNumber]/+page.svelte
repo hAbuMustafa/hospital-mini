@@ -131,10 +131,12 @@
       {getDate(patient.transfers[to + 1].timestamp)}
     {:else if patient.discharge_date}{getDate(patient.discharge_date)}{:else}الآن{/if}
   </span>
-  <button type="button" class="btn get-period-items" title="معاينة">
-    🔍
-    <!-- todo: list all items dispensed in the selected range in a modal -->
-  </button>
+  {#if patient.transfers[from].timestamp! >= new Date(PUBLIC_System_Started_Since)}
+    <button type="button" class="btn get-period-items" title="معاينة">
+      🔍
+      <!-- todo: list all items dispensed in the selected range in a modal -->
+    </button>
+  {/if}
 </p>
 
 <form
