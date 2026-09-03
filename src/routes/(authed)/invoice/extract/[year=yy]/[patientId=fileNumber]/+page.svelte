@@ -15,9 +15,9 @@
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { encodeObjectToUrl } from "../../../encoding";
-  import { PUBLIC_System_Started_Since } from "$env/static/public";
   import { browser } from "$app/env";
   import { isNarcotic } from "$lib/CONSTANTS";
+  import { getSystemFirstDate } from "../../../../CONSTANTS.remote";
 
   const today = getToday();
   setToEndOfDay(today);
@@ -26,6 +26,8 @@
 
   let fromDate = $derived(patient.admission_date);
   let toDate = $derived(patient.discharge_date ?? new Date());
+
+  const systemFirstDate = await getSystemFirstDate();
 
   let periodSameAsStay = $derived(
     fromDate === patient.admission_date && toDate === patient.discharge_date
@@ -170,7 +172,7 @@
     </table>
   </div>
 
-  {#if new Date(PUBLIC_System_Started_Since) > fromDate}
+  {#if systemFirstDate > fromDate}
     <div class="warning hide-in-print">
       {periodSameAsStay ? "المريض دخل" : "فترة التسعير تبدأ"} في فترة تسبق بداية تشغيل المنظومة،
       برجاء استخراج فاتورة يدوية

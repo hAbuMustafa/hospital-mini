@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { PUBLIC_System_Started_Since } from "$env/static/public";
   import { formatDate } from "$lib/date/utils";
   import Lock from "@lucide/svelte/icons/lock-keyhole-open";
   import Locked from "@lucide/svelte/icons/lock";
@@ -18,10 +17,13 @@
   } from "../../../invoice.remote";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
+  import { getSystemFirstDate } from "../../../../CONSTANTS.remote";
 
   const patientGetter = getPatientWithTransfers(
     [page.params.year, page.params.patientId].join("/")
   );
+
+  const systemFirstDate = await getSystemFirstDate();
 
   const patient = await patientGetter;
 
@@ -131,7 +133,7 @@
       {getDate(patient.transfers[to + 1].timestamp)}
     {:else if patient.discharge_date}{getDate(patient.discharge_date)}{:else}الآن{/if}
   </span>
-  {#if patient.transfers[from].timestamp! >= new Date(PUBLIC_System_Started_Since)}
+  {#if patient.transfers[from].timestamp! >= systemFirstDate}
     <button type="button" class="btn get-period-items" title="معاينة">
       🔍
       <!-- todo: list all items dispensed in the selected range in a modal -->
@@ -194,7 +196,7 @@
     {...createInvoice.fields.toTimestamp.as("hidden", toDateString)}
   />
 
-  {#if new Date(PUBLIC_System_Started_Since) > patient.transfers[from].timestamp!}
+  {#if systemFirstDate > patient.admission_date && systemFirstDate > patient.transfers[from].timestamp!}
     <label
       title="هذا الاختيار يظهر فقط في حال كانت الفاتورة تبدأ من فترة تسبق فترة تشغيل المنظومة"
     >
