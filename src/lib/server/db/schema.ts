@@ -126,9 +126,7 @@ export const invoiceExtraItems = sqliteTable("invoiceExtraItems", {
   invoice_id: int()
     .notNull()
     .references(() => invoices.id, { onDelete: "cascade" }),
-  item_id: int()
-    .notNull()
-    .references(() => drugs.id),
+  item_id: int().notNull(),
   qty: int().notNull().default(1),
   unit_price: int().notNull(),
 
