@@ -1,73 +1,37 @@
 <script lang="ts">
-  import { authState } from "$lib/auth-client/auth.svelte";
   import PageBorder from "$lib/components/PageBorder.svelte";
-  import {
-    formatDate,
-    getDuration,
-    getTermed,
-    getToday,
-    setToEndOfDay,
-  } from "$lib/date/utils";
+  import { formatDate, getDuration, getTermed } from "$lib/date/utils";
 
-  import { scale } from "svelte/transition";
-  import { useKeyboardNavigation } from "$lib/attachments";
-  import { getDispenses, getPatient } from "../../invoice.remote";
+  import { getInvoice } from "../../invoice.remote";
   import { page } from "$app/state";
-  import { goto } from "$app/navigation";
-  import { encodeObjectToUrl } from "../../encoding";
-  import { browser } from "$app/env";
-  import { isNarcotic } from "$lib/CONSTANTS";
-  import { getSystemFirstDate } from "../../../CONSTANTS.remote";
 
-  const today = getToday();
-  setToEndOfDay(today);
+  const invoice = await getInvoice(Number(page.params.invoiceNumber));
 
-  const patient = await getPatient(`${page.params.year}/${page.params.patientId}`);
-
-  let fromDate = $derived(patient.admission_date);
-  let toDate = $derived(patient.discharge_date ?? new Date());
-
-  const systemFirstDate = await getSystemFirstDate();
+  const patient = $derived(invoice.patient);
 
   let periodSameAsStay = $derived(
-    fromDate === patient.admission_date && toDate === patient.discharge_date
+    invoice.from.getTime() === patient.admission_date.getTime() &&
+      invoice.to.getTime() === patient.discharge_date?.getTime()
   );
 
-  let dispensesGetter = $derived(
-    getDispenses({ patientId: patient.id, fromDate, toDate })
-  );
-
-  let staleData = $derived(await dispensesGetter);
-
-  let invoiceDrugs: InvoiceDrugT[] = $derived.by(() => {
-    const arr: InvoiceDrugT[] = $state([]);
-
-    for (const d of staleData.dispenses) {
-      arr.push(d);
-    }
-    return arr;
-  });
+  let invoiceDrugs = $derived(invoice.items);
 
   const pricingDuration = $derived(
-    getTermed(getDuration(fromDate, toDate) || 1, "يوم", "أيام")
+    getTermed(getDuration(invoice.from, invoice.to) || 1, "يوم", "أيام")
   );
 
   let pageTitle = $derived.by(() => {
     if (periodSameAsStay) return patient.name;
 
-    return `${patient.name} (من ${formatDate(fromDate)} إلى ${formatDate(toDate)})`;
+    return `${patient.name} (من ${formatDate(invoice.from)} إلى ${formatDate(invoice.to)})`;
   });
-
-  let isCashPricing = $state(false);
-
-  let invoiceItemsBody: HTMLElement | undefined = $state();
 </script>
 
 <svelte:head>
   <title>{pageTitle}</title>
 </svelte:head>
 
-<header>
+<header class:hide-in-print={!invoice.is_closed || invoice.is_cancelled}>
   <h1>فاتورة أدوية</h1>
   <table class="patient-data">
     <tbody>
@@ -89,7 +53,7 @@
       </tr>
       <tr>
         <th>القسم:</th>
-        <td>{staleData.ward}</td>
+        <td>{invoice.period_ward}</td>
 
         <th>تاريخ الدخول:</th>
         <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
@@ -107,11 +71,7 @@
       </tr>
     </tbody>
   </table>
-  <fieldset class="pricing-type hide-in-print">
-    <legend>نوع المحاسبة</legend>
-    <label><input type="radio" bind:group={isCashPricing} value={false} />عادي</label>
-    <label><input type="radio" bind:group={isCashPricing} value={true} />نقدي</label>
-  </fieldset>
+
   <div class="pricing-range" class:hide-in-print={periodSameAsStay}>
     <table>
       <thead>
@@ -123,87 +83,35 @@
         <tr>
           <th>من:</th>
           <td>
-            <input
-              type="datetime-local"
-              bind:value={
-                () => formatDate(fromDate, "YYYY-MM-DDThh:mm:ss"),
-                (v) => {
-                  const newDate = new Date(v);
-                  if (
-                    !isNaN(newDate.getTime()) &&
-                    newDate >= patient.admission_date &&
-                    newDate <= (patient.discharge_date ?? today)
-                  ) {
-                    fromDate = new Date(v);
-                  }
-                }
-              }
-              min={formatDate(patient.admission_date, "YYYY-MM-DDThh:mm:ss")}
-              max={formatDate(patient.discharge_date ?? today, "YYYY-MM-DDThh:mm:ss")}
-              step="1"
-            />
-            <span class="selected-date">{formatDate(fromDate)}</span>
+            <span class="selected-date">{formatDate(invoice.from)}</span>
           </td>
           <th>إلى:</th>
           <td>
-            <input
-              type="datetime-local"
-              bind:value={
-                () => formatDate(toDate, "YYYY-MM-DDThh:mm:ss"),
-                (v) => {
-                  const newDate = new Date(v);
-                  if (
-                    !isNaN(newDate.getTime()) &&
-                    newDate >= fromDate &&
-                    newDate <= (patient.discharge_date ?? today)
-                  ) {
-                    fromDate = new Date(v);
-                  }
-                }
-              }
-              min={formatDate(fromDate, "YYYY-MM-DDThh:mm:ss")}
-              max={formatDate(patient.discharge_date ?? today, "YYYY-MM-DDThh:mm:ss")}
-              step="1"
-            />
-            <span class="selected-date">{formatDate(toDate)}</span>
+            <span class="selected-date">{formatDate(invoice.to)}</span>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  {#if systemFirstDate > fromDate}
-    <div class="warning hide-in-print">
-      {periodSameAsStay ? "المريض دخل" : "فترة التسعير تبدأ"} في فترة تسبق بداية تشغيل المنظومة،
-      برجاء استخراج فاتورة يدوية
-    </div>
-  {/if}
-
-  <h2>
-    سداد فاتورة {#if isCashPricing}نقدي{/if}
-    <button
-      class="btn hide-in-print"
-      onclick={() => {
-        if (browser)
-          goto(
-            `/invoice/create/${patient.id}?items=${encodeObjectToUrl(invoiceDrugs.filter((item) => !isNarcotic(item as { category: string })))}`
-          );
-      }}>استخراج فاتورة يدوية</button
-    >
-  </h2>
+  <h2>سداد فاتورة</h2>
 </header>
 
-<table class="invoice-items">
+<table
+  class="invoice-items"
+  class:hide-in-print={!invoice.is_closed || invoice.is_cancelled}
+>
   <colgroup>
     <col />
     {#if !patient.insured}
-      <col />
+      <col class="num-column" />
     {/if}
     <col />
-    <col class="num-input-column" />
-    <col class="num-input-column" />
+    <col class="num-column" />
+    <col class="num-column" />
     <col />
   </colgroup>
+
   <thead>
     <tr>
       <th>م</th>
@@ -216,10 +124,11 @@
       <th>الإجمالي</th>
     </tr>
   </thead>
+
   {#if invoiceDrugs.length}
-    <tbody bind:this={invoiceItemsBody}>
+    <tbody>
       {#each invoiceDrugs as drug, i (drug.id!)}
-        <tr class:hide-in-print={drug.total === 0} transition:scale>
+        <tr class:hide-in-print={drug.total === 0}>
           <td>{i + 1}</td>
           {#if !patient.insured}
             <td>{drug.smc_code}</td>
@@ -227,46 +136,19 @@
           <td>{drug.name_ar}</td>
           <td>{drug.amount}</td>
           <td>
-            {#if isCashPricing}
-              <input
-                type="number"
-                name="price-{drug.id}"
-                id="price-{drug.id}"
-                min="0"
-                step="0.01"
-                bind:value={
-                  () => drug.cashPrice ?? 0,
-                  (v) => {
-                    drug.cashPrice = v;
-                  }
-                }
-                {@attach useKeyboardNavigation("price", invoiceItemsBody)}
-              />
-            {:else}{drug.price_resale?.toFixed(2)}{/if}</td
-          >
+            {drug.price_resale?.toFixed(2)}
+          </td>
           <td>
-            {#if !isCashPricing}
-              {drug.total.toFixed(2)}
-            {:else}
-              {((drug.cashPrice ?? 0) * drug.amount).toFixed(2)}
-            {/if}
+            {drug.total.toFixed(2)}
           </td>
         </tr>
       {/each}
     </tbody>
     <tfoot>
       <tr>
-        <th colspan="3">إجمالي الأدوية المنصرفة:</th>
+        <th colspan="3">إجمالي قيمة الأدوية المنصرفة:</th>
         <td colspan="3">
-          {invoiceDrugs
-            .reduce((acc, curr) => {
-              if (!isCashPricing) {
-                return acc + curr.total;
-              } else {
-                return acc + (curr.cashPrice ?? 0) * curr.amount;
-              }
-            }, 0)
-            .toFixed(2)}
+          {invoice.grandTotal.toFixed(2)}
         </td>
       </tr>
       <tr>
@@ -278,7 +160,9 @@
             <dt>يعتمد،<br />مدير المستشفى/</dt>
 
             <dd></dd>
-            <dd>{authState.user?.name}</dd>
+            <dd>
+              {invoice.username}
+            </dd>
             <dd></dd>
             <dd></dd>
           </dl>
@@ -294,6 +178,17 @@
   {/if}
 </table>
 
+{#if !invoice.is_closed}
+  <p class="error message">
+    لا يمكن طباعة الفاتورة حيث أنها لا تزال مفتوحة لإضافة أصناف إليها، بما أن فترة التسعير
+    تبدأ قبل بدء تشغيل المنظومة
+  </p>
+{/if}
+
+{#if invoice.is_cancelled}
+  <p class="error message">الفاتورة لاغية. لا يمكن طباعتها</p>
+{/if}
+
 <PageBorder />
 
 <style>
@@ -303,7 +198,6 @@
     }
 
     thead {
-      background-color: var(--main-table-header-bg-color);
       th {
         padding: 0.25rem 0.75rem;
       }
@@ -320,42 +214,16 @@
     }
   }
 
-  fieldset.pricing-type {
-    display: flex;
-    justify-content: space-around;
-
-    margin-block-end: 1rem;
-  }
-
   .pricing-range {
+    margin-block-start: 1rem;
+
     table {
       width: 100%;
       border-collapse: collapse;
 
-      &,
       th,
       td {
         border: var(--main-border);
-      }
-
-      input[type="datetime-local"] {
-        width: 80%;
-        text-align: center;
-        font-size: inherit;
-      }
-
-      span.selected-date {
-        display: none;
-      }
-
-      @media print {
-        input[type="datetime-local"] {
-          display: none;
-        }
-
-        span.selected-date {
-          display: inline-block;
-        }
       }
     }
   }
@@ -374,23 +242,13 @@
       padding-inline: 0.75rem;
     }
 
-    .num-input-column {
+    .num-column {
       width: 8vw;
     }
 
     thead {
       @media print {
         display: table-header-group;
-
-        &::before {
-          content: "";
-          display: block;
-          height: 2rem;
-          line-height: 0;
-          font-size: 0;
-          visibility: hidden;
-          margin-bottom: 0;
-        }
       }
     }
 
@@ -407,34 +265,6 @@
 
         td {
           page-break-inside: avoid;
-        }
-      }
-
-      tr {
-        td {
-          &:has(input[type="number"]) {
-            padding: 0;
-
-            & > input[type="number"] {
-              box-sizing: border-box;
-              width: 100%;
-              text-align: center;
-
-              @media print {
-                appearance: textfield;
-                margin: 2px 4px;
-                width: 90%;
-
-                border: none;
-                font-size: 1rem;
-                &::-webkit-outer-spin-button,
-                &::-webkit-inner-spin-button {
-                  -webkit-appearance: none;
-                  margin: 0;
-                }
-              }
-            }
-          }
         }
       }
     }
@@ -460,9 +290,12 @@
         }
 
         .signatures {
-          display: none;
+          display: grid;
+          grid-template: repeat(4, 1fr) / repeat(4, 1fr);
+          align-items: center;
+          text-align: center;
           margin-top: 1rem;
-          width: 80vw;
+          width: 100%;
           border: none;
           font-size: 1rem;
 
@@ -473,13 +306,6 @@
           dd {
             font-weight: normal;
             margin: 0;
-          }
-
-          @media print {
-            display: grid;
-            grid-template: repeat(4, 1fr) / repeat(4, 1fr);
-            align-items: center;
-            text-align: center;
           }
         }
       }
@@ -497,15 +323,5 @@
         vertical-align: top;
       }
     }
-  }
-
-  .warning {
-    background-color: light-dark(maroon, salmon);
-    border: 1px solid light-dark(red, maroon);
-    color: var(--main-bg-color);
-    text-align: center;
-    border-radius: 8px;
-    margin: 1rem 0;
-    padding: 0.5rem;
   }
 </style>
