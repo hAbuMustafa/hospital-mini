@@ -44,19 +44,23 @@
 
   async function selectDrug(item: DrugT) {
     const foundItem = invoiceItems.find((d) => d.item_id === item.id);
+
     if (!foundItem) {
-      await addInvoiceExtraItem({
-        drugId: item.id,
-        invoiceId: invoice.id,
-        drugUnitPrice: item.price_resale!,
-      });
+      toast.promise(
+        addInvoiceExtraItem({
+          drugId: item.id,
+          invoiceId: invoice.id,
+          drugUnitPrice: item.price_resale!,
+        }),
+        {
+          loading: "جار إضافة الصنف للفاتورة...",
+          error: "حدث خطأ ما أثناء إضافة الصنف للفاتورة",
+        }
+      );
     } else {
-      const newQty = foundItem.qty + 1;
-      await updateInvoiceExtraItemAmount({
-        invoiceId: invoice.id,
-        itemId: foundItem.id,
-        amount: newQty,
-      });
+      const newQty = (updatesToSave[foundItem.id] ?? foundItem.qty) + 1;
+
+      updatesToSave[foundItem.id] = newQty;
 
       toast.info("الصنف موجود بالفاتورة مسبقا، تم تعديل الكمية لتصبح " + newQty);
     }
