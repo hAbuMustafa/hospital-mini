@@ -60,29 +60,56 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
   const invoice = await getInvoiceMetadata(invoiceNumber);
   const systemFirstDate = await getSystemFirstDate();
 
-  const items = (
-    await getDispenses({
-      patientId: invoice.patient_id,
-      fromDate: invoice.from,
-      toDate: invoice.to,
+  const items = await db
+    .select({
+      ...getTableColumns(drugs),
+      user_name: user.name,
+      amount: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0))`,
+      total: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)) * ${drugs.price_resale}`,
     })
-  ).dispenses;
+    .from(transactions)
+    .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
+    .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+    .leftJoin(user, eq(transactionTickets.user_id, user.id))
+    .where(
+      and(
+        eq(transactionTickets.patient_id, invoice.patient_id),
+        gte(transactionTickets.timestamp, invoice.from),
+        lte(transactionTickets.timestamp, invoice.to)
+      )
+    )
+    .groupBy(transactions.item_id)
+    .having((thisView) => gt(thisView.amount, 0));
 
   if (invoice.from < systemFirstDate) {
-    const extraItems = await getInvoiceExtraItems(invoiceNumber);
+    const extraItems = await db
+      .select({
+        ...getTableColumns(drugs),
+        user_name: user.name,
+        amount: invoiceExtraItems.qty,
+        total: sql<number>`${invoiceExtraItems.qty} * ${drugs.price_resale}`,
+      })
+      .from(invoiceExtraItems)
+      .where(eq(invoiceExtraItems.invoice_id, invoiceNumber))
+      .leftJoin(user, eq(invoiceExtraItems.added_by, user.id))
+      .leftJoin(drugs, eq(invoiceExtraItems.item_id, drugs.id));
 
     if (extraItems.length) {
       for (const xItem of extraItems) {
-        const foundDispenseIndex = items.findIndex((drug) => drug.id === xItem.item_id);
+        const foundDispenseIndex = items.findIndex((drug) => drug.id === xItem.id);
 
         if (foundDispenseIndex > -1) {
-          items[foundDispenseIndex].amount += xItem.qty;
+          items[foundDispenseIndex].amount += xItem.amount;
           items[foundDispenseIndex].total =
             items[foundDispenseIndex].amount * items[foundDispenseIndex].price_resale!;
+        } else {
+          items.push(xItem);
         }
       }
     }
   }
+
+  console.log(items);
 
   return {
     ...invoice,
@@ -232,8 +259,8 @@ export const getDispenses = query(
       const dispenses = await db
         .select({
           ...getTableColumns(drugs),
-          amount: sql<number>`SUM(${transactions.qty} - ${transactions.qty_returned})`,
-          total: sql<number>`SUM(${transactions.qty} - ${transactions.qty_returned}) * ${drugs.price_resale}`,
+          amount: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0))`,
+          total: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)) * ${drugs.price_resale}`,
         })
         .from(transactions)
         .innerJoin(drugs, eq(transactions.item_id, drugs.id))
