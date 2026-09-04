@@ -32,7 +32,8 @@
 </svelte:head>
 
 <header class:hide-in-print={!invoice.is_closed || invoice.is_cancelled}>
-  <h1>فاتورة أدوية</h1>
+  <h1 data-invoice-number={invoice.id}>فاتورة أدوية</h1>
+
   <table class="patient-data">
     <tbody>
       <tr>
@@ -192,6 +193,18 @@
 <PageBorder />
 
 <style>
+  h1 {
+    position: relative;
+
+    &::after {
+      content: "#" attr(data-invoice-number);
+      color: gray;
+      font-size: 0.75em;
+      position: absolute;
+      inset-inline-start: 90%;
+    }
+  }
+
   table {
     td {
       text-align: center;
