@@ -63,6 +63,8 @@
   }
 
   let drugQuery = $state("");
+
+  const updatesToSave: Record<number, number> = $state({ 1: 1 });
 </script>
 
 <div class="patient_data" class:insured={patient.insured}>
@@ -189,9 +191,17 @@
                 <input
                   id="amount-{item.id}"
                   min="1"
-                  {...updateInvoiceExtraItem
-                    .for(item.id)
-                    .fields.amount.as("number", item.qty)}
+                  type="number"
+                  class:unsaved-changes={updatesToSave[item.id]
+                    ? updatesToSave[item.id] !== item.qty
+                    : false}
+                  {...updateInvoiceExtraItem.for(item.id).fields.amount}
+                  bind:value={
+                    () => updatesToSave[item.id] ?? item.qty,
+                    (v) => {
+                      updatesToSave[item.id] = v;
+                    }
+                  }
                   {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
                 />
               </form>
@@ -217,7 +227,9 @@
     type="button"
     class="btn"
     onclick={async () => {
-      toast.promise(closeInvoice(invoice.id), {
+      const { promise, resolve, reject } = Promise.withResolvers();
+
+      toast.promise(promise, {
         loading: "جار حفظ الفاتورة...",
         success: () => {
           getInvoice(invoice.id).refresh();
@@ -226,6 +238,29 @@
         },
         error: "حدث خطأ أثناء غلق الفاتورة",
       });
+
+      try {
+        if (Object.entries(updatesToSave).length) {
+          for (const [id, qty] of Object.entries(updatesToSave).map(([k, v]) => [
+            Number(k),
+            v,
+          ])) {
+            if (invoiceItems.find((item) => item.id === id)?.qty !== qty) {
+              await updateInvoiceExtraItemAmount({
+                invoiceId: invoice.id,
+                itemId: id,
+                amount: qty,
+              });
+            }
+          }
+        }
+
+        await closeInvoice(invoice.id);
+
+        resolve(1);
+      } catch (err) {
+        reject();
+      }
     }}
   >
     <Save size="1em" color="salmon" />
@@ -391,5 +426,10 @@
 
   table + h2 {
     margin-block-start: 1rem;
+  }
+
+  input.unsaved-changes {
+    background: orange;
+    color: black;
   }
 </style>
