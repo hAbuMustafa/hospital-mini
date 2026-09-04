@@ -11,13 +11,13 @@
 
   import { scale } from "svelte/transition";
   import { useKeyboardNavigation } from "$lib/attachments";
-  import { getDispenses, getPatient } from "../../../invoice.remote";
+  import { getDispenses, getPatient } from "../../invoice.remote";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import { encodeObjectToUrl } from "../../../encoding";
+  import { encodeObjectToUrl } from "../../encoding";
   import { browser } from "$app/env";
   import { isNarcotic } from "$lib/CONSTANTS";
-  import { getSystemFirstDate } from "../../../../CONSTANTS.remote";
+  import { getSystemFirstDate } from "../../../CONSTANTS.remote";
 
   const today = getToday();
   setToEndOfDay(today);
