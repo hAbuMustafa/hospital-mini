@@ -1,5 +1,5 @@
 import { command, form, getRequestEvent, query } from "$app/server";
-import { formatDate, parseDate } from "$lib/date/utils";
+import { formatDate } from "$lib/date/utils";
 import { db } from "$lib/server/db/";
 import {
   drugs,
@@ -39,7 +39,7 @@ export const getPatientWithTransfers = query(v.string(), async (patientId) => {
   return { ...patient, transfers };
 });
 
-export const getInvoice = query(v.number(), async (invoiceNumber) => {
+export const getInvoiceMetadata = query(v.number(), async (invoiceNumber) => {
   const [invoice] = await db
     .select()
     .from(invoices)

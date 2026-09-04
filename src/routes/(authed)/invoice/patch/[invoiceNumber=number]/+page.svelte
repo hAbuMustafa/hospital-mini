@@ -13,7 +13,7 @@
   import Lock from "@lucide/svelte/icons/lock-keyhole-open";
   import Save from "@lucide/svelte/icons/save";
   import {
-    getInvoice,
+    getInvoiceMetadata,
     getInvoiceExtraItems,
     getPeriodExtraItems,
     addInvoiceExtraItem,
@@ -24,7 +24,7 @@
   } from "../../invoice.remote";
   import { goto } from "$app/navigation";
 
-  const invoice = $derived(await getInvoice(Number(page.params.invoiceNumber)));
+  const invoice = $derived(await getInvoiceMetadata(Number(page.params.invoiceNumber)));
 
   const invoiceItemsGetter = $derived(getInvoiceExtraItems(invoice.id));
 
@@ -236,7 +236,7 @@
       toast.promise(promise, {
         loading: "جار حفظ الفاتورة...",
         success: () => {
-          getInvoice(invoice.id).refresh();
+          getInvoiceMetadata(invoice.id).refresh();
           goto(`/invoice/print/${invoice.id}`);
           return "تم حفظ وغلق الفاتورة";
         },
