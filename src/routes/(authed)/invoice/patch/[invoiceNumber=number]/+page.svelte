@@ -428,7 +428,8 @@
     margin-block: 1rem;
   }
 
-  table + h2 {
+  table + h2,
+  h2 + table {
     margin-block-start: 1rem;
   }
 
