@@ -43,6 +43,10 @@ html[data-theme="dark"] {
 body {
   background-color: var(--main-bg-color);
   color: var(--main-text-color);
+
+  @media print {
+    print-color-adjust: exact;
+  }
 }
 
 .message.error {
