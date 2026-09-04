@@ -13,8 +13,9 @@ import {
 } from "$lib/server/db/schema";
 import { totalAndAmount } from "$lib/utils/query";
 import { error, invalid } from "@sveltejs/kit";
-import { and, desc, eq, getTableColumns, gt, gte, lte } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, gt, gte, lte, sql } from "drizzle-orm";
 import * as v from "valibot";
+import { getSystemFirstDate } from "../CONSTANTS.remote";
 
 export const getPatient = query(v.string(), async (patientId) => {
   const [patient] = await db
@@ -53,6 +54,41 @@ export const getInvoiceMetadata = query(v.number(), async (invoiceNumber) => {
     .where(eq(patients_view.id, invoice.patient_id));
 
   return { ...invoice, patient };
+});
+
+export const getInvoice = query(v.number(), async (invoiceNumber) => {
+  const invoice = await getInvoiceMetadata(invoiceNumber);
+  const systemFirstDate = await getSystemFirstDate();
+
+  const items = (
+    await getDispenses({
+      patientId: invoice.patient_id,
+      fromDate: invoice.from,
+      toDate: invoice.to,
+    })
+  ).dispenses;
+
+  if (invoice.from < systemFirstDate) {
+    const extraItems = await getInvoiceExtraItems(invoiceNumber);
+
+    if (extraItems.length) {
+      for (const xItem of extraItems) {
+        const foundDispenseIndex = items.findIndex((drug) => drug.id === xItem.item_id);
+
+        if (foundDispenseIndex > -1) {
+          items[foundDispenseIndex].amount += xItem.qty;
+          items[foundDispenseIndex].total =
+            items[foundDispenseIndex].amount * items[foundDispenseIndex].price_resale!;
+        }
+      }
+    }
+  }
+
+  return {
+    ...invoice,
+    items,
+    grandTotal: items.reduce((tally, curr) => tally + curr.total, 0),
+  };
 });
 
 export const getInvoiceExtraItems = query(v.number(), async (invoiceNumber) => {
@@ -196,7 +232,8 @@ export const getDispenses = query(
       const dispenses = await db
         .select({
           ...getTableColumns(drugs),
-          ...totalAndAmount(),
+          amount: sql<number>`SUM(${transactions.qty} - ${transactions.qty_returned})`,
+          total: sql<number>`SUM(${transactions.qty} - ${transactions.qty_returned}) * ${drugs.price_resale}`,
         })
         .from(transactions)
         .innerJoin(drugs, eq(transactions.item_id, drugs.id))
