@@ -14,26 +14,26 @@
   import Save from "@lucide/svelte/icons/save";
   import {
     getInvoice,
-    getInvoiceItems,
-    getPeriodItems,
-    addInvoiceItem,
-    updateInvoiceItem,
-    updateInvoiceItemAmount,
-    deleteInvoiceItem,
+    getInvoiceExtraItems,
+    getPeriodExtraItems,
+    addInvoiceExtraItem,
+    updateInvoiceExtraItem,
+    updateInvoiceExtraItemAmount,
+    deleteInvoiceExtraItem,
     closeInvoice,
   } from "../../invoice.remote";
   import { goto } from "$app/navigation";
 
   const invoice = $derived(await getInvoice(Number(page.params.invoiceNumber)));
 
-  const invoiceItemsGetter = $derived(getInvoiceItems(invoice.id));
+  const invoiceItemsGetter = $derived(getInvoiceExtraItems(invoice.id));
 
   let invoiceItems = $derived(await invoiceItemsGetter);
 
   const patient = $derived(invoice.patient);
 
   let periodItems = $derived(
-    await getPeriodItems({
+    await getPeriodExtraItems({
       patientId: patient.id,
       from: invoice.from,
       to: invoice.to,
@@ -45,14 +45,14 @@
   async function selectDrug(item: DrugT) {
     const foundItem = invoiceItems.find((d) => d.item_id === item.id);
     if (!foundItem) {
-      await addInvoiceItem({
+      await addInvoiceExtraItem({
         drugId: item.id,
         invoiceId: invoice.id,
         drugUnitPrice: item.price_resale!,
       });
     } else {
       const newQty = foundItem.qty + 1;
-      await updateInvoiceItemAmount({
+      await updateInvoiceExtraItemAmount({
         invoiceId: invoice.id,
         itemId: foundItem.id,
         amount: newQty,
@@ -155,7 +155,7 @@
               <button
                 type="button"
                 onclick={async () => {
-                  await deleteInvoiceItem({
+                  await deleteInvoiceExtraItem({
                     invoiceId: invoice.id,
                     itemId: item.id,
                   });
@@ -175,19 +175,23 @@
           </td>
           <td>
             {#if !invoice.is_closed}
-              <form {...updateInvoiceItem.for(item.id)}>
+              <form {...updateInvoiceExtraItem.for(item.id)}>
                 <input
-                  {...updateInvoiceItem
+                  {...updateInvoiceExtraItem
                     .for(item.id)
                     .fields.invoiceId.as("hidden", invoice.id)}
                 />
                 <input
-                  {...updateInvoiceItem.for(item.id).fields.itemId.as("hidden", item.id)}
+                  {...updateInvoiceExtraItem
+                    .for(item.id)
+                    .fields.itemId.as("hidden", item.id)}
                 />
                 <input
                   id="amount-{item.id}"
                   min="1"
-                  {...updateInvoiceItem.for(item.id).fields.amount.as("number", item.qty)}
+                  {...updateInvoiceExtraItem
+                    .for(item.id)
+                    .fields.amount.as("number", item.qty)}
                   {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
                 />
               </form>

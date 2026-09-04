@@ -55,7 +55,7 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
   return { ...invoice, patient };
 });
 
-export const getInvoiceItems = query(v.number(), async (invoiceNumber) => {
+export const getInvoiceExtraItems = query(v.number(), async (invoiceNumber) => {
   return await db
     .select({
       ...getTableColumns(invoiceExtraItems),
@@ -70,7 +70,7 @@ export const getInvoiceItems = query(v.number(), async (invoiceNumber) => {
     .leftJoin(drugs, eq(invoiceExtraItems.item_id, drugs.id));
 });
 
-export const getPeriodItems = query(
+export const getPeriodExtraItems = query(
   v.object({
     patientId: v.string(),
     from: v.date(),
@@ -97,7 +97,7 @@ export const getPeriodItems = query(
   }
 );
 
-export const addInvoiceItem = command(
+export const addInvoiceExtraItem = command(
   v.object({
     invoiceId: v.number(),
     drugId: v.number(),
@@ -111,11 +111,11 @@ export const addInvoiceItem = command(
       unit_price: data.drugUnitPrice,
     });
 
-    void getInvoiceItems(data.invoiceId).refresh();
+    void getInvoiceExtraItems(data.invoiceId).refresh();
   }
 );
 
-export const updateInvoiceItem = form(
+export const updateInvoiceExtraItem = form(
   v.object({ invoiceId: v.number(), itemId: v.number(), amount: v.number() }),
   async (data) => {
     await db
@@ -128,11 +128,11 @@ export const updateInvoiceItem = form(
         )
       );
 
-    void getInvoiceItems(data.invoiceId).refresh();
+    void getInvoiceExtraItems(data.invoiceId).refresh();
   }
 );
 
-export const updateInvoiceItemAmount = command(
+export const updateInvoiceExtraItemAmount = command(
   v.object({ invoiceId: v.number(), itemId: v.number(), amount: v.number() }),
   async (data) => {
     await db
@@ -145,11 +145,11 @@ export const updateInvoiceItemAmount = command(
         )
       );
 
-    void getInvoiceItems(data.invoiceId).refresh();
+    void getInvoiceExtraItems(data.invoiceId).refresh();
   }
 );
 
-export const deleteInvoiceItem = command(
+export const deleteInvoiceExtraItem = command(
   v.object({
     itemId: v.number(),
     invoiceId: v.number(),
@@ -164,7 +164,7 @@ export const deleteInvoiceItem = command(
         )
       );
 
-    void getInvoiceItems(data.invoiceId).refresh();
+    void getInvoiceExtraItems(data.invoiceId).refresh();
   }
 );
 
