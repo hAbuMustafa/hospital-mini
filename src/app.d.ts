@@ -17,11 +17,6 @@ declare global {
 
   type DrugT = typeof drugs.$inferSelect;
   type PatientT = typeof patients_view.$inferSelect;
-
-  type InvoiceDrugT = DrugT & {
-    amount: number;
-    total: number;
-  };
 }
 
 export {};
