@@ -66,6 +66,14 @@
     }
   }
 
+  function getDate(date: Date) {
+    return formatDate(date, "YYYY/MM/DD (hh:mm:ss A)")
+      .replace("AM", "ص")
+      .replace("PM", "م")
+      .replace(" (12:00:00 ص)", "")
+      .replace(" (11:59:59 م)", "");
+  }
+
   let drugQuery = $state("");
 
   const updatesToSave: Record<number, number> = $state({ 1: 1 });
@@ -102,6 +110,16 @@
 
   <h2>
     {invoice.period_ward}
+  </h2>
+  <h2>
+    من
+    <span class="invoice-marker">
+      {getDate(invoice.from)}
+    </span>
+    إلى
+    <span class="invoice-marker">
+      {getDate(invoice.to)}
+    </span>
   </h2>
 
   <div class="diagnoses">
