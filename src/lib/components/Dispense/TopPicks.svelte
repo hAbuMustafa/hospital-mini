@@ -13,7 +13,7 @@
 
 <svelte:boundary>
   {#snippet failed(error, reset)}
-    <div class="error-wrapper">
+    <div class="error message">
       <p>حدث خطأ ما...</p>
       <p class="error-message">{error}</p>
       <button type="button" class="btn" onclick={reset}>حاول مرة أخرى</button>

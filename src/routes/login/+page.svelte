@@ -54,7 +54,7 @@
   <input type="password" id="password" name="password" dir="auto" required />
 
   {#if error}
-    <p class="error">{error}</p>
+    <p class="error message">{error}</p>
   {/if}
 
   <input type="submit" value="تسجيل الدخول" />
@@ -84,13 +84,7 @@
     }
   }
 
-  p.error {
-    background-color: salmon;
-    color: maroon;
-    border: maroon 1px solid;
-    border-radius: 4px;
+  .error.message {
     grid-column: 1/-1;
-    text-align: center;
-    padding: 0.25rem 1rem;
   }
 </style>

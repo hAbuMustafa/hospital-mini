@@ -45,6 +45,15 @@ body {
   color: var(--main-text-color);
 }
 
+.message.error {
+  background-color: salmon;
+  color: maroon;
+  border: maroon 1px solid;
+  border-radius: 4px;
+  text-align: center;
+  padding: 0.25rem 1rem;
+}
+
 h1,
 h2 {
   text-align: center;
