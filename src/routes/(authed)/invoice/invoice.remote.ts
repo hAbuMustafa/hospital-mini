@@ -109,8 +109,6 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
     }
   }
 
-  console.log(items);
-
   return {
     ...invoice,
     items,
