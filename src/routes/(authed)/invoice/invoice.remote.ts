@@ -42,8 +42,9 @@ export const getPatientWithTransfers = query(v.string(), async (patientId) => {
 
 export const getInvoiceMetadata = query(v.number(), async (invoiceNumber) => {
   const [invoice] = await db
-    .select()
+    .select({ ...getTableColumns(invoices), username: user.name })
     .from(invoices)
+    .leftJoin(user, eq(invoices.issued_by, user.id))
     .where(eq(invoices.id, invoiceNumber));
 
   if (!invoice) error(404, { message: "لا توجد فاتورة بالرقم المطلوب" });
