@@ -12,12 +12,14 @@
     closeInvoice,
     copyInvoice,
     createInvoice,
+    getDispenses,
     getPatientInvoices,
     getPatientWithTransfers,
   } from "../../../invoice.remote";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
   import { getSystemFirstDate } from "../../../../CONSTANTS.remote";
+  import Dialog from "$lib/components/Dialog.svelte";
 
   const patientGetter = getPatientWithTransfers(
     [page.params.year, page.params.patientId].join("/")
@@ -121,7 +123,7 @@
   </tbody>
 </table>
 
-<p>
+<div class="pricing-range">
   من <span class="from">{getDate(patient.transfers[from].timestamp)}</span> إلى
   <span class="to">
     {#if to < lastTransferIndex}
@@ -129,12 +131,49 @@
     {:else if patient.discharge_date}{getDate(patient.discharge_date)}{:else}الآن{/if}
   </span>
   {#if patient.transfers[from].timestamp! >= systemFirstDate}
-    <button type="button" class="btn get-period-items" title="معاينة">
+    <button
+      type="button"
+      command="show-modal"
+      commandfor="period-dispenses"
+      class="btn get-period-items"
+      title="معاينة"
+    >
       🔍
-      <!-- todo: list all items dispensed in the selected range in a modal -->
     </button>
+
+    <Dialog id="period-dispenses">
+      {const dispenses = await getDispenses({
+        patientId: patient.id,
+        fromDate: patient.transfers[from].timestamp!,
+        toDate:
+          to < lastTransferIndex
+            ? patient.transfers[to].timestamp!
+            : (patient.discharge_date ?? new Date()),
+      })}
+
+      {#if dispenses.dispenses.length}
+        <ul>
+          {#each dispenses.dispenses as dispense, i (dispense.id)}
+            <li>
+              <span class="dispensed-item-amount">{dispense.amount}</span>
+              <span class="dispensed-item-name">{dispense.name_ar}</span>
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <span>
+          لا يوجد منصرف ل{patient.name} في الفترة المحددة.
+          {formatDate(patient.transfers[from].timestamp!)}
+          {formatDate(
+            to < lastTransferIndex
+              ? patient.transfers[to].timestamp!
+              : (patient.discharge_date ?? new Date())
+          )}
+        </span>
+      {/if}
+    </Dialog>
   {/if}
-</p>
+</div>
 
 <form
   class="create-invoice"
@@ -375,6 +414,10 @@
 
   td > input[type="checkbox"].to {
     accent-color: red;
+  }
+
+  .pricing-range {
+    margin-block: 1rem;
   }
 
   form.create-invoice {
