@@ -18,26 +18,10 @@ declare global {
   type DrugT = typeof drugs.$inferSelect;
   type PatientT = typeof patients_view.$inferSelect;
 
-  type StaleData = {
-    ward: string;
-    dispenses: InvoiceNarcoticDrugT[];
-  };
-
-  type InvoiceSelectedDrugT = DrugT & {
-    amount: number;
-    cashPrice: number;
-    total: () => number;
-    editable: boolean;
-  };
-
   type InvoiceDrugT = DrugT & {
     amount: number;
-    cashPrice?: number;
     total: number;
-    editable?: boolean;
   };
-
-  type InvoiceNarcoticDrugT = InvoiceDrugT;
 }
 
 export {};
