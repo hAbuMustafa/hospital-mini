@@ -20,21 +20,25 @@
     updateInvoiceItem,
     updateInvoiceItemAmount,
     deleteInvoiceItem,
+    closeInvoice,
   } from "../../invoice.remote";
+  import { goto } from "$app/navigation";
 
-  const invoice = await getInvoice(Number(page.params.invoiceNumber));
+  const invoice = $derived(await getInvoice(Number(page.params.invoiceNumber)));
 
-  const invoiceItemsGetter = getInvoiceItems(invoice.id);
+  const invoiceItemsGetter = $derived(getInvoiceItems(invoice.id));
 
   let invoiceItems = $derived(await invoiceItemsGetter);
 
-  const patient = invoice.patient;
+  const patient = $derived(invoice.patient);
 
-  let periodItems = await getPeriodItems({
-    patientId: patient.id,
-    from: invoice.from,
-    to: invoice.to,
-  });
+  let periodItems = $derived(
+    await getPeriodItems({
+      patientId: patient.id,
+      from: invoice.from,
+      to: invoice.to,
+    })
+  );
 
   let invoiceItemsBody: HTMLElement | undefined = $state();
 
@@ -101,27 +105,31 @@
   </div>
 </div>
 
-<div class="item-controls-wrapper">
-  <Combobox
-    bind:query={drugQuery}
-    filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
-    endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
-    placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-    className="hide-in-print"
-    onSelect={(drug: DrugT) => selectDrug(drug)}
-  >
-    {#snippet itemSnippet(drug: DrugT)}
-      <SelectItemDrug
-        {drug}
-        query={drugQuery}
-        isSelected={invoiceItems.findIndex((item) => item.item_id === drug.id) > -1}
-        onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
-      />
-    {/snippet}
-  </Combobox>
+{#if !invoice.is_closed}
+  <div class="item-controls-wrapper">
+    <Combobox
+      bind:query={drugQuery}
+      filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
+      endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
+      placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
+      className="hide-in-print"
+      onSelect={(drug: DrugT) => selectDrug(drug)}
+    >
+      {#snippet itemSnippet(drug: DrugT)}
+        <SelectItemDrug
+          {drug}
+          query={drugQuery}
+          isSelected={invoiceItems.findIndex((item) => item.item_id === drug.id) > -1}
+          onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+        />
+      {/snippet}
+    </Combobox>
 
-  <TopPicks onSelect={selectDrug} />
-</div>
+    <TopPicks onSelect={selectDrug} />
+  </div>
+{:else}
+  <p class="error message">فاتورة مغلقة</p>
+{/if}
 
 <table class="invoice-items">
   <colgroup>
@@ -143,18 +151,22 @@
       {#each invoiceItems as item, i (item.id)}
         <tr transition:scale>
           <td>
-            <button
-              type="button"
-              onclick={async () => {
-                await deleteInvoiceItem({
-                  invoiceId: invoice.id,
-                  itemId: item.id,
-                });
-              }}
-              class="delete-item"
-            >
+            {#if !invoice.is_closed}
+              <button
+                type="button"
+                onclick={async () => {
+                  await deleteInvoiceItem({
+                    invoiceId: invoice.id,
+                    itemId: item.id,
+                  });
+                }}
+                class="delete-item"
+              >
+                {i + 1}
+              </button>
+            {:else}
               {i + 1}
-            </button>
+            {/if}
           </td>
           <td>
             <label for="amount-{item.id}" title={item.item_tradename}>
@@ -162,22 +174,26 @@
             </label>
           </td>
           <td>
-            <form {...updateInvoiceItem.for(item.id)}>
-              <input
-                {...updateInvoiceItem
-                  .for(item.id)
-                  .fields.invoiceId.as("hidden", invoice.id)}
-              />
-              <input
-                {...updateInvoiceItem.for(item.id).fields.itemId.as("hidden", item.id)}
-              />
-              <input
-                id="amount-{item.id}"
-                min="1"
-                {...updateInvoiceItem.for(item.id).fields.amount.as("number", item.qty)}
-                {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
-              />
-            </form>
+            {#if !invoice.is_closed}
+              <form {...updateInvoiceItem.for(item.id)}>
+                <input
+                  {...updateInvoiceItem
+                    .for(item.id)
+                    .fields.invoiceId.as("hidden", invoice.id)}
+                />
+                <input
+                  {...updateInvoiceItem.for(item.id).fields.itemId.as("hidden", item.id)}
+                />
+                <input
+                  id="amount-{item.id}"
+                  min="1"
+                  {...updateInvoiceItem.for(item.id).fields.amount.as("number", item.qty)}
+                  {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
+                />
+              </form>
+            {:else}
+              {item.qty}
+            {/if}
           </td>
           <td>{item.user_name}</td>
         </tr>
@@ -192,12 +208,27 @@
   {/if}
 </table>
 
-<!-- todo: close invoice and redirect to print page -->
-<button type="button" class="btn" onclick={() => {}}>
-  <Save size="1em" color="salmon" />
-  <Lock size="1em" color="gold" />
-  حفظ وقفل الفاتورة
-</button>
+{#if !invoice.is_closed}
+  <button
+    type="button"
+    class="btn"
+    onclick={async () => {
+      toast.promise(closeInvoice(invoice.id), {
+        loading: "جار حفظ الفاتورة...",
+        success: () => {
+          getInvoice(invoice.id).refresh();
+          goto(`/invoice/print/${invoice.id}`);
+          return "تم حفظ وغلق الفاتورة";
+        },
+        error: "حدث خطأ أثناء غلق الفاتورة",
+      });
+    }}
+  >
+    <Save size="1em" color="salmon" />
+    <Lock size="1em" color="gold" />
+    حفظ وقفل الفاتورة
+  </button>
+{/if}
 
 <h2>أصناف ستضاف تلقائيا على الفاتورة</h2>
 
@@ -352,5 +383,9 @@
 
   .btn {
     margin-block: 1rem;
+  }
+
+  table + h2 {
+    margin-block-start: 1rem;
   }
 </style>
