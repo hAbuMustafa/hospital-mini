@@ -248,16 +248,20 @@ export const createInvoice = form(
       .where(
         and(
           eq(patientTransfers.patient_id, data.patientId),
-          gte(patientTransfers.id, data.fromTransferId),
-          lte(patientTransfers.id, data.toTransferId)
+          gte(patientTransfers.id, data.fromTransferId)
         )
       )
       .orderBy(patientTransfers.timestamp);
 
     if (!transfers.length) invalid(issue("الفترة المختارة خارج فترة إقامة المريض"));
 
+    const endTransferIndex = transfers.findIndex((t) => t.id === data.toTransferId);
+
     const from = transfers[0].timestamp!;
-    const to = transfers.at(-1)?.timestamp!;
+    const to =
+      endTransferIndex < transfers.length - 1
+        ? transfers[endTransferIndex]?.timestamp!
+        : (patient.discharge_date ?? new Date());
 
     const issued_by = getRequestEvent().locals.user?.id!;
     const issuing_department = getRequestEvent().locals.user?.affiliation!;
@@ -275,7 +279,7 @@ export const createInvoice = form(
           period_ward:
             transfers.length > 1
               ? transfers
-                  .filter((_, i) => i < transfers.length - 1)
+                  .filter((_, i) => i < transfers.length - 1 && i < endTransferIndex)
                   .map((p) => p.to_ward)
                   .join(" - ")
               : transfers[0].to_ward!,
