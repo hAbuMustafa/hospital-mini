@@ -144,7 +144,7 @@
           {drug}
           query={drugQuery}
           isSelected={invoiceItems.findIndex((item) => item.item_id === drug.id) > -1}
-          onclick={() => selectDrug(drug as InvoiceSelectedDrugT)}
+          onclick={() => selectDrug(drug)}
         />
       {/snippet}
     </Combobox>
