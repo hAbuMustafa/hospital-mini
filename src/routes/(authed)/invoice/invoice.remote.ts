@@ -398,6 +398,8 @@ export const copyInvoice = form(
         .from(invoiceExtraItems)
         .where(eq(invoiceExtraItems.invoice_id, data.invoiceId));
 
+      if (!oldInvoiceItems.length) invalid("لا يوجد أصناف بالفاتورة...");
+
       const [newInvoice] = await db
         .insert(invoices)
         .values({
