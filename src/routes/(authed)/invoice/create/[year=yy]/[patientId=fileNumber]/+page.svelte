@@ -287,17 +287,34 @@
             {/if}
           </td>
           <td>
-            {#if invoice.is_closed}
+            {#if invoice.is_closed && invoice.from <= systemFirstDate}
               <form
                 {...copyInvoice.for(invoice.id).enhance(async (form) => {
-                  toast.promise(form.submit(), {
-                    success: (result) => {
-                      goto(`/invoice/patch/${form.result?.newInvoiceId}`);
+                  const { promise, resolve, reject } = Promise.withResolvers();
+
+                  toast.promise(promise, {
+                    success: (newInvoiceId) => {
+                      goto(`/invoice/patch/${newInvoiceId}`);
                       return "تم نسخ الفاتورة بنجاح";
                     },
-                    error: "حدث خطأ غير متوقع",
+                    error: "لم يتم نسخ الفاتورة...",
                     loading: "جار نسخ الفاتورة...",
                   });
+
+                  await form.submit();
+
+                  if (!form.result?.newInvoiceId) {
+                    reject();
+
+                    const issues = form.fields?.allIssues();
+                    if (issues?.length) {
+                      for (const message of issues) {
+                        toast.warning(String(message));
+                      }
+                    }
+                  } else {
+                    resolve(form.result.newInvoiceId);
+                  }
                 })}
               >
                 <input
