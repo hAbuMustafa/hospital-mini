@@ -74,6 +74,7 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
     .leftJoin(user, eq(transactionTickets.user_id, user.id))
     .where(
       and(
+        eq(transactionTickets.is_dispense, true),
         eq(transactionTickets.patient_id, invoice.patient_id),
         gte(transactionTickets.timestamp, invoice.from),
         lte(transactionTickets.timestamp, invoice.to)
@@ -266,6 +267,7 @@ export const getDispenses = query(
         .innerJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
         .where(
           and(
+            eq(transactionTickets.is_dispense, true),
             eq(transactionTickets.patient_id, data.patientId),
             gte(transactionTickets.timestamp, data.fromDate),
             lte(transactionTickets.timestamp, data.toDate)
