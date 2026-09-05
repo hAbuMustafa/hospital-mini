@@ -91,7 +91,7 @@
       </span>
     {/if}
     <span class="invoice-marker">فاتورة</span>
-    <span class="patient_name">
+    <span class="patient_name pii">
       <a href="/patient/{patient.id}" class="patient_link">
         {patient.name}
       </a>
