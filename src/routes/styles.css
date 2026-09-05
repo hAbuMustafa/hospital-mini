@@ -182,7 +182,7 @@ input:user-invalid {
 .recording .pii {
   filter: blur(5px);
 
-  :is(h1, h2) > &,
+  :is(h1, h2) &,
   :is(h1, h2)& {
     filter: blur(10px);
   }
