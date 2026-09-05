@@ -80,7 +80,7 @@
           </span>
         {/if}
         <span class="patient_name">
-          <a href="/patient/{patient.id}" class="patient_link">
+          <a href="/patient/{patient.id}" class="patient_link pii">
             {patient.name}
           </a>
         </span>
@@ -266,7 +266,7 @@
                   </button>
 
                   <Dialog id="item-{drug.id}-dialog">
-                    <h4>{"name" in patient ? patient.name : patient.id}</h4>
+                    <h4 class="pii">{"name" in patient ? patient.name : patient.id}</h4>
                     <h5>{drug.name_ar}</h5>
 
                     <ul>
@@ -346,9 +346,10 @@
   }
 
   a.patient_link {
-    all: unset;
     cursor: pointer;
     border-radius: 4px;
+    color: inherit;
+    text-decoration: none;
 
     &:hover,
     &:focus {
