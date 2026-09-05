@@ -386,7 +386,7 @@ export const copyInvoice = form(
   v.object({
     invoiceId: v.number(),
   }),
-  async (data) => {
+  async (data, issue) => {
     try {
       const [oldInvoice] = await db
         .select()
@@ -398,7 +398,7 @@ export const copyInvoice = form(
         .from(invoiceExtraItems)
         .where(eq(invoiceExtraItems.invoice_id, data.invoiceId));
 
-      if (!oldInvoiceItems.length) invalid("لا يوجد أصناف بالفاتورة...");
+      if (!oldInvoiceItems.length) invalid(issue.invoiceId("لا يوجد أصناف بالفاتورة..."));
 
       const [newInvoice] = await db
         .insert(invoices)

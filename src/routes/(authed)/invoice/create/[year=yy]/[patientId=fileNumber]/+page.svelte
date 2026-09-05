@@ -292,12 +292,19 @@
                 {...copyInvoice.for(invoice.id).enhance(async (form) => {
                   const { promise, resolve, reject } = Promise.withResolvers();
 
-                  toast.promise(promise, {
+                  toast.promise(promise as Promise<typeof form.result> , {
                     success: (newInvoiceId) => {
                       goto(`/invoice/patch/${newInvoiceId}`);
                       return "تم نسخ الفاتورة بنجاح";
                     },
-                    error: "لم يتم نسخ الفاتورة...",
+                    error: () => {
+                      copyInvoice.fields?.allIssues()?.forEach((issue) => {
+                        toast.warning(issue.message, {
+                          duration: Number.POSITIVE_INFINITY,
+                        });
+                      });
+                      return "لم يتم نسخ الفاتورة...";
+                    },
                     loading: "جار نسخ الفاتورة...",
                   });
 
@@ -305,13 +312,6 @@
 
                   if (!form.result?.newInvoiceId) {
                     reject();
-
-                    const issues = form.fields?.allIssues();
-                    if (issues?.length) {
-                      for (const message of issues) {
-                        toast.warning(String(message));
-                      }
-                    }
                   } else {
                     resolve(form.result.newInvoiceId);
                   }
