@@ -4,6 +4,8 @@
 
   import { getInvoice } from "../../invoice.remote";
   import { page } from "$app/state";
+  import { onMount } from "svelte";
+  import { browser } from "$app/env";
 
   const invoice = await getInvoice(Number(page.params.invoiceNumber));
 
@@ -24,6 +26,12 @@
     if (periodSameAsStay) return patient.name;
 
     return `${patient.name} (من ${formatDate(invoice.from)} إلى ${formatDate(invoice.to)})`;
+  });
+
+  onMount(() => {
+    if (browser && invoice.is_closed && !invoice.is_cancelled) {
+      window.print();
+    }
   });
 </script>
 
