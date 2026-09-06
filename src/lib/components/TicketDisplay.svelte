@@ -16,7 +16,9 @@
 <div class="ticket" class:return={isReturn}>
   <div class="ticket-data">
     <h3>
-      <span class="pii">{ticket?.patient_name}</span>
+      <span class="pii">
+        <a href="/patient/{ticket.patient_id}">{ticket?.patient_name}</a>
+      </span>
       <span class="pii">({ticket?.patient_id})</span>
       {#if canReturn && items.some((item) => item.qty - (item.qty_returned ?? 0) > 0)}
         <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
@@ -76,6 +78,16 @@
       justify-content: space-between;
       align-items: center;
       margin: 0;
+
+      .pii > a {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover,
+        &:focus {
+          background-color: var(--main-accent-color);
+        }
+      }
 
       .ticket-numbers {
         font-size: 0.9rem;
