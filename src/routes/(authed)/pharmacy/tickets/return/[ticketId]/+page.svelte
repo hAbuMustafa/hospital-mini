@@ -65,44 +65,66 @@
   })}
 >
   <input {...returnItems.fields.originalTicketId.as("hidden", ticketId)} />
-  <ul>
-    {#each items as item, i (item.item_id)}
-      {@const remaining = item.qty! - (item.qty_returned ?? 0)}
-      <li>
-        <span title={item.item_tradename}>{item.item_name}</span>
-        <input {...returnItems.fields.items[i].itemId.as("hidden", item.item_id!)} />
-        <input
-          {...returnItems.fields.items[i].itemUnitPrice.as(
-            "hidden",
-            item.item_unit_price!
-          )}
-        />
-        <input
-          {...returnItems.fields.items[i].transactionId.as(
-            "hidden",
-            item.transaction_id!
-          )}
-          value={item.transaction_id}
-        />
-        {#if canReturn && remaining > 0}
-          <input
-            {...returnItems.fields.items[i].returnedAmount.as("number")}
-            min="0"
-            max={remaining}
-            value="0"
-          />
-          <small>(متبقي {remaining} من {item.qty})</small>
-        {:else if canReturn && remaining === 0}
-          <span class="no-return">(صرف {item.qty} وتم ارتجاع الكمية كاملة)</span>
-        {:else if !canReturn}
-          <span>({item.qty})</span>
-          {#if item.qty !== remaining}
-            <span>(المتبقي على التذكرة {item.qty})</span>
-          {/if}
-        {/if}
-      </li>
-    {/each}
-  </ul>
+  <table>
+    <thead>
+      <tr>
+        <th>اسم الصنف</th>
+        <th>الكمية الأصلية</th>
+        <th>المتبقي</th>
+        <th>إرجاع</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each items as item, i (item.item_id)}
+        {@const remaining = item.qty! - (item.qty_returned ?? 0)}
+        <tr>
+          <td>
+            <label for="item-{item.item_id}" title={item.item_tradename}
+              >{item.item_name}</label
+            >
+            <input {...returnItems.fields.items[i].itemId.as("hidden", item.item_id!)} />
+            <input
+              {...returnItems.fields.items[i].itemUnitPrice.as(
+                "hidden",
+                item.item_unit_price!
+              )}
+            />
+            <input
+              {...returnItems.fields.items[i].transactionId.as(
+                "hidden",
+                item.transaction_id!
+              )}
+              value={item.transaction_id}
+            />
+          </td>
+          <td>
+            {item.qty}
+          </td>
+          <td class:highlight={remaining !== item.qty}>
+            {remaining}
+          </td>
+          <td>
+            {#if canReturn && remaining > 0}
+              <input
+                id="item-{item.item_id}"
+                {...returnItems.fields.items[i].returnedAmount.as("number")}
+                min="0"
+                max={remaining}
+                value="0"
+              />
+            {:else if canReturn && remaining === 0}
+              <span class="no-return">(صرف {item.qty} وتم ارتجاع الكمية كاملة)</span>
+            {:else if !canReturn}
+              <span>({item.qty})</span>
+              {#if item.qty !== remaining}
+                <span>(المتبقي على التذكرة {item.qty})</span>
+              {/if}
+            {/if}
+          </td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
   {#if canReturn && items.some((item) => item.qty! - (item.qty_returned ?? 0) > 0)}
     <button type="submit" class="btn" disabled={saving}>حفظ المرتجع</button>
   {:else}
@@ -124,18 +146,19 @@
     margin-block-start: 0;
   }
 
-  ul {
-    list-style: none;
-    padding-inline: 0;
+  table {
+    border-collapse: collapse;
+    margin-block-end: 1rem;
 
-    display: flex;
-    flex-direction: column;
-
-    li {
-      display: flex;
-      align-items: space-between;
-      gap: 0.5rem;
+    th,
+    td {
+      border: var(--main-border);
+      padding: 0.25rem 0.5rem;
     }
+  }
+
+  .highlight {
+    color: light-dark(maroon, salmon);
   }
 
   button[type="submit"] {
