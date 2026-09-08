@@ -8,7 +8,6 @@
     getPatient,
     postTicket,
   } from "../../../pharmacy/ticket.remote";
-  import { onMount } from "svelte";
   import Combobox from "$lib/components/Combobox.svelte";
   import { scale } from "svelte/transition";
   import { useKeyboardNavigation } from "$lib/attachments";
@@ -19,23 +18,28 @@
   import { countryMap, getFlagEmoji } from "$lib/utils/countries";
   import Female from "@lucide/svelte/icons/venus";
   import Male from "@lucide/svelte/icons/mars";
+  import { browser } from "$app/env";
 
-  const patient = await getPatient(`${page.params.y}/${page.params.id}`);
+  const patientId = `${page.params.y}/${page.params.id}`;
+
+  const isForNonRegisteredPatient = page.params.id === "0";
+
+  let nonregisteredPatientName = $state(page.url.searchParams.get("patient_name")!);
+
+  if (isForNonRegisteredPatient && !nonregisteredPatientName && browser) goto("/");
+
+  const patient = isForNonRegisteredPatient
+    ? { id: nonregisteredPatientName }
+    : await getPatient(patientId);
 
   const isRegisteredPatient = "name" in patient;
 
   const getLastDispensed = async (itemId: number) =>
     await getItemLastDispensed({ patientId: patient.id, itemId });
 
-  onMount(() => {
-    if (isRegisteredPatient && patient?.discharge_date !== null) {
-      goto("/patient");
-
-      toast.error(
-        `لا يمكنك الصرف لمريض غير مقيم بالمستشفى.\nالمريض ${patient?.name} خرج يوم ${formatDate(patient?.discharge_date!, "YYYY/MM/DD الساعة HH:mm")}`
-      );
-    }
-  });
+  if (isRegisteredPatient && patient?.discharge_date !== null && browser) {
+    goto("/patient");
+  }
 
   let ticketItemsBody: HTMLElement | undefined = $state();
 
@@ -100,7 +104,7 @@
           </span>
         {/if}
       {:else}
-        <span class="not-yet-registered">مريض غير مسجل بعد</span>
+        <span class="not-yet-registered">"{patient.id}" مريض غير مسجل</span>
       {/if}
     </h1>
 
