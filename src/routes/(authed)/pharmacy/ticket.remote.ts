@@ -169,7 +169,7 @@ export const getTickets = query(
         ticket_id: transactionTickets.id,
         timestamp: transactionTickets.timestamp,
         user_name: user.name,
-        patient_id: patients_view.id,
+        patient_id: transactionTickets.patient_id,
         patient_name: patients_view.name,
         item_id: drugs.id,
         item_name: drugs.name_ar,
