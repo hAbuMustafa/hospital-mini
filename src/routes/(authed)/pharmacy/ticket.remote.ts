@@ -12,7 +12,21 @@ import {
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
 import { invalid } from "@sveltejs/kit";
-import { and, desc, eq, gte, isNotNull, gt, lte, isNull, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  gte,
+  isNotNull,
+  gt,
+  lte,
+  isNull,
+  sql,
+  not,
+  like,
+  notLike,
+  inArray,
+} from "drizzle-orm";
 import * as v from "valibot";
 import { isReturnable } from "./utils";
 import { PUBLIC_store_id } from "$env/static/public";
@@ -311,5 +325,25 @@ export const returnItems = form(
     });
 
     return result;
+  }
+);
+
+export const getUnlinkedTickets = query(async () => {
+  return await db
+    .selectDistinct({ name: transactionTickets.patient_id })
+    .from(transactionTickets)
+    .where(notLike(transactionTickets.patient_id, "%/%"));
+});
+
+export const linkTickets = form(
+  v.object({
+    patient_names: v.pipe(v.array(v.string()), v.minLength(1)),
+    link_to_id: v.pipe(v.string(), v.nonEmpty()),
+  }),
+  async (data) => {
+    await db
+      .update(transactionTickets)
+      .set({ patient_id: data.link_to_id })
+      .where(inArray(transactionTickets.patient_id, data.patient_names));
   }
 );
