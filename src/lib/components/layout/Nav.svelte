@@ -48,6 +48,8 @@
             <li><a href="/pharmacy/tickets">عرض تذاكر الصرف</a></li>
             <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
             <hr />
+            <li><a href="/pharmacy/link-tickets">ربط تذاكر الصرف</a></li>
+            <hr />
             <li><a href="/stock/transfer">صرف لجهة</a></li>
             <li><a href="/stock/receive">استلام وارد</a></li>
           </ul>
