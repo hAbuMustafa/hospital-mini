@@ -45,6 +45,7 @@
     name="identifier"
     bind:value={identifier}
     dir="ltr"
+    class="pii"
     placeholder="بريد إلكتروني / اسم مستخدم / موبايل"
     required
     {...validators}

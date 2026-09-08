@@ -39,6 +39,7 @@
     name="name"
     pattern={`${triadicArabicName.source} ?`}
     title="اسم ثلاثي على الأقل"
+    class="pii"
     required
     bind:value={nameOfUser}
   />
@@ -54,7 +55,7 @@
   />
 
   <label for="email">البريد الإلكتروني</label>
-  <input type="email" id="email" name="email" dir="auto" required />
+  <input type="email" id="email" name="email" dir="auto" class="pii" required />
 
   <label for="phone">رقم الموبايل</label>
   <input
@@ -63,6 +64,7 @@
     name="phone"
     dir="auto"
     pattern={egyptianPhoneNumber.source}
+    class="pii"
     required
   />
 
