@@ -44,7 +44,7 @@
     id="identifier"
     name="identifier"
     bind:value={identifier}
-    dir="auto"
+    dir="ltr"
     placeholder="بريد إلكتروني / اسم مستخدم / موبايل"
     required
     {...validators}
