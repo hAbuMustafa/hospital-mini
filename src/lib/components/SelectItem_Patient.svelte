@@ -6,16 +6,22 @@
   type PropsT = {
     patient: PatientT;
     query: string;
-    href: string;
+    href?: string;
+    onSelect?: Function;
   };
 
-  let { patient, query, href }: PropsT = $props();
+  let { patient, query, href, onSelect }: PropsT = $props();
 </script>
 
 <button
+  type="button"
   class="patient-select"
   onclick={() => {
-    goto(href);
+    if (href) {
+      goto(href);
+    } else if (onSelect) {
+      onSelect();
+    }
   }}
 >
   <span class="pii"><Highlight text={patient.id} {query} /></span>
