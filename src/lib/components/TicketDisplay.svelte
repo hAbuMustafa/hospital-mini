@@ -16,10 +16,17 @@
 <div class="ticket" class:return={isReturn}>
   <div class="ticket-data">
     <h3>
-      <span class="pii">
-        <a href="/patient/{ticket.patient_id}">{ticket?.patient_name}</a>
-      </span>
-      <span class="pii">({ticket?.patient_id})</span>
+      {#if ticket.patient_name}
+        <span class="pii">
+          <a href="/patient/{ticket.patient_id}">{ticket?.patient_name}</a>
+        </span>
+        <span class="pii">({ticket?.patient_id})</span>
+      {:else}
+        <span class="pii">
+          {ticket.patient_id}
+          <small>(مريض غير مسجل)</small>
+        </span>
+      {/if}
       {#if canReturn && items.some((item) => item.qty - (item.qty_returned ?? 0) > 0)}
         <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
       {/if}
