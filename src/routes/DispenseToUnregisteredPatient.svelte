@@ -2,8 +2,6 @@
   let patientName = $state("");
 </script>
 
-<h2>صرف لمريض غير مسجل</h2>
-
 <form action="/dispense/26/0" method="GET">
   <input
     type="text"

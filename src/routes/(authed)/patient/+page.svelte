@@ -7,6 +7,7 @@
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
   import { getUnlinkedTickets } from "../pharmacy/ticket.remote.js";
+  import DispenseToUnregisteredPatient from "../../DispenseToUnregisteredPatient.svelte";
 
   let { data } = $props();
 
@@ -81,13 +82,14 @@
 
 <div class="ward-wrapper">
   <h2 id="unregistered">مرضى غير مسجلين</h2>
-  {#each unregisteredPatients as p, i (i)}
-    <div class="unregistered-patients">
+  <div class="unregistered-patients">
+    {#each unregisteredPatients as p, i (i)}
       <a href="/dispense/25/0?patient_name={p.name}" class="btn" style:--bg="green">
         {p.name}
       </a>
-    </div>
-  {/each}
+    {/each}
+  </div>
+  <DispenseToUnregisteredPatient />
 </div>
 
 {#snippet Ward(wardName: string, patientsList: PatientT[])}
@@ -295,7 +297,10 @@
     gap: 1rem;
     align-items: center;
     justify-content: center;
+    margin-block-end: 1rem;
+  }
 
+  .ward-wrapper:last-of-type {
     margin-block-end: 2rem;
   }
 
