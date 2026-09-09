@@ -6,6 +6,7 @@
   import Student from "@lucide/svelte/icons/graduation-cap";
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
+  import { getUnlinkedTickets } from "../pharmacy/ticket.remote.js";
 
   let { data } = $props();
 
@@ -46,6 +47,8 @@
   );
 
   let headerHight = $state(0);
+
+  let unregisteredPatients = await getUnlinkedTickets();
 </script>
 
 <header bind:clientHeight={headerHight}>
@@ -60,6 +63,12 @@
       <a href="#{ward}">{ward}</a>
     </li>
   {/each}
+  {#if unregisteredPatients.length}
+    <hr />
+    <li>
+      <a href="#unregistered">غير مسجلين</a>
+    </li>
+  {/if}
 </ul>
 
 {#each wards as ward (ward)}
@@ -69,6 +78,17 @@
     </div>
   {/if}
 {/each}
+
+<div class="ward-wrapper">
+  <h2 id="unregistered">مرضى غير مسجلين</h2>
+  {#each unregisteredPatients as p, i (i)}
+    <div class="unregistered-patients">
+      <a href="/dispense/25/0?patient_name={p.name}" class="btn" style:--bg="green">
+        {p.name}
+      </a>
+    </div>
+  {/each}
+</div>
 
 {#snippet Ward(wardName: string, patientsList: PatientT[])}
   <h2>
@@ -200,6 +220,11 @@
       color: var(--main-text-color);
       text-decoration: none;
     }
+
+    hr {
+      width: 100%;
+      margin-block: 0.2rem;
+    }
   }
 
   input[type="search"] {
@@ -263,6 +288,15 @@
         }
       }
     }
+  }
+
+  .unregistered-patients {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+
+    margin-block-end: 2rem;
   }
 
   .btn.invoice {
