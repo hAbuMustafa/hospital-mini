@@ -92,7 +92,7 @@ input.btn {
   font-weight: bolder;
 
   &:disabled {
-    background-color: hsl(from var(--main-accent-color) h 0% 40%);
+    --bg: hsl(from var(--main-accent-color) h 0% 40%);
   }
 
   &:hover,
