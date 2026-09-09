@@ -1,0 +1,98 @@
+<script lang="ts">
+  import Combobox from "$lib/components/Combobox.svelte";
+  import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
+  import { getUnlinkedTickets, linkTickets } from "../ticket.remote";
+
+  let unlinkedTickets = $derived(await getUnlinkedTickets());
+
+  let selectedId = $state("");
+  let selectedPatientName = $state("");
+
+  let selectedNames = $state([]);
+
+  let patientQuery = $state("");
+</script>
+
+{#if unlinkedTickets.length}
+  <form {...linkTickets.enhance(async (form) => {})}>
+    {#if selectedId}
+      <button
+        type="button"
+        onclick={() => {
+          selectedId = "";
+          selectedPatientName = "";
+        }}
+      >
+        {selectedId}
+        {selectedPatientName}
+      </button>
+    {/if}
+    <input {...linkTickets.fields.link_to_id.as("hidden", selectedId)} readonly />
+    {#if !selectedId}
+      <Combobox
+        bind:query={patientQuery}
+        endpoint={`/api/v1/patient?q=${patientQuery}`}
+        placeholder="بحث عن مريض"
+      >
+        {#snippet itemSnippet(patient: PatientT)}
+          <SelectItemPatient
+            {patient}
+            query={patientQuery}
+            onSelect={() => {
+              selectedId = patient.id;
+              selectedPatientName = patient.name!;
+            }}
+          />
+        {/snippet}
+      </Combobox>
+    {/if}
+    <ul>
+      {#each unlinkedTickets as ticket, i (ticket.name)}
+        <li>
+          <label>
+            <input
+              bind:group={selectedNames}
+              {...linkTickets.fields.patient_names.as("checkbox", ticket.name!)}
+            />
+            {ticket.name}
+          </label>
+          <a href="/dispense/26/0?patient_name={ticket.name}" class="btn">
+            صرف جديد بنفس الاسم
+          </a>
+        </li>
+      {/each}
+    </ul>
+
+    <input
+      type="submit"
+      class="btn"
+      value="حفظ"
+      disabled={!selectedId && !selectedNames.length}
+    />
+  </form>
+{:else}
+  <p>لا يوجد لديك تذاكر تحتاج لربط 🎉🥳</p>
+{/if}
+
+<style>
+  ul {
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  li > .btn {
+    --bg: green;
+    font-size: 1em;
+    font-weight: normal;
+    padding: 0.1rem;
+  }
+
+  input[type="submit"] {
+    width: 100%;
+  }
+</style>
