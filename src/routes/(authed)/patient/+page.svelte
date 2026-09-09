@@ -8,6 +8,7 @@
   import { fly } from "svelte/transition";
   import { getUnlinkedTickets } from "../pharmacy/ticket.remote.js";
   import DispenseToUnregisteredPatient from "../../DispenseToUnregisteredPatient.svelte";
+  import { authState } from "$lib/auth-client/auth.svelte.js";
 
   let { data } = $props();
 
@@ -50,6 +51,8 @@
   let headerHight = $state(0);
 
   let unregisteredPatients = await getUnlinkedTickets();
+
+  let isPharmacy = authState.user?.role?.includes("-ph-");
 </script>
 
 <header bind:clientHeight={headerHight}>
@@ -64,7 +67,7 @@
       <a href="#{ward}">{ward}</a>
     </li>
   {/each}
-  {#if unregisteredPatients.length}
+  {#if isPharmacy && unregisteredPatients.length}
     <hr />
     <li>
       <a href="#unregistered">غير مسجلين</a>
@@ -80,17 +83,19 @@
   {/if}
 {/each}
 
-<div class="ward-wrapper">
-  <h2 id="unregistered">مرضى غير مسجلين</h2>
-  <div class="unregistered-patients">
-    {#each unregisteredPatients as p, i (i)}
-      <a href="/dispense/25/0?patient_name={p.name}" class="btn" style:--bg="green">
-        {p.name}
-      </a>
-    {/each}
+{#if isPharmacy && unregisteredPatients.length}
+  <div class="ward-wrapper">
+    <h2 id="unregistered">مرضى غير مسجلين</h2>
+    <div class="unregistered-patients">
+      {#each unregisteredPatients as p, i (i)}
+        <a href="/dispense/25/0?patient_name={p.name}" class="btn" style:--bg="green">
+          {p.name}
+        </a>
+      {/each}
+    </div>
+    <DispenseToUnregisteredPatient />
   </div>
-  <DispenseToUnregisteredPatient />
-</div>
+{/if}
 
 {#snippet Ward(wardName: string, patientsList: PatientT[])}
   <h2>
@@ -106,8 +111,10 @@
         <th>التشخيص</th>
         <th>تاريخ الدخول</th>
 
-        <th>فاتورة</th>
-        <th>صرف</th>
+        {#if isPharmacy}
+          <th>فاتورة</th>
+          <th>صرف</th>
+        {/if}
       </tr>
     </thead>
     <tbody>
@@ -159,12 +166,14 @@
           <td>{patient.diagnosis}</td>
           <td>{formatDate(patient.admission_date, "YYYY/MM/DD")}</td>
 
-          <td>
-            <a href="/invoice/create/{patient.id}" class="btn invoice">فاتورة</a>
-          </td>
-          <td>
-            <a href="/dispense/{patient.id}" class="btn dispense">صرف</a>
-          </td>
+          {#if isPharmacy}
+            <td>
+              <a href="/invoice/create/{patient.id}" class="btn invoice">فاتورة</a>
+            </td>
+            <td>
+              <a href="/dispense/{patient.id}" class="btn dispense">صرف</a>
+            </td>
+          {/if}
         </tr>
       {/each}
     </tbody>
