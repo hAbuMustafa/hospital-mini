@@ -66,7 +66,8 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
       ...getTableColumns(drugs),
       user_name: user.name,
       amount: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0))`,
-      total: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)) * ${drugs.price_resale}`,
+      unit_price: transactions.unit_price,
+      total: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)) * ${transactions.unit_price}`,
     })
     .from(transactions)
     .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
@@ -89,7 +90,8 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
         ...getTableColumns(drugs),
         user_name: user.name,
         amount: invoiceExtraItems.qty,
-        total: sql<number>`${invoiceExtraItems.qty} * ${drugs.price_resale}`,
+        unit_price: invoiceExtraItems.unit_price,
+        total: sql<number>`${invoiceExtraItems.qty} * ${invoiceExtraItems.unit_price}`,
       })
       .from(invoiceExtraItems)
       .where(eq(invoiceExtraItems.invoice_id, invoiceNumber))
@@ -103,7 +105,7 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
         if (foundDispenseIndex > -1) {
           items[foundDispenseIndex].amount += xItem.amount;
           items[foundDispenseIndex].total =
-            items[foundDispenseIndex].amount * items[foundDispenseIndex].price_resale!;
+            items[foundDispenseIndex].amount * items[foundDispenseIndex].unit_price;
         } else {
           items.push(xItem);
         }
