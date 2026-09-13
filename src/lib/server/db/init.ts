@@ -21,7 +21,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
-import { eq } from "drizzle-orm";
+import { eq, ne } from "drizzle-orm";
 import { reportSheetFetch, reportSheetMultiFetch } from "./utils";
 import { formatDate } from "$lib/date/utils";
 
@@ -31,6 +31,7 @@ export async function initialize() {
     "Admissions!C:T",
     "Transfers!B:E",
     "Discharges!B:E",
+    "Changelog!A:A",
   ]);
 
   reportSheetMultiFetch(fetchedPatient);
@@ -50,6 +51,7 @@ export async function initialize() {
     !fetchedPatient.Admissions.values ||
     !fetchedPatient.Transfers.values ||
     !fetchedPatient.Discharges.values ||
+    !fetchedPatient.Changelog.values ||
     !fetchedNarcoticsDispensed.values ||
     !fetchedDrugs.values
   ) {
@@ -66,7 +68,7 @@ export async function initialize() {
   await db.delete(patientTransfers);
   await db.delete(patientDischarges);
   await db.delete(transactionTickets).where(eq(transactionTickets.user_id, ""));
-  await db.delete(status);
+  await db.update(status).set({ value: 0 }).where(ne(status.item, "first_date"));
 
   console.info(
     formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
@@ -172,10 +174,25 @@ export async function initialize() {
     process.exit(1);
   }
 
-  await db.insert(status).values([
-    { item: "admissions", value: fetchedPatient.Admissions.values.length },
-    { item: "transfers", value: fetchedPatient.Transfers.values.length },
-    { item: "discharges", value: fetchedPatient.Discharges.values.length },
-    { item: "narcotics_dispensed", value: fetchedNarcoticsDispensed.values.length },
-  ]);
+  // 5. UPDATE status numbers
+  await db
+    .update(status)
+    .set({ value: fetchedPatient.Admissions.values.length })
+    .where(eq(status.item, "admissions"));
+  await db
+    .update(status)
+    .set({ value: fetchedPatient.Transfers.values.length })
+    .where(eq(status.item, "transfers"));
+  await db
+    .update(status)
+    .set({ value: fetchedPatient.Discharges.values.length })
+    .where(eq(status.item, "discharges"));
+  await db
+    .update(status)
+    .set({ value: fetchedPatient.Changelog.values.length })
+    .where(eq(status.item, "updates"));
+  await db
+    .update(status)
+    .set({ value: fetchedNarcoticsDispensed.values.length })
+    .where(eq(status.item, "narcotics_dispensed"));
 }
