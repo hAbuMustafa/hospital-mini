@@ -21,7 +21,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { reportSheetMultiFetch, reportSheetFetch } from "./utils";
 import { formatDate } from "$lib/date/utils";
 
@@ -37,6 +37,7 @@ export async function syncPatients() {
   const latestNarcoticsDispensedCount = latestRows.find(
     (r) => r.item === "narcotics_dispensed"
   )?.value;
+  const latestUpdatesCount = latestRows.find((r) => r.item === "updates")?.value ?? 0;
 
   if (
     !latestAdmissionCount ||
@@ -59,6 +60,7 @@ export async function syncPatients() {
     `Admissions!C${latestAdmissionCount + 1}:T`,
     `Transfers!B${latestTransferCount + 1}:E`,
     `Discharges!B${latestDischargeCount + 1}:E`,
+    `Changelog!B${latestUpdatesCount + 1}:A`,
   ]);
 
   reportSheetMultiFetch(fetchedPatientsData);
@@ -146,6 +148,31 @@ export async function syncPatients() {
       console.log(
         formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
         `♻️✔️ Synced ${fetchedPatientsData.Discharges.values.length} Discharges. Current count is ${newCount.value}`
+      );
+    }
+  });
+
+  await db.transaction(async (tx) => {
+    if (fetchedPatientsData.Changelog.values) {
+      for (const update of fetchedPatientsData.Changelog.values) {
+        try {
+          await tx.run(update[0]);
+        } catch (err) {
+          console.error("Error in EXECUTING IMPORTED UPDATES\n", update[0], "\n", err);
+        }
+      }
+
+      const [newCount] = await tx
+        .update(status)
+        .set({
+          value: latestUpdatesCount + fetchedPatientsData.Changelog.values.length,
+        })
+        .where(eq(status.item, "updates"))
+        .returning();
+
+      console.log(
+        formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+        `♻️✔️ Synced ${fetchedPatientsData.Changelog.values.length} IMPORTED UPDATES. Current count is ${newCount.value}`
       );
     }
   });
