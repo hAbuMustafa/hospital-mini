@@ -104,7 +104,10 @@ export async function syncPatients() {
 
       console.log(
         formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-        `♻️✔️ Synced ${fetchedPatientsData.Admissions.values.length} Admissions. Current count is ${newCount.value}`
+        "♻️✔️ Synced",
+        fetchedPatientsData.Admissions.values.length,
+        "Admissions. Current count is",
+        newCount.value
       );
     }
   });
@@ -128,7 +131,10 @@ export async function syncPatients() {
 
       console.log(
         formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-        `♻️✔️ Synced ${fetchedPatientsData.Transfers.values.length} Transfers. Current count is ${newCount.value}`
+        "♻️✔️ Synced",
+        fetchedPatientsData.Transfers.values.length,
+        "Transfers. Current count is",
+        newCount.value
       );
     }
   });
@@ -152,7 +158,10 @@ export async function syncPatients() {
 
       console.log(
         formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-        `♻️✔️ Synced ${fetchedPatientsData.Discharges.values.length} Discharges. Current count is ${newCount.value}`
+        "♻️✔️ Synced",
+        fetchedPatientsData.Discharges.values.length,
+        "Discharges. Current count is",
+        newCount.value
       );
     }
   });
@@ -178,7 +187,10 @@ export async function syncPatients() {
 
       console.log(
         formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-        `♻️✔️ Synced ${fetchedPatientsData.Changelog.values.length} IMPORTED UPDATES. Current count is ${newCount.value}`
+        "♻️✔️ Synced",
+        fetchedPatientsData.Changelog.values.length,
+        "IMPORTED UPDATES. Current count is",
+        newCount.value
       );
     }
   });
@@ -220,7 +232,10 @@ export async function syncPatients() {
 
       console.log(
         formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-        `♻️✔️ Synced ${fetchedNarcoticsDispensed.values.length} narcotic dispenses. Current count is ${newCount.value}`
+        "♻️✔️ Synced",
+        fetchedNarcoticsDispensed.values.length,
+        "narcotic dispenses. Current count is",
+        newCount.value
       );
     }
   });
@@ -252,6 +267,8 @@ export async function syncDrugs() {
 
   console.info(
     formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-    `♻️✔️ Synced ${fetchedDrugs.values.length} drugs.`
+    "♻️✔️ Synced",
+    fetchedDrugs.values.length,
+    "drugs."
   );
 }
