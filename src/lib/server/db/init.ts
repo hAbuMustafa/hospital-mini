@@ -21,7 +21,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
-import { eq, ne } from "drizzle-orm";
+import { eq, ne, sql } from "drizzle-orm";
 import { reportSheetFetch, reportSheetMultiFetch } from "./utils";
 import { formatDate } from "$lib/date/utils";
 
@@ -176,23 +176,13 @@ export async function initialize() {
 
   // 5. UPDATE status numbers
   await db
-    .update(status)
-    .set({ value: fetchedPatient.Admissions.values.length })
-    .where(eq(status.item, "admissions"));
-  await db
-    .update(status)
-    .set({ value: fetchedPatient.Transfers.values.length })
-    .where(eq(status.item, "transfers"));
-  await db
-    .update(status)
-    .set({ value: fetchedPatient.Discharges.values.length })
-    .where(eq(status.item, "discharges"));
-  await db
-    .update(status)
-    .set({ value: fetchedPatient.Changelog.values.length })
-    .where(eq(status.item, "updates"));
-  await db
-    .update(status)
-    .set({ value: fetchedNarcoticsDispensed.values.length })
-    .where(eq(status.item, "narcotics_dispensed"));
+    .insert(status)
+    .values([
+      { item: "admissions", value: fetchedPatient.Admissions.values.length },
+      { item: "transfers", value: fetchedPatient.Transfers.values.length },
+      { item: "discharges", value: fetchedPatient.Discharges.values.length },
+      { item: "updates", value: fetchedPatient.Changelog.values.length },
+      { item: "narcotics_dispensed", value: fetchedNarcoticsDispensed.values.length },
+    ])
+    .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.name` } });
 }
