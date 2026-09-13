@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `status_item_unique` ON `status` (`item`);

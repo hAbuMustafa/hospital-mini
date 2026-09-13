@@ -208,7 +208,7 @@ LEFT JOIN recentWards_view r ON a.id = r.patient_id
 
 export const status = sqliteTable("status", {
   id: int().primaryKey({ autoIncrement: true }),
-  item: text(),
+  item: text().unique(),
   value: int(),
 });
 
