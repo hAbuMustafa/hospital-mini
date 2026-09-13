@@ -184,5 +184,5 @@ export async function initialize() {
       { item: "updates", value: fetchedPatient.Changelog.values.length },
       { item: "narcotics_dispensed", value: fetchedNarcoticsDispensed.values.length },
     ])
-    .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.name` } });
+    .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } });
 }
