@@ -141,3 +141,20 @@ export async function saveNarcoticTicketToGoogleSheet(
     );
   }
 }
+
+export async function saveNarcoticTicketToGoogleSheetBatch(
+  rows: [Date, string, null, string, number][]
+) {
+  try {
+    return await appendSheetRow(
+      narcotics_spreadsheetId,
+      "Dispensed",
+      rows.map((row) => [formatDate(row[0], "M/D/YYYY HH:mm:ss"), ...row.slice(1)])
+    );
+  } catch (err) {
+    console.error(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "Couldn't save to Google Sheet"
+    );
+  }
+}

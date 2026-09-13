@@ -4,7 +4,11 @@ import {
   patients_spreadsheetId,
 } from "$env/static/private";
 import { db } from "$lib/server/db";
-import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
+import {
+  getSheetRange,
+  getSheetRanges,
+  saveNarcoticTicketToGoogleSheetBatch,
+} from "$lib/server/gcp/sheets";
 import {
   drugs,
   patientAdmissions,
@@ -13,6 +17,7 @@ import {
   status,
   transactions,
   transactionTickets,
+  unsyncedNarcotics,
 } from "$lib/server/db/schema";
 import {
   admissionRowToObject,
@@ -239,6 +244,30 @@ export async function syncPatients() {
       );
     }
   });
+
+  const unsyncedNarcoticDispenses = await db.select().from(unsyncedNarcotics);
+
+  if (unsyncedNarcoticDispenses.length) {
+    console.log("⏫ UPLOADING", unsyncedNarcoticDispenses.length, "narcotic dispenses");
+
+    const appendResult = await saveNarcoticTicketToGoogleSheetBatch(
+      unsyncedNarcoticDispenses.map((nd) => [
+        nd.ticket_timestamp,
+        nd.patient_id,
+        null,
+        nd.item_name,
+        nd.qty,
+      ])
+    );
+
+    if (!appendResult) return;
+
+    await db.delete(unsyncedNarcotics);
+    await db
+      .update(status)
+      .set({ value: sql`${status.value} + ${unsyncedNarcoticDispenses.length}` })
+      .where(eq(status.item, "narcotics_dispensed"));
+  }
 }
 
 export async function syncDrugs() {

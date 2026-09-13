@@ -2,13 +2,13 @@
 
 ## Sync
 
-- [ ] Remote sync flow:
+- [x] Remote sync flow:
   - [x] Add sync buttons to Nav.
   - [x] Pull edits from remote:
     - [x] New sheet in one of the google sheets for sync orders
     - [x] Add entry to `status` table with latest synced id.
     - [x] Add sql execution logic to sync functions.
-  - [ ] On login, after all fetches and writes to local DB, upload all un uploaded narcotic tickets.
+  - [x] On login, after all fetches and writes to local DB, upload all un uploaded narcotic tickets.
     - [x] Add a screen to manually upload narcotic tickets.
 
 ## Schema
