@@ -94,11 +94,12 @@ export async function syncPatients() {
       });
 
       const [newCount] = await tx
-        .update(status)
-        .set({
+        .insert(status)
+        .values({
+          item: "admissions",
           value: latestAdmissionCount + fetchedPatientsData.Admissions.values.length,
         })
-        .where(eq(status.item, "admissions"))
+        .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } })
         .returning();
 
       console.log(
@@ -117,9 +118,12 @@ export async function syncPatients() {
       await tx.insert(patientTransfers).values(seedableTransfers);
 
       const [newCount] = await tx
-        .update(status)
-        .set({ value: latestTransferCount + fetchedPatientsData.Transfers.values.length })
-        .where(eq(status.item, "transfers"))
+        .insert(status)
+        .values({
+          item: "transfers",
+          value: latestTransferCount + fetchedPatientsData.Transfers.values.length,
+        })
+        .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } })
         .returning();
 
       console.log(
@@ -138,11 +142,12 @@ export async function syncPatients() {
       await tx.insert(patientDischarges).values(seedableDischarges);
 
       const [newCount] = await tx
-        .update(status)
-        .set({
+        .insert(status)
+        .values({
+          item: "discharges",
           value: latestDischargeCount + fetchedPatientsData.Discharges.values.length,
         })
-        .where(eq(status.item, "discharges"))
+        .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } })
         .returning();
 
       console.log(
@@ -163,11 +168,12 @@ export async function syncPatients() {
       }
 
       const [newCount] = await tx
-        .update(status)
-        .set({
+        .insert(status)
+        .values({
+          item: "updates",
           value: latestUpdatesCount + fetchedPatientsData.Changelog.values.length,
         })
-        .where(eq(status.item, "updates"))
+        .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } })
         .returning();
 
       console.log(
@@ -204,11 +210,12 @@ export async function syncPatients() {
       }
 
       const [newCount] = await tx
-        .update(status)
-        .set({
+        .insert(status)
+        .values({
+          item: "narcotics_dispensed",
           value: latestNarcoticsDispensedCount + fetchedNarcoticsDispensed.values.length,
         })
-        .where(eq(status.item, "narcotics_dispensed"))
+        .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } })
         .returning();
 
       console.log(
