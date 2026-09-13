@@ -248,7 +248,12 @@ export async function syncPatients() {
   const unsyncedNarcoticDispenses = await db.select().from(unsyncedNarcotics);
 
   if (unsyncedNarcoticDispenses.length) {
-    console.log("⏫ UPLOADING", unsyncedNarcoticDispenses.length, "narcotic dispenses");
+    console.log(
+      formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
+      "⏫ UPLOADING",
+      unsyncedNarcoticDispenses.length,
+      "narcotic dispenses"
+    );
 
     const appendResult = await saveNarcoticTicketToGoogleSheetBatch(
       unsyncedNarcoticDispenses.map((nd) => [
