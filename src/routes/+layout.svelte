@@ -15,10 +15,12 @@
         window.clearInterval(signOutInterval);
       };
   });
+
+  const appName = "مستشفى 23 يوليو للأمراض الصدرية";
 </script>
 
 <svelte:head>
-  <title>{page.data.title ?? "مستشفى 23 يوليو للأمراض الصدرية"}</title>
+  <title>{page.data.title ? `${page.data.title} | ${appName}` : appName}</title>
 </svelte:head>
 
 <Nav />
