@@ -61,33 +61,56 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
   const invoice = await getInvoiceMetadata(invoiceNumber);
   const systemFirstDate = await getSystemFirstDate();
 
-  const items = await db
-    .select({
-      ...getTableColumns(drugs),
-      user_name: user.name,
-      amount: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0))`,
-      unit_price: sql<number>`${transactions.unit_price} * 1.07`,
-      total: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)) * (${transactions.unit_price} * 1.07)`,
-    })
-    .from(transactions)
-    .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
-    .leftJoin(drugs, eq(transactions.item_id, drugs.id))
-    .leftJoin(user, eq(transactionTickets.user_id, user.id))
-    .where(
-      and(
-        eq(transactionTickets.is_dispense, true),
-        eq(transactionTickets.patient_id, invoice.patient_id),
-        gte(transactionTickets.timestamp, invoice.from),
-        lte(transactionTickets.timestamp, invoice.to)
+  // get inverted transactions list so `group by` takes the first price (most recent) as the item price
+  const patientTxns = db.$with("pnt_txns").as(
+    db
+      .select({
+        id: drugs.id,
+        name_ar: drugs.name_ar,
+        smc_code: drugs.smc_code,
+        amount:
+          sql<number>`${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)`.as(
+            "amount"
+          ),
+        unit_price: sql<number>`${transactions.unit_price} * 1.07`.as("unit_price"),
+        user_name: user.name,
+      })
+      .from(transactions)
+      .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
+      .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+      .leftJoin(user, eq(transactionTickets.user_id, user.id))
+      .where(
+        and(
+          eq(transactionTickets.is_dispense, true),
+          eq(transactionTickets.patient_id, invoice.patient_id),
+          gte(transactionTickets.timestamp, invoice.from),
+          lte(transactionTickets.timestamp, invoice.to)
+        )
       )
-    )
-    .groupBy(transactions.item_id)
+      .orderBy(desc(transactionTickets.timestamp))
+  );
+
+  const items = await db
+    .with(patientTxns)
+    .select({
+      id: patientTxns.id,
+      name_ar: patientTxns.name_ar,
+      smc_code: patientTxns.smc_code,
+      user_name: patientTxns.user_name,
+      amount: sql<number>`SUM(${patientTxns.amount})`,
+      unit_price: patientTxns.unit_price,
+      total: sql<number>`SUM(${patientTxns.amount}) * ${patientTxns.unit_price}`,
+    })
+    .from(patientTxns)
+    .groupBy(patientTxns.id)
     .having((thisView) => gt(thisView.amount, 0));
 
   if (invoice.from < systemFirstDate) {
     const extraItems = await db
       .select({
-        ...getTableColumns(drugs),
+        id: drugs.id,
+        name_ar: drugs.name_ar,
+        smc_code: drugs.smc_code,
         user_name: user.name,
         amount: invoiceExtraItems.qty,
         unit_price: invoiceExtraItems.unit_price, // resale price already, no need for adjustment
