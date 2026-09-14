@@ -299,7 +299,6 @@
         <th>م</th>
         <th>اسم الصنف</th>
         <th>الكمية</th>
-        <th>القيمة</th>
       </tr>
     </thead>
     <tbody>
@@ -308,7 +307,6 @@
           <td>{i + 1}</td>
           <td>{item.name}</td>
           <td>{item.amount}</td>
-          <td>{item.total}</td>
         </tr>
       {/each}
     </tbody>
