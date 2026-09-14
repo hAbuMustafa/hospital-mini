@@ -90,8 +90,8 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
         ...getTableColumns(drugs),
         user_name: user.name,
         amount: invoiceExtraItems.qty,
-        unit_price: sql<number>`${invoiceExtraItems.unit_price} * 1.07`,
-        total: sql<number>`${invoiceExtraItems.qty} * (${invoiceExtraItems.unit_price} * 1.07)`,
+        unit_price: invoiceExtraItems.unit_price, // resale price already, no need for adjustment
+        total: sql<number>`${invoiceExtraItems.qty} * ${invoiceExtraItems.unit_price}`,
       })
       .from(invoiceExtraItems)
       .where(eq(invoiceExtraItems.invoice_id, invoiceNumber))
