@@ -145,7 +145,7 @@
           <td>{drug.name_ar}</td>
           <td>{drug.amount}</td>
           <td>
-            {drug.price_resale?.toFixed(2)}
+            {drug.unit_price?.toFixed(2)}
           </td>
           <td>
             {drug.total.toFixed(2)}
