@@ -70,6 +70,9 @@ export async function initialize() {
   await db.delete(transactionTickets).where(eq(transactionTickets.user_id, ""));
   await db.update(status).set({ value: 0 }).where(ne(status.item, "first_date"));
 
+  // reset sequences
+  await db.run("UPDATE sqlite_sequence set seq = 0 where name = 'patientTransfers'");
+
   console.info(
     formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
     "🧹 Tables Truncated Successfully"
