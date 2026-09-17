@@ -260,7 +260,7 @@ export const returnItems = form(
         itemId: v.number(),
         itemUnitPrice: v.number(),
         transactionId: v.number(),
-        returnedAmount: v.number(),
+        returnedAmount: v.optional(v.number()),
       })
     ),
   }),
@@ -277,7 +277,9 @@ export const returnItems = form(
 
     const currentUser = getRequestEvent().locals.user;
 
-    const returnedItems = data.items.filter((item) => item.returnedAmount > 0);
+    const returnedItems = data.items.filter(
+      (item) => item.returnedAmount && item.returnedAmount > 0
+    );
 
     if (!returnedItems.length) invalid(issue("لم تقم بكتابة أي كميات للارتجاع"));
 
@@ -299,7 +301,7 @@ export const returnItems = form(
             ticket_id: newTicket.id,
             item_id: item.itemId,
             unit_price: item.itemUnitPrice,
-            qty: item.returnedAmount,
+            qty: item.returnedAmount!,
           }))
         );
 
