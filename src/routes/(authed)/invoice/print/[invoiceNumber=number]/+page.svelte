@@ -169,7 +169,7 @@
             <dt>يعتمد،<br />مدير المستشفى/</dt>
 
             <dd></dd>
-            <dd>
+            <dd class="pii">
               {invoice.username}
             </dd>
             <dd></dd>
