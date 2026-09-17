@@ -298,7 +298,7 @@
                       return "تم نسخ الفاتورة بنجاح";
                     },
                     error: () => {
-                      copyInvoice.fields?.allIssues()?.forEach((issue) => {
+                      form.fields?.allIssues()?.forEach((issue) => {
                         toast.warning(issue.message, {
                           duration: Number.POSITIVE_INFINITY,
                         });

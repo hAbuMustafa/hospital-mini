@@ -412,45 +412,41 @@ export const copyInvoice = form(
     invoiceId: v.number(),
   }),
   async (data, issue) => {
-    try {
-      const [oldInvoice] = await db
-        .select()
-        .from(invoices)
-        .where(eq(invoices.id, data.invoiceId));
+    const [oldInvoice] = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.id, data.invoiceId));
 
-      const oldInvoiceItems = await db
-        .select()
-        .from(invoiceExtraItems)
-        .where(eq(invoiceExtraItems.invoice_id, data.invoiceId));
+    const oldInvoiceItems = await db
+      .select()
+      .from(invoiceExtraItems)
+      .where(eq(invoiceExtraItems.invoice_id, data.invoiceId));
 
-      if (!oldInvoiceItems.length) invalid(issue.invoiceId("لا يوجد أصناف بالفاتورة..."));
+    if (!oldInvoiceItems.length) invalid(issue.invoiceId("لا يوجد أصناف بالفاتورة..."));
 
-      const [newInvoice] = await db
-        .insert(invoices)
-        .values({
-          ...oldInvoice,
-          id: undefined,
-          is_closed: undefined,
-          is_cancelled: undefined,
-          issued_at: undefined,
-          issued_by: getRequestEvent().locals.user?.id!,
-        })
-        .returning();
+    const [newInvoice] = await db
+      .insert(invoices)
+      .values({
+        ...oldInvoice,
+        id: undefined,
+        is_closed: undefined,
+        is_cancelled: undefined,
+        issued_at: undefined,
+        issued_by: getRequestEvent().locals.user?.id!,
+      })
+      .returning();
 
-      await db.insert(invoiceExtraItems).values(
-        oldInvoiceItems.map((item) => ({
-          ...item,
-          id: undefined,
-          invoice_id: newInvoice.id,
-          added_by: newInvoice.issued_by,
-          added_at: newInvoice.issued_at,
-        }))
-      );
+    await db.insert(invoiceExtraItems).values(
+      oldInvoiceItems.map((item) => ({
+        ...item,
+        id: undefined,
+        invoice_id: newInvoice.id,
+        added_by: newInvoice.issued_by,
+        added_at: newInvoice.issued_at,
+      }))
+    );
 
-      return { newInvoiceId: newInvoice.id };
-    } catch (err) {
-      console.error(err);
-    }
+    return { newInvoiceId: newInvoice.id };
   }
 );
 
