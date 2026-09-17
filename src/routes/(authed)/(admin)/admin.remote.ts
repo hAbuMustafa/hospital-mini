@@ -24,18 +24,11 @@ export const changeAffiliation = form(
     departmentId: v.picklist(departmentsIds),
   }),
   async (data) => {
-    try {
-      await db
-        .update(user)
-        .set({ affiliation: Number(data.departmentId) })
-        .where(eq(user.id, data.userId));
-      return { success: true };
-    } catch (err) {
-      console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), err);
-      return {
-        error: err,
-      };
-    }
+    await db
+      .update(user)
+      .set({ affiliation: Number(data.departmentId) })
+      .where(eq(user.id, data.userId));
+    return { success: true };
   }
 );
 

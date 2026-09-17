@@ -83,14 +83,14 @@
 
                         return `تم تغيير جهة عمل ${user.displayUsername}`;
                       },
-                      error: (err) => (err as unknown as { message: string }).message,
+                      error: "حدث خطأ أثناء تغيير جهة عمل " + user.displayUsername,
                       loading: `جار تعديل جهة عمل ${user.displayUsername}...`,
                     });
 
                     if (await form.submit()) {
                       resolve(form.result);
                     } else {
-                      reject(form.result?.error);
+                      reject();
                     }
                   }}
                 >
