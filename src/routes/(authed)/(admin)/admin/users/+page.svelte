@@ -84,7 +84,7 @@
                         return `تم تغيير جهة عمل ${user.displayUsername}`;
                       },
                       error: (err) => (err as unknown as { message: string }).message,
-                      loading: `جار تعديل جهة العمل ل${user.displayUsername}...`,
+                      loading: `جار تعديل جهة عمل ${user.displayUsername}...`,
                     });
 
                     if (await form.submit()) {
