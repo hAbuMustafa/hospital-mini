@@ -38,8 +38,8 @@
         {#each rows as dispense, i (dispense.id)}
           <tr>
             <td>{dispense.ticket_id}</td>
-            <td>{dispense.patient_id}</td>
-            <td>{dispense.patient_name}</td>
+            <td class="pii">{dispense.patient_id}</td>
+            <td class="pii">{dispense.patient_name}</td>
             <td>{dispense.item_name}</td>
             <td>{dispense.qty}</td>
             <td>
