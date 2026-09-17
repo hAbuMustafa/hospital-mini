@@ -29,7 +29,13 @@
   {@render children()}
 </div>
 
-<Toaster position="bottom-left" richColors closeButton pauseWhenPageIsHidden />
+<Toaster
+  position="bottom-left"
+  richColors
+  closeButton
+  pauseWhenPageIsHidden
+  class="hide-in-print"
+/>
 
 <style>
   .main-wrapper {
