@@ -1,14 +1,29 @@
 <script lang="ts">
   import { formatDate } from "$lib/date/utils";
   import { isReturnable } from "../../routes/(authed)/pharmacy/utils";
+  import TicketNumber from "./TicketNumber.svelte";
 
   type PropsT = {
-    items: any[];
-    dateOnly: boolean;
+    ticket: {
+      id: number;
+      timestamp: Date;
+      patient_id: string | null;
+      patient_name: string | null;
+      is_dispense: boolean;
+      user_name: string | null;
+    };
+    items: {
+      ticket_id: number | null;
+      item_id: number | null;
+      item_name: string | null;
+      item_tradename: string | null;
+      qty: number;
+      qty_returned: number | null;
+    }[];
+    dateOnly?: boolean;
   };
-  const { items, dateOnly }: PropsT = $props();
+  const { ticket, items, dateOnly = false }: PropsT = $props();
 
-  const ticket = $derived(items?.[0]);
   const isReturn = $derived(!ticket?.is_dispense);
   const canReturn = $derived(!isReturn && isReturnable(ticket.timestamp));
 </script>
@@ -18,9 +33,11 @@
     <h3>
       {#if ticket.patient_name}
         <span class="pii">
-          <a href="/patient/{ticket.patient_id}">{ticket?.patient_name}</a>
+          <span>
+            <a href="/patient/{ticket.patient_id}">{ticket?.patient_name}</a>
+          </span>
+          <span>({ticket?.patient_id})</span>
         </span>
-        <span class="pii">({ticket?.patient_id})</span>
       {:else}
         <span class="pii">
           {ticket.patient_id}
@@ -28,7 +45,7 @@
         </span>
       {/if}
       {#if canReturn && items.some((item) => item.qty - (item.qty_returned ?? 0) > 0)}
-        <a href="/pharmacy/tickets/return/{ticket.ticket_id}" class="btn">ارتجاع</a>
+        <a href="/pharmacy/ticket/{ticket.id}/return" class="btn">ارتجاع</a>
       {/if}
       <span class="ticket-numbers">
         <span class="ticket-time">
@@ -36,7 +53,7 @@
             ? formatDate(ticket?.timestamp, "HH:mm")
             : formatDate(ticket?.timestamp, "YYYY/MM/DD (HH:mm)")}
         </span>
-        <span class="ticket-id">&#x23;{ticket?.ticket_id}</span>
+        <TicketNumber number={ticket?.id} />
       </span>
     </h3>
   </div>
@@ -86,7 +103,7 @@
       align-items: center;
       margin: 0;
 
-      .pii > a {
+      a {
         color: inherit;
         text-decoration: none;
 
@@ -103,10 +120,6 @@
           background-color: hsl(from var(--main-bg-color) h s 40%);
           border-radius: 4px;
           padding: 0.15rem;
-        }
-
-        .ticket-id {
-          color: gray;
         }
       }
     }

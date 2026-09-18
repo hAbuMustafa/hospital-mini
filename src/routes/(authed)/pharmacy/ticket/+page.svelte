@@ -20,7 +20,7 @@
   );
 
   // svelte-ignore state_referenced_locally
-  const tickets = await getTickets({ from, to });
+  const dispenses = await getTickets({ from, to });
 </script>
 
 <h1>عرض تذاكر الصرف</h1>
@@ -38,8 +38,12 @@
 <DateTimeControls from={urlFrom} to={urlTo} />
 
 <div class="tickets-wrapper">
-  {#each tickets as [ticketId, items], i (ticketId)}
-    <TicketDisplay dateOnly={isWholeDay} items={items!} />
+  {#each dispenses.tickets as ticket, i (ticket.id)}
+    <TicketDisplay
+      {ticket}
+      dateOnly={isWholeDay}
+      items={dispenses.ticketsItems.filter((txn) => txn.ticket_id === ticket.id)}
+    />
   {/each}
 </div>
 

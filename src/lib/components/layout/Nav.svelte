@@ -45,7 +45,7 @@
             >الصيدلية</button
           >
           <ul id="pharmacy-nav-list" popover="hint">
-            <li><a href="/pharmacy/tickets">عرض تذاكر الصرف</a></li>
+            <li><a href="/pharmacy/ticket">عرض تذاكر الصرف</a></li>
             <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
             <hr />
             <li><a href="/pharmacy/link-tickets">ربط تذاكر الصرف</a></li>

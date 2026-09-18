@@ -11,7 +11,7 @@ import {
   user,
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
-import { invalid } from "@sveltejs/kit";
+import { error, invalid } from "@sveltejs/kit";
 import {
   and,
   desc,
@@ -181,19 +181,16 @@ export const getTickets = query(
 
     const tickets = await db
       .select({
-        ticket_id: transactionTickets.id,
+        id: transactionTickets.id,
         timestamp: transactionTickets.timestamp,
-        user_name: user.name,
         patient_id: transactionTickets.patient_id,
         patient_name: patients_view.name,
-        item_id: drugs.id,
-        item_name: drugs.name_ar,
-        item_tradename: drugs.tradename_ar,
-        qty: transactions.qty,
-        qty_returned: transactions.qty_returned,
         is_dispense: transactionTickets.is_dispense,
+        user_name: user.name,
       })
       .from(transactionTickets)
+      .leftJoin(patients_view, eq(transactionTickets.patient_id, patients_view.id))
+      .leftJoin(user, eq(transactionTickets.user_id, user.id))
       .where(
         and(
           currentUser?.role === "admin"
@@ -203,17 +200,75 @@ export const getTickets = query(
           lte(transactionTickets.timestamp, data.to),
           isNotNull(transactionTickets.patient_id)
         )
-      )
-      .leftJoin(transactions, eq(transactions.ticket_id, transactionTickets.id))
-      .leftJoin(patients_view, eq(transactionTickets.patient_id, patients_view.id))
-      .leftJoin(drugs, eq(transactions.item_id, drugs.id))
-      .leftJoin(user, eq(transactionTickets.user_id, user.id));
+      );
 
-    return Object.entries(Object.groupBy(tickets, (t) => t.ticket_id));
+    const ticketsItems = await db
+      .select({
+        ticket_id: transactions.ticket_id,
+        item_id: drugs.id,
+        item_name: drugs.name_ar,
+        item_tradename: drugs.tradename_ar,
+        qty: transactions.qty,
+        qty_returned: transactions.qty_returned,
+      })
+      .from(transactions)
+      .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+      .where(
+        and(
+          inArray(
+            transactions.ticket_id,
+            tickets.map((t) => t.id)
+          )
+        )
+      );
+
+    return { tickets, ticketsItems };
   }
 );
 
-export const getTicket = query(v.number(), async (ticketNumber) => {
+export const getTicket = query(v.number(), async (ticketId) => {
+  const currentUser = getRequestEvent().locals.user;
+
+  const [ticket] = await db
+    .select({
+      id: transactionTickets.id,
+      timestamp: transactionTickets.timestamp,
+      patient_id: transactionTickets.patient_id,
+      patient_name: patients_view.name,
+      is_dispense: transactionTickets.is_dispense,
+      user_name: user.name,
+      store_id: transactionTickets.store_id,
+    })
+    .from(transactionTickets)
+    .leftJoin(patients_view, eq(transactionTickets.patient_id, patients_view.id))
+    .leftJoin(user, eq(transactionTickets.user_id, user.id))
+    .where(eq(transactionTickets.id, ticketId));
+
+  if (!ticket || !ticket.patient_id) {
+    error(404, "التذكرة المطلوبة غير موجودة");
+  }
+
+  if (!(currentUser?.role === "admin" || ticket.store_id === Number(PUBLIC_store_id))) {
+    error(401, "التذكرة المطلوبة لا تخص جهتك");
+  }
+
+  const ticketItems = await db
+    .select({
+      ticket_id: transactions.ticket_id,
+      item_id: drugs.id,
+      item_name: drugs.name_ar,
+      item_tradename: drugs.tradename_ar,
+      qty: transactions.qty,
+      qty_returned: transactions.qty_returned,
+    })
+    .from(transactions)
+    .leftJoin(drugs, eq(transactions.item_id, drugs.id))
+    .where(eq(transactions.ticket_id, ticketId));
+
+  return { ticket, ticketItems };
+});
+
+export const getTicketForReturn = query(v.number(), async (ticketNumber) => {
   const currentUser = getRequestEvent().locals.user;
 
   const ticket = await db

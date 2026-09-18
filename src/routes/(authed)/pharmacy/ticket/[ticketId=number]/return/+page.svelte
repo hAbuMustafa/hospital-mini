@@ -1,12 +1,13 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { toast } from "svelte-sonner";
-  import { getTicket, returnItems } from "../../../ticket.remote";
+  import { getTicketForReturn, returnItems } from "../../../ticket.remote";
   import { isReturnable } from "../../../utils";
   import { formatDate } from "$lib/date/utils";
+  import TicketNumber from "$lib/components/TicketNumber.svelte";
 
   const ticketId = Number(page.params.ticketId);
-  const ticketItems = getTicket(ticketId);
+  const ticketItems = getTicketForReturn(ticketId);
 
   let items = $derived(await ticketItems);
 
@@ -18,7 +19,7 @@
 <h1>
   ارتجاع
   <small class="ticket-number">
-    (#{items[0].ticket_id})
+    (<TicketNumber number={items[0].ticket_id} /> )
   </small>: <span class="pii">{items[0].patient_name ?? items[0].patient_id}</span>
 </h1>
 <h2>{formatDate(items[0].timestamp!, "YYYY/MM/DD (HH:mm)")}</h2>
