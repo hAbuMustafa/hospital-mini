@@ -29,7 +29,7 @@
 <style>
   .line {
     width: 2px;
-    background: #bdbdbd;
+    background: light-dark(gray, #bdbdbd);
     height: calc(var(--period-line-height) * 10px);
 
     display: flex;
@@ -39,7 +39,7 @@
   }
 
   .line.fading {
-    background: linear-gradient(#fff, 30%, transparent 99% 1%);
+    background: linear-gradient(light-dark(gray, #bdbdbd), 30%, transparent 99% 1%);
     height: 80px;
   }
 
