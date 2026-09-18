@@ -333,12 +333,12 @@
   button.clear-filter {
     position: fixed;
     inset-block-end: 1rem;
-    inset-inline-end: 1rem;
+    inset-inline-start: 1rem;
 
     padding: 0.35rem 0.5rem;
 
     border-radius: 50%;
     background-color: var(--main-accent-color);
-    color: var(--main-bg-color);
+    color: white;
   }
 </style>
