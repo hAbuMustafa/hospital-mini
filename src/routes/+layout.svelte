@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import Nav from "$lib/components/layout/Nav.svelte";
+  import GoToTop from "$lib/components/layout/GoToTop.svelte";
   import { signOutOnShiftEnd } from "./logout-on-shift-end";
   import "./styles.css";
   import { Toaster } from "svelte-sonner";
@@ -28,6 +29,8 @@
 <div class="main-wrapper">
   {@render children()}
 </div>
+
+<GoToTop />
 
 <Toaster
   position="bottom-left"
