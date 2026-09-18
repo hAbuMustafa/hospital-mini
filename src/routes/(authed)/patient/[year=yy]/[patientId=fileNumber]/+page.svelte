@@ -10,6 +10,7 @@
   } from "./getPatientHistory.remote";
   import Female from "@lucide/svelte/icons/venus";
   import Male from "@lucide/svelte/icons/mars";
+  import { authState } from "$lib/auth-client/auth.svelte";
 
   const patientId = [page.params.year, page.params.patientId].join("/");
 
@@ -89,7 +90,20 @@
     </tr>
     <tr>
       <td colspan="4">
-        <a class="btn invoice header" href="/invoice/create/{patient.id}">فاتورة</a>
+        <div class="actions-wrapper">
+          {#if authState.user?.role === "admin" || authState.user?.role?.includes("-ph-")}
+            <a class="btn invoice" href="/invoice/create/{patient.id}">استخراج فاتورة</a>
+            <a
+              class="btn tickets"
+              href="/pharmacy/ticket?f={formatDate(patient.admission_date) +
+                'T00:00:00'}&t={formatDate(patient.discharge_date ?? new Date()) +
+                'T23:59:59'}&patient_id={patient.id}">عرض تذاكر الصرف</a
+            >
+            {#if !patient.discharge_date}
+              <a class="btn dispense" href="/dispense/{patient.id}">صرف</a>
+            {/if}
+          {/if}
+        </div>
       </td>
     </tr>
   </tbody>
@@ -202,13 +216,16 @@
     width: 80%;
   }
 
-  a.btn.invoice {
-    background-color: gold;
-    color: contrast-color(gold);
+  .actions-wrapper {
+    padding: 0.5rem;
+    display: flex;
+    gap: 1rem;
 
-    &.header {
-      margin-block: 0.5rem;
-      width: 50%;
+    .invoice {
+      --bg: gold;
+    }
+    .dispense {
+      --bg: green;
     }
   }
 </style>
