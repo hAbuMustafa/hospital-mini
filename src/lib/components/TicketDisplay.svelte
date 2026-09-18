@@ -41,7 +41,7 @@
       {:else}
         <span class="pii">
           {ticket.patient_id}
-          <small>(مريض غير مسجل)</small>
+          <small class="unregistered-marker">(مريض غير مسجل)</small>
         </span>
       {/if}
       <span class="ticket-meta">
@@ -117,6 +117,10 @@
         &:focus {
           background-color: var(--main-accent-color);
         }
+      }
+
+      .unregistered-marker {
+        color: light-dark(maroon, salmon);
       }
 
       .ticket-meta {
