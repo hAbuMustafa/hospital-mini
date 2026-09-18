@@ -80,3 +80,21 @@ export function getToday() {
 
   return today;
 }
+
+const monthsArabicNames = [
+  "يناير",
+  "فبراير",
+  "مارس",
+  "إبريل",
+  "مايو",
+  "يونيو",
+  "يوليو",
+  "أغسطس",
+  "سبتمبر",
+  "أكتوبر",
+  "نوفمبر",
+  "ديسمبر",
+];
+export function getMonthArabicName(monthIndex: number) {
+  return monthsArabicNames.at(monthIndex % 12);
+}
