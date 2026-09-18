@@ -8,6 +8,7 @@
     usernamePattern,
   } from "$lib/utils/patterns";
   import { toast } from "svelte-sonner";
+  import Password from "$lib/components/Forms/Password.svelte";
 
   $effect(() => {
     if (authState.isAuthenticated) goto("/");
@@ -82,10 +83,10 @@
   <hr />
 
   <label for="password">كلمة المرور</label>
-  <input type="password" id="password" name="password" required />
+  <Password id="password" name="password" required />
 
   <label for="confirm-password">تأكيد كلمة المرور</label>
-  <input type="password" id="confirm-password" name="confirm-password" required />
+  <Password id="confirm-password" name="confirm-password" required />
 
   <input type="submit" value="إنشاء حساب" />
 </form>

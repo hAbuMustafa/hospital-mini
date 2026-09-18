@@ -2,6 +2,7 @@
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   import { authState } from "$lib/auth-client/auth.svelte";
+  import Password from "$lib/components/Forms/Password.svelte";
   import {
     egyptianPhoneNumber,
     emailPattern,
@@ -52,7 +53,7 @@
   />
 
   <label for="password">كلمة المرور</label>
-  <input type="password" id="password" name="password" dir="auto" required />
+  <Password id="password" name="password" dir="auto" required />
 
   {#if error}
     <p class="error message">{error}</p>
