@@ -1,14 +1,17 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import { formatDate } from "$lib/date/utils";
 
   type PropsT = {
     from?: string;
     to?: string;
+    keepSearchParams?: string[];
   };
 
   const {
     from = formatDate(new Date()) + "T00:00:00",
     to = formatDate(new Date()) + "T23:59:59",
+    keepSearchParams = [],
   }: PropsT = $props();
 
   const fromDate = $derived(new Date(from));
@@ -23,11 +26,17 @@
 
     return [yDay, nxDay];
   });
+
+  // svelte-ignore state_referenced_locally
+  const keptParams = keepSearchParams.filter((p) => page.url.searchParams.get(p));
+  const fixedParams = keptParams.length
+    ? `&${keptParams.map((p) => `${p}=${page.url.searchParams.get(p)}`).join("&")}`
+    : "";
 </script>
 
 <div class="date-controls">
   <a
-    href="?f={yesterday}T00:00:00&t={yesterday}T23:59:59"
+    href="?f={yesterday}T00:00:00&t={yesterday}T23:59:59{fixedParams}"
     class="btn"
     data-sveltekit-reload>&Lt;</a
   >
@@ -41,10 +50,20 @@
       إلى:
       <input type="datetime-local" name="t" value={to} step="1" />
     </label>
+
+    {#each keptParams as searchParam, i (i)}
+      <input
+        type="hidden"
+        name={searchParam}
+        value={page.url.searchParams.get(searchParam)}
+      />
+    {/each}
     <button type="submit">تأكيد</button>
   </form>
-  <a href="?f={tomorrow}T00:00:00&t={tomorrow}T23:59:59" class="btn" data-sveltekit-reload
-    >&Gt;</a
+  <a
+    href="?f={tomorrow}T00:00:00&t={tomorrow}T23:59:59{fixedParams}"
+    class="btn"
+    data-sveltekit-reload>&Gt;</a
   >
 </div>
 
