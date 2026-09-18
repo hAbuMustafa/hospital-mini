@@ -3,8 +3,9 @@
   import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
   import { toast } from "svelte-sonner";
   import { getUnlinkedTickets, linkTickets } from "../ticket.remote";
+  import { page } from "$app/state";
 
-  let unlinkedTickets = $derived(await getUnlinkedTickets());
+  let unlinked = $derived(await getUnlinkedTickets());
 
   let selectedId = $state("");
   let selectedPatientName = $state("");
@@ -16,7 +17,9 @@
   const THIS_YEAR = new Date().getFullYear() - 2000;
 </script>
 
-{#if unlinkedTickets.length}
+<h1>{page.data.title}</h1>
+
+{#if unlinked.patientNames}
   <form
     {...linkTickets.enhance(async (form) => {
       const { promise, resolve, reject } = Promise.withResolvers();
@@ -44,6 +47,7 @@
     {#if selectedId}
       <button
         type="button"
+        class="selected-patient"
         onclick={() => {
           selectedId = "";
           selectedPatientName = "";
@@ -52,6 +56,7 @@
         {selectedId}
         {selectedPatientName}
       </button>
+      <hr />
     {/if}
     <input {...linkTickets.fields.link_to_id.as("hidden", selectedId)} readonly />
     {#if !selectedId}
@@ -72,19 +77,30 @@
         {/snippet}
       </Combobox>
     {/if}
+
+    <h2>أسماء المرضى على التذاكر</h2>
     <ul>
-      {#each unlinkedTickets as ticket, i (ticket.name)}
+      {#each unlinked.patientNames as patientName, i (i)}
         <li>
           <label>
             <input
               bind:group={selectedNames}
-              {...linkTickets.fields.patient_names.as("checkbox", ticket.name!)}
+              {...linkTickets.fields.patient_names.as("checkbox", patientName!)}
             />
-            {ticket.name}
+            {patientName}
           </label>
-          <a href="/dispense/{THIS_YEAR}/0?patient_name={ticket.name}" class="btn">
-            صرف جديد بنفس الاسم
-          </a>
+          <ul class="ticket-numbers">
+            {#each unlinked.tickets.filter((t) => t.patient_id === patientName) as ticket, j (ticket.id)}
+              <li>
+                <a href="/pharmacy/ticket/{ticket.id}">{ticket.id}</a>
+              </li>
+            {/each}
+            <li>
+              <a href="/dispense/{THIS_YEAR}/0?patient_name={patientName}" class="btn">
+                جديد
+              </a>
+            </li>
+          </ul>
         </li>
       {/each}
     </ul>
@@ -101,21 +117,40 @@
 {/if}
 
 <style>
+  .selected-patient {
+    background-color: gold;
+    color: black;
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    font-size: 1.25rem;
+  }
+
   ul {
     list-style: none;
+    padding-inline: 0;
   }
 
   li {
     display: flex;
-    gap: 1rem;
     align-items: center;
+    justify-content: space-between;
+  }
+
+  li > .ticket-numbers {
+    display: flex;
+    gap: 1ch;
+    flex-wrap: wrap;
+
+    li:not(:last-of-type)::after {
+      content: "،";
+    }
   }
 
   li > .btn {
     --bg: green;
     font-size: 1em;
     font-weight: normal;
-    padding: 0.1rem;
+    padding: 0.1rem 0.4rem;
   }
 
   input[type="submit"] {
