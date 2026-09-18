@@ -36,7 +36,7 @@
 
 {#if urlPatientId}
   <h2 class="for-patient-header">
-    للمريض "{dispenses.tickets[0]?.patient_name ?? urlPatientId}"
+    للمريض <span class="pii">"{dispenses.tickets[0]?.patient_name ?? urlPatientId}"</span>
     <button
       type="button"
       class="clear-patient-id"
