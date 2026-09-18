@@ -83,7 +83,7 @@ button.btn,
 input.btn {
   --bg: var(--main-accent-color);
   background-color: var(--bg);
-  color: white;
+  color: contrast-color(var(--bg));
   text-decoration: unset;
   padding: 0.25rem;
   border: var(--main-border);
