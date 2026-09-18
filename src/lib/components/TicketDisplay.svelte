@@ -44,10 +44,10 @@
           <small>(مريض غير مسجل)</small>
         </span>
       {/if}
-      {#if canReturn && items.some((item) => item.qty - (item.qty_returned ?? 0) > 0)}
-        <a href="/pharmacy/ticket/{ticket.id}/return" class="btn">ارتجاع</a>
-      {/if}
-      <span class="ticket-numbers">
+      <span class="ticket-meta">
+        {#if canReturn && items.some((item) => item.qty - (item.qty_returned ?? 0) > 0)}
+          <a href="/pharmacy/ticket/{ticket.id}/return" class="btn">ارتجاع</a>
+        {/if}
         <span class="ticket-time">
           {dateOnly
             ? formatDate(ticket?.timestamp, "HH:mm")
@@ -113,8 +113,11 @@
         }
       }
 
-      .ticket-numbers {
+      .ticket-meta {
         font-size: 0.9rem;
+        display: flex;
+        gap: 0.5em;
+        align-items: center;
 
         .ticket-time {
           background-color: hsl(from var(--main-bg-color) h s 40%);
