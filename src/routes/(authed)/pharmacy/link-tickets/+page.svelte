@@ -4,6 +4,7 @@
   import { toast } from "svelte-sonner";
   import { getUnlinkedTickets, linkTickets } from "../ticket.remote";
   import { page } from "$app/state";
+  import TicketNumber from "$lib/components/TicketNumber.svelte";
 
   let unlinked = $derived(await getUnlinkedTickets());
 
@@ -92,7 +93,7 @@
           <ul class="ticket-numbers">
             {#each unlinked.tickets.filter((t) => t.patient_id === patientName) as ticket, j (ticket.id)}
               <li>
-                <a href="/pharmacy/ticket/{ticket.id}">{ticket.id}</a>
+                <TicketNumber number={ticket.id} />
               </li>
             {/each}
             <li>
@@ -128,6 +129,10 @@
   ul {
     list-style: none;
     padding-inline: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   li {
@@ -138,8 +143,9 @@
 
   li > .ticket-numbers {
     display: flex;
+    flex-direction: row;
     gap: 1ch;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 
     li:not(:last-of-type)::after {
       content: "،";
