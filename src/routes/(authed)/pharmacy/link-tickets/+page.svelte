@@ -1,6 +1,7 @@
 <script lang="ts">
   import Combobox from "$lib/components/Combobox.svelte";
   import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
+  import { toast } from "svelte-sonner";
   import { getUnlinkedTickets, linkTickets } from "../ticket.remote";
 
   let unlinkedTickets = $derived(await getUnlinkedTickets());
@@ -11,10 +12,20 @@
   let selectedNames = $state([]);
 
   let patientQuery = $state("");
+
+  const THIS_YEAR = new Date().getFullYear() - 2000;
 </script>
 
 {#if unlinkedTickets.length}
-  <form {...linkTickets.enhance(async (form) => {})}>
+  <form
+    {...linkTickets.enhance(async (form) => {
+      toast.promise(form.submit(), {
+        loading: "جار ربط تذاكر الصرف بالملف رقم " + selectedId + "...",
+        success: "تم ربط تذاكر الصرف",
+        error: "حدث خطأ أثناء ربط تذاكر الصرف",
+      });
+    })}
+  >
     {#if selectedId}
       <button
         type="button"
@@ -56,7 +67,7 @@
             />
             {ticket.name}
           </label>
-          <a href="/dispense/26/0?patient_name={ticket.name}" class="btn">
+          <a href="/dispense/{THIS_YEAR}/0?patient_name={ticket.name}" class="btn">
             صرف جديد بنفس الاسم
           </a>
         </li>
@@ -67,7 +78,7 @@
       type="submit"
       class="btn"
       value="حفظ"
-      disabled={!selectedId && !selectedNames.length}
+      disabled={!selectedId || !selectedNames.length}
     />
   </form>
 {:else}
