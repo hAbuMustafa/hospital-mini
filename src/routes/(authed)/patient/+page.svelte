@@ -53,6 +53,8 @@
   let unregisteredPatients = await getUnlinkedTickets();
 
   let isPharmacy = authState.user?.role?.includes("-ph-");
+
+  const THIS_YEAR = new Date().getFullYear() - 2000;
 </script>
 
 <header bind:clientHeight={headerHight}>
@@ -67,7 +69,7 @@
       <a href="#{ward}">{ward}</a>
     </li>
   {/each}
-  {#if isPharmacy && unregisteredPatients.length}
+  {#if isPharmacy}
     <hr />
     <li>
       <a href="#unregistered">غير مسجلين</a>
@@ -83,19 +85,23 @@
   {/if}
 {/each}
 
-{#if isPharmacy && unregisteredPatients.length}
-  <div class="ward-wrapper">
-    <h2 id="unregistered">مرضى غير مسجلين</h2>
-    <div class="unregistered-patients">
+<div class="ward-wrapper">
+  <h2 id="unregistered">مرضى غير مسجلين</h2>
+  <div class="unregistered-patients">
+    {#if isPharmacy && unregisteredPatients.length}
       {#each unregisteredPatients as p, i (i)}
-        <a href="/dispense/25/0?patient_name={p.name}" class="btn" style:--bg="green">
+        <a
+          href="/dispense/{THIS_YEAR}/0?patient_name={p.name}"
+          class="btn"
+          style:--bg="green"
+        >
           {p.name}
         </a>
       {/each}
-    </div>
-    <DispenseToUnregisteredPatient />
+    {/if}
   </div>
-{/if}
+  <DispenseToUnregisteredPatient />
+</div>
 
 {#snippet Ward(wardName: string, patientsList: PatientT[])}
   <h2>
@@ -303,6 +309,7 @@
 
   .unregistered-patients {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
     align-items: center;
     justify-content: center;
