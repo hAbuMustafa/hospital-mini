@@ -1,12 +1,12 @@
 <script lang="ts">
   import { getUnlinkedTickets } from "./(authed)/pharmacy/ticket.remote";
 
-  const unlinkedTickets = await getUnlinkedTickets();
+  const unlinked = await getUnlinkedTickets();
 </script>
 
-{#if unlinkedTickets.length}
+{#if unlinked.patientNames.length}
   <p class="warning message">
-    لديك {unlinkedTickets.length} تذكرة لم يتم ربطها بمرضى الأقسام. يرجى
-    <a href="/pharmacy/link-tickets">ربطها الآن</a>.
+    لديك {unlinked.patientNames.length} تذكرة لم يتم ربطها بمرضى الأقسام. يرجى
+    <a href="/pharmacy/link-tickets" class="btn">ربطها الآن</a>.
   </p>
 {/if}

@@ -332,10 +332,14 @@ export const returnItems = form(
 );
 
 export const getUnlinkedTickets = query(async () => {
-  return await db
-    .selectDistinct({ name: transactionTickets.patient_id })
+  const tickets = await db
+    .select()
     .from(transactionTickets)
     .where(notLike(transactionTickets.patient_id, "%/%"));
+
+  const patientNames = Array.from(new Set(tickets.map((t) => t.patient_id)));
+
+  return { tickets, patientNames };
 });
 
 export const linkTickets = form(

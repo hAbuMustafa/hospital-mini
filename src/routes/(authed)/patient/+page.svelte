@@ -50,7 +50,7 @@
 
   let headerHight = $state(0);
 
-  let unregisteredPatients = await getUnlinkedTickets();
+  let unlinked = await getUnlinkedTickets();
 
   let isPharmacy = authState.user?.role?.includes("-ph-");
 
@@ -88,14 +88,10 @@
 <div class="ward-wrapper">
   <h2 id="unregistered">مرضى غير مسجلين</h2>
   <div class="unregistered-patients">
-    {#if isPharmacy && unregisteredPatients.length}
-      {#each unregisteredPatients as p, i (i)}
-        <a
-          href="/dispense/{THIS_YEAR}/0?patient_name={p.name}"
-          class="btn"
-          style:--bg="green"
-        >
-          {p.name}
+    {#if isPharmacy && unlinked.patientNames.length}
+      {#each unlinked.patientNames as p, i (i)}
+        <a href="/dispense/{THIS_YEAR}/0?patient_name={p}" class="btn" style:--bg="green">
+          {p}
         </a>
       {/each}
     {/if}
