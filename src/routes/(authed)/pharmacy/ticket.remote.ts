@@ -175,6 +175,7 @@ export const getTickets = query(
   v.object({
     from: v.date(),
     to: v.date(),
+    patient_id: v.optional(v.string()),
   }),
   async (data) => {
     const currentUser = getRequestEvent().locals.user;
@@ -198,7 +199,9 @@ export const getTickets = query(
             : eq(transactionTickets.store_id, Number(PUBLIC_store_id)),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to),
-          isNotNull(transactionTickets.patient_id)
+          data.patient_id
+            ? eq(transactionTickets.patient_id, data.patient_id)
+            : isNotNull(transactionTickets.patient_id)
         )
       );
 
