@@ -69,7 +69,13 @@
       </li>
     {/each}
   </ul>
-  <div class="signature"><span class="pii">{ticket?.user_name}</span></div>
+  <div class="signature">
+    {#if ticket.user_name}
+      <span class="pii">{ticket?.user_name}</span>
+    {:else}
+      <span>مستخدم غير معرف</span>
+    {/if}
+  </div>
 </div>
 
 <style>
