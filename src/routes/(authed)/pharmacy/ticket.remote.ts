@@ -3,6 +3,7 @@ import { isNarcotic, unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
 import {
   drugs,
+  patientAdmissions,
   patients_view,
   status,
   transactions,
@@ -27,6 +28,8 @@ import {
   like,
   notLike,
   inArray,
+  or,
+  getTableColumns,
 } from "drizzle-orm";
 import * as v from "valibot";
 import { isReturnable } from "./utils";
@@ -391,9 +394,15 @@ export const returnItems = form(
 
 export const getUnlinkedTickets = query(async () => {
   const tickets = await db
-    .select()
+    .select({
+      ...getTableColumns(transactionTickets),
+      patient_name: patientAdmissions.name,
+    })
     .from(transactionTickets)
-    .where(notLike(transactionTickets.patient_id, "%/%"));
+    .leftJoin(patientAdmissions, eq(transactionTickets.patient_id, patientAdmissions.id))
+    .where(
+      or(notLike(transactionTickets.patient_id, "%/%"), isNull(patientAdmissions.name))
+    );
 
   const patientNames = Array.from(new Set(tickets.map((t) => t.patient_id)));
 
