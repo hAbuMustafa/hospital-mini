@@ -19,11 +19,26 @@
 {#if unlinkedTickets.length}
   <form
     {...linkTickets.enhance(async (form) => {
-      toast.promise(form.submit(), {
+      const { promise, resolve, reject } = Promise.withResolvers();
+
+      toast.promise(promise, {
         loading: "جار ربط تذاكر الصرف بالملف رقم " + selectedId + "...",
         success: "تم ربط تذاكر الصرف",
-        error: "حدث خطأ أثناء ربط تذاكر الصرف",
+        error: () => {
+          form.fields.allIssues()?.forEach((issue) => {
+            toast.warning(issue.message, { duration: Number.POSITIVE_INFINITY });
+          });
+          return "حدث خطأ أثناء ربط تذاكر الصرف";
+        },
       });
+
+      await form.submit();
+
+      if (form.fields.allIssues()?.length) {
+        reject();
+      } else {
+        resolve(true);
+      }
     })}
   >
     {#if selectedId}

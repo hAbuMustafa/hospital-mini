@@ -19,6 +19,7 @@ import {
   gte,
   isNotNull,
   gt,
+  lt,
   lte,
   isNull,
   sql,
@@ -343,9 +344,38 @@ export const linkTickets = form(
     link_to_id: v.pipe(v.string(), v.nonEmpty()),
   }),
   async (data) => {
+    const [patient] = await db
+      .select()
+      .from(patients_view)
+      .where(eq(patients_view.id, data.link_to_id));
+
+    if (!patient) invalid("لا يوجد مريض بالملف المختار");
+
+    const affectedTickets = await db
+      .select({ id: transactionTickets.id })
+      .from(transactionTickets)
+      .where(
+        and(
+          inArray(transactionTickets.patient_id, data.patient_names),
+          gt(transactionTickets.timestamp, patient.admission_date),
+          lt(transactionTickets.timestamp, patient.discharge_date ?? new Date())
+        )
+      );
+
+    if (!affectedTickets.length)
+      invalid("لا يمكن ربط تذاكر لمريض في غير مدة إقامته داخل المستشفى");
+
     await db
       .update(transactionTickets)
       .set({ patient_id: data.link_to_id })
-      .where(inArray(transactionTickets.patient_id, data.patient_names));
+      .where(
+        and(
+          inArray(transactionTickets.patient_id, data.patient_names),
+          inArray(
+            transactionTickets.id,
+            affectedTickets.map((t) => t.id)
+          )
+        )
+      );
   }
 );
