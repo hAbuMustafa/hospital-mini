@@ -6,6 +6,7 @@ import {
   narcotics_spreadsheetId,
 } from "$env/static/private";
 import { formatDate } from "$lib/date/utils";
+import { logResponseSize } from "../utils";
 
 // gather service account key
 const credentials = {
@@ -35,6 +36,8 @@ export async function getSheetRange(spreadsheetId: string, range: string) {
       range,
     });
 
+    logResponseSize(range, response.data);
+
     return response.data;
   } catch (error) {
     console.error(
@@ -58,6 +61,8 @@ export async function getSheetRanges(spreadsheetId: string, ranges: string[]) {
       spreadsheetId,
       ranges,
     });
+
+    logResponseSize(ranges.join(", "), response.data);
 
     const result: Record<string, sheets_v4.Schema$ValueRange> = {};
 
