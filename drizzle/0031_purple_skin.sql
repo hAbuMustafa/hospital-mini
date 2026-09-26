@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD `qty_remaining` integer GENERATED ALWAYS AS (qty - qty_returned) VIRTUAL;

@@ -80,7 +80,10 @@ export const transactions = sqliteTable("transactions", {
   id: int().primaryKey({ autoIncrement: true }),
   item_id: int().notNull(),
   qty: int().notNull(),
-  qty_returned: int(),
+  qty_returned: int().notNull().default(0),
+  qty_remaining: int().generatedAlwaysAs(() => sql`qty - qty_returned`, {
+    mode: "virtual",
+  }),
   unit_price: numeric({ mode: "number" }).notNull(),
   ticket_id: int().references(() => transactionTickets.id, { onDelete: "cascade" }),
 });
