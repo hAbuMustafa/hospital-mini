@@ -68,10 +68,7 @@ export const getInvoice = query(v.number(), async (invoiceNumber) => {
         id: drugs.id,
         name_ar: drugs.name_ar,
         smc_code: drugs.smc_code,
-        amount:
-          sql<number>`${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)`.as(
-            "amount"
-          ),
+        amount: transactions.qty_remaining,
         unit_price: sql<number>`${transactions.unit_price} * 1.07`.as("unit_price"),
         user_name: user.name,
       })
@@ -284,8 +281,8 @@ export const getDispenses = query(
       const dispenses = await db
         .select({
           ...getTableColumns(drugs),
-          amount: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0))`,
-          total: sql<number>`SUM(${transactions.qty} - IFNULL(${transactions.qty_returned}, 0)) * ${drugs.price_resale}`,
+          amount: transactions.qty_remaining,
+          total: sql<number>`${transactions.qty_remaining} * ${drugs.price_resale}`,
         })
         .from(transactions)
         .innerJoin(drugs, eq(transactions.item_id, drugs.id))
@@ -295,11 +292,11 @@ export const getDispenses = query(
             eq(transactionTickets.is_dispense, true),
             eq(transactionTickets.patient_id, data.patientId),
             gte(transactionTickets.timestamp, data.fromDate),
-            lte(transactionTickets.timestamp, data.toDate)
+            lte(transactionTickets.timestamp, data.toDate),
+            gt(transactions.qty_remaining, 0)
           )
         )
-        .groupBy(transactions.item_id)
-        .having((thisView) => gt(thisView.amount, 0));
+        .groupBy(transactions.item_id);
 
       return {
         ward: periodWard.to_ward ?? patient.ward_on_admission,
