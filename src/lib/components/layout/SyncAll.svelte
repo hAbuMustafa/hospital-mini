@@ -2,6 +2,7 @@
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import PersonIcon from "@lucide/svelte/icons/user-pen";
   import DrugIcon from "@lucide/svelte/icons/pill";
+  import SyncButton from "./SyncButton.svelte";
 
   let AllIsLoading = $state(false);
   let patientsIsLoading = $state(false);
@@ -11,108 +12,44 @@
 </script>
 
 <div class="sync-buttons-wrapper">
-  <button
-    type="button"
+  <SyncButton
+    bind:loading={AllIsLoading}
+    endpoint="/api/v1/sync/all"
     aria-label="تحديث جميع البيانات"
     title="تحديث جميع البيانات"
     disabled={loading}
-    class:AllIsLoading
-    onclick={() => {
-      AllIsLoading = true;
-
-      fetch("/api/v1/sync/all")
-        .then((r) => r.json())
-        .then((d) => {
-          console.log(d);
-        })
-        .catch((e) => console.error(e))
-        .finally(() => {
-          AllIsLoading = false;
-        });
-    }}
   >
     <RefreshCwIcon size="2rem" />
-  </button>
+  </SyncButton>
 
-  <button
-    type="button"
+  <SyncButton
+    bind:loading={patientsIsLoading}
+    endpoint="/api/v1/sync/patients"
     aria-label="تحديث بيانات المرضى"
     title="تحديث بيانات المرضى"
     disabled={loading}
-    class:loading={patientsIsLoading}
-    onclick={() => {
-      patientsIsLoading = true;
-
-      fetch("/api/v1/sync/patients")
-        .then((r) => r.json())
-        .then((d) => {
-          console.log(d);
-        })
-        .catch((e) => console.error(e))
-        .finally(() => {
-          patientsIsLoading = false;
-        });
-    }}
   >
     <RefreshCwIcon size="2rem" />
     <span class="embedded">
       <PersonIcon size="16px" class="embedded" color="lightgreen" />
     </span>
-  </button>
+  </SyncButton>
 
-  <button
-    type="button"
+  <SyncButton
+    bind:loading={drugsIsLoading}
+    endpoint="/api/v1/sync/drugs"
     aria-label="تحديث بيانات الأدوية"
     title="تحديث بيانات الأدوية"
     disabled={loading}
-    class:loading={drugsIsLoading}
-    onclick={() => {
-      drugsIsLoading = true;
-
-      fetch("/api/v1/sync/drugs")
-        .then((r) => r.json())
-        .then((d) => {
-          console.log(d);
-        })
-        .catch((e) => console.error(e))
-        .finally(() => {
-          drugsIsLoading = false;
-        });
-    }}
   >
     <RefreshCwIcon size="2rem" />
     <span class="embedded">
       <DrugIcon size="16px" class="embedded" color="light-dark(maroon, salmon)" />
     </span>
-  </button>
+  </SyncButton>
 </div>
 
 <style>
-  button {
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    position: relative;
-
-    :global(svg) {
-      display: inline-block;
-    }
-
-    &:hover {
-      :global(> svg) {
-        filter: drop-shadow(0px 0px 4px lightgreen);
-        animation: spin 5s linear infinite;
-      }
-    }
-
-    &.loading {
-      :global(> svg) {
-        animation: spin 1s linear infinite;
-      }
-    }
-  }
-
   .embedded {
     position: absolute;
     inset: 0;
@@ -121,11 +58,5 @@
 
     align-items: center;
     justify-content: center;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(1turn);
-    }
   }
 </style>
