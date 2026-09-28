@@ -29,7 +29,7 @@ export async function initialize() {
   // 0. Check if can fetch?
   const canFetch = await getSheetRange(patients_spreadsheetId, "Changelog!E1");
 
-  if (canFetch.values?.[0]?.[0] !== "TRUE") {
+  if (canFetch.values?.[0]?.[0]?.toUpperCase() !== "TRUE") {
     throw new Error("لا يمكن تحديث البيانات الآن.");
   }
 
