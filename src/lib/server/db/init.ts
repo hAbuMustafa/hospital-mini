@@ -26,6 +26,13 @@ import { reportSheetFetch, reportSheetMultiFetch } from "./utils";
 import { formatDate } from "$lib/date/utils";
 
 export async function initialize() {
+  // 0. Check if can fetch?
+  const canFetch = await getSheetRange(patients_spreadsheetId, "Changelog!E1");
+
+  if (canFetch.values?.[0]?.[0] !== "TRUE") {
+    throw new Error("لا يمكن تحديث البيانات الآن.");
+  }
+
   // 1. FETCH
   const fetchedPatient = await getSheetRanges(patients_spreadsheetId, [
     "Admissions!C:T",
