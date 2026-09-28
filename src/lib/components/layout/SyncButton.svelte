@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import { toast } from "svelte-sonner";
   import type { HTMLButtonAttributes } from "svelte/elements";
 
   type PropsT = {
@@ -18,9 +19,13 @@
     loading = true;
 
     fetch(endpoint)
-      .then((r) => r.json())
-      .then((d) => {
-        console.log(d);
+      .then((r) => {
+        if (r.ok) {
+          toast.success("تم تحديث البيانات");
+        } else {
+          // todo: use passed error message from server
+          toast.error("لا يمكن تحديث البيانات الآن");
+        }
       })
       .catch((e) => console.error(e))
       .finally(() => {

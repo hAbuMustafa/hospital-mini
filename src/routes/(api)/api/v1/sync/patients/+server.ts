@@ -1,6 +1,6 @@
 import { formatDate } from "$lib/date/utils";
 import { syncPatients } from "$lib/server/db/sync";
-import { json } from "@sveltejs/kit";
+import { json, error } from "@sveltejs/kit";
 
 export async function GET() {
   try {
@@ -17,6 +17,6 @@ export async function GET() {
       "⚠️ Patient Sync Failed:\n",
       e
     );
-    return json("ERROR 500");
+    error(500, { message: (e as { message: string }).message });
   }
 }
