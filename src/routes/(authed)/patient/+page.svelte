@@ -52,7 +52,8 @@
 
   let unlinked = await getUnlinkedTickets();
 
-  let isPharmacy = authState.user?.role?.includes("-ph-");
+  let isPharmacy =
+    authState.user?.role === "admin" || authState.user?.role?.includes("-ph-");
 
   const THIS_YEAR = new Date().getFullYear() - 2000;
 </script>

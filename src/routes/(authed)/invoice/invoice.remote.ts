@@ -320,6 +320,7 @@ export const createInvoice = form(
     fromTransferId: v.number(),
     toTransferId: v.number(),
     keepOpen: v.optional(v.boolean()),
+    department: v.optional(v.number()),
   }),
   async (data, issue) => {
     const [patient] = await db
@@ -351,7 +352,10 @@ export const createInvoice = form(
         : (patient.discharge_date ?? new Date());
 
     const issued_by = getRequestEvent().locals.user?.id!;
-    const issuing_department = getRequestEvent().locals.user?.affiliation!;
+    const issuing_department =
+      getRequestEvent().locals.user?.role === "admin"
+        ? data.department
+        : getRequestEvent().locals.user?.affiliation!;
 
     if (!issuing_department)
       invalid(issue("أنت غير تابع لأي جهة. لا يمكنك تسجيل فواتير"));

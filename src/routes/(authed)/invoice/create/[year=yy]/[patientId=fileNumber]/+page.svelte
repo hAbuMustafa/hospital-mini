@@ -20,6 +20,8 @@
   import { goto } from "$app/navigation";
   import { getSystemFirstDate } from "../../../../CONSTANTS.remote";
   import Dialog from "$lib/components/Dialog.svelte";
+  import { authState } from "$lib/auth-client/auth.svelte";
+  import { getDepartments } from "../../../../(admin)/admin.remote";
 
   const patientGetter = getPatientWithTransfers(
     [page.params.year, page.params.patientId].join("/")
@@ -216,6 +218,15 @@
     }
   })}
 >
+
+{#if authState.user?.role === "admin"}
+  <select {...createInvoice.fields.department.as("number")}>
+    {#each await getDepartments() as dep,i (dep.id) }
+      <option value="{dep.id}">{dep.name}</option>
+    {/each}
+  </select>
+{/if}
+
   <input readonly {...createInvoice.fields.patientId.as("hidden", patient.id)} />
 
   <input
