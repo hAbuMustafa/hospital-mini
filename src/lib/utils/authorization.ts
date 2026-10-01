@@ -4,7 +4,7 @@ export function isAdmin(user: typeof authState.user) {
   return user && user?.role === "admin";
 }
 
-export function allowDepartment(
+export function departmentIsAllowed(
   user: typeof authState.user,
   department: number | number[]
 ) {
@@ -19,7 +19,7 @@ export function allowDepartment(
   }
 }
 
-export function allowUser(user: typeof authState.user, userId: string | string[]) {
+export function userIsAllowed(user: typeof authState.user, userId: string | string[]) {
   if (!user) {
     return false;
   } else if (isAdmin(user)) {
@@ -31,7 +31,7 @@ export function allowUser(user: typeof authState.user, userId: string | string[]
   }
 }
 
-export function allowRole(
+export function roleIsAllowed(
   user: typeof authState.user,
   role: string | string[],
   exact = true
@@ -57,7 +57,7 @@ export function allowRole(
   }
 }
 
-export function blockDepartment(
+export function departmentNotBlocked(
   user: typeof authState.user,
   department: number | number[]
 ) {
@@ -72,7 +72,7 @@ export function blockDepartment(
   }
 }
 
-export function blockUser(user: typeof authState.user, userId: string | string[]) {
+export function userNotBlocked(user: typeof authState.user, userId: string | string[]) {
   if (!user) {
     return false;
   } else if (isAdmin(user)) {
@@ -84,7 +84,7 @@ export function blockUser(user: typeof authState.user, userId: string | string[]
   }
 }
 
-export function blockRole(
+export function roleNotBlocked(
   user: typeof authState.user,
   role: string | string[],
   exact = true
