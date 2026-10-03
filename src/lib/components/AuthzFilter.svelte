@@ -1,5 +1,13 @@
 <script lang="ts">
   import { authState } from "$lib/auth-client/auth.svelte";
+  import {
+    departmentNotBlocked,
+    roleNotBlocked,
+    userNotBlocked,
+    departmentIsAllowed,
+    roleIsAllowed,
+    userIsAllowed,
+  } from "$lib/utils/authorization";
   import type { Snippet } from "svelte";
 
   type PropsT = {
@@ -33,12 +41,12 @@
       user &&
       !user.banned &&
       user.role &&
-      !blockDepartment.includes(user?.affiliation) &&
-      !blockRole.includes(user.role) &&
-      !blockUser.includes(user.id) &&
-      (allowDepartment.includes(user?.affiliation) ||
-        allowRole.includes(user?.role) ||
-        allowUser.includes(user.id))
+      departmentNotBlocked(user, blockDepartment) &&
+      roleNotBlocked(user, blockRole) &&
+      userNotBlocked(user, blockUser) &&
+      (departmentIsAllowed(user, allowDepartment) ||
+        roleIsAllowed(user, allowRole) ||
+        userIsAllowed(user, allowUser))
     );
   }
 </script>
