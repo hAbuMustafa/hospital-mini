@@ -1,15 +1,15 @@
 <script>
-  import { authState } from "$lib/auth-client/auth.svelte";
   import UnsyncedNarcotics from "./UnsyncedNarcotics.svelte";
   import NonregisteredPatientDispenseAndLinkage from "./NonregisteredPatientDispenseAndLinkage.svelte";
+  import AuthzFilter from "$lib/components/AuthzFilter.svelte";
 </script>
 
 <h1>مستشفى 23 يوليو للأمراض الصدرية</h1>
 
-{#if authState.user?.role?.includes("-ph-")}
+<AuthzFilter allowRole={["*-ph-*"]}>
   <NonregisteredPatientDispenseAndLinkage />
-{/if}
+</AuthzFilter>
 
-{#if authState.user?.affiliation === 1}
+<AuthzFilter allowRole={["e-ph-*"]}>
   <UnsyncedNarcotics />
-{/if}
+</AuthzFilter>
