@@ -19,6 +19,8 @@
   import Female from "@lucide/svelte/icons/venus";
   import Male from "@lucide/svelte/icons/mars";
   import { browser } from "$app/env";
+  import { authState } from "$lib/auth-client/auth.svelte";
+  import { getDepartments } from "../../../(admin)/admin.remote";
 
   const patientId = `${page.params.y}/${page.params.id}`;
 
@@ -311,6 +313,14 @@
         </tbody>
       {/if}
     </table>
+
+    {#if authState.user?.role === "admin"}
+      <select {...postTicket.fields.department}>
+        {#each await getDepartments() as dep, i (dep.id)}
+          <option value={dep.id}>{dep.name}</option>
+        {/each}
+      </select>
+    {/if}
 
     {#if ticketDrugs.length}
       <input type="submit" class="btn" value="حفظ الطلبية" disabled={saving} />

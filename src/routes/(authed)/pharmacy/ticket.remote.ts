@@ -80,6 +80,8 @@ export const getItemLastDispensed = query(
 export const postTicket = form(
   v.object({
     patientId: v.pipe(v.string(), v.nonEmpty()),
+    department: v.optional(v.number()),
+
     drugs: v.array(
       v.object({
         item_id: v.number(),
@@ -121,7 +123,10 @@ export const postTicket = form(
           .insert(transactionTickets)
           .values({
             patient_id: data.patientId,
-            store_id: currentUser?.affiliation!,
+            store_id:
+              currentUser?.role === "admin"
+                ? data.department!
+                : currentUser?.affiliation!,
             user_id: currentUser?.id!,
             is_dispense: true,
           })
