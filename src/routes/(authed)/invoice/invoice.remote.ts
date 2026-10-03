@@ -13,7 +13,17 @@ import {
 } from "$lib/server/db/schema";
 import { totalAndAmount } from "$lib/utils/query";
 import { error, invalid } from "@sveltejs/kit";
-import { and, desc, eq, getTableColumns, gt, gte, lte, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  gte,
+  isNotNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 import * as v from "valibot";
 import { getSystemFirstDate } from "../CONSTANTS.remote";
 
@@ -403,7 +413,9 @@ export const getPatientInvoices = query(v.string(), async (patientId) => {
     .where(
       and(
         eq(invoices.patient_id, patientId),
-        eq(invoices.issuing_department, getRequestEvent().locals.user?.affiliation!)
+        getRequestEvent().locals.user?.role === "admin"
+          ? isNotNull(invoices.id)
+          : eq(invoices.issuing_department, getRequestEvent().locals.user?.affiliation!)
       )
     );
 });
