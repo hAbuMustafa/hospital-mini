@@ -13,7 +13,12 @@ export function departmentIsAllowed(
   } else if (isAdmin(user)) {
     return true;
   } else if (Array.isArray(department)) {
-    return department.includes(user.affiliation);
+    if (department.length) {
+      return department.includes(user.affiliation);
+    } else {
+      // if the list is empty, then it is a free pass for another check
+      return true;
+    }
   } else {
     return department === user.affiliation;
   }
@@ -25,17 +30,18 @@ export function userIsAllowed(user: typeof authState.user, userId: string | stri
   } else if (isAdmin(user)) {
     return true;
   } else if (Array.isArray(userId)) {
-    return userId.includes(user.id);
+    if (userId.length) {
+      return userId.includes(user.id);
+    } else {
+      // if the list is empty, then it is a free pass for another check
+      return true;
+    }
   } else {
     return userId === user.id;
   }
 }
 
-export function roleIsAllowed(
-  user: typeof authState.user,
-  role: string | string[],
-  exact = true
-) {
+export function roleIsAllowed(user: typeof authState.user, role: string | string[]) {
   if (!user) {
     return false;
   } else if (!user.role) {
@@ -43,16 +49,21 @@ export function roleIsAllowed(
   } else if (isAdmin(user)) {
     return true;
   } else if (Array.isArray(role)) {
-    if (exact) {
-      return role.includes(user.role);
+    if (role.length) {
+      if (!role.some((r) => r.includes("*"))) {
+        return role.includes(user.role);
+      } else {
+        return role.some((r) => user.role && user.role.includes(r.replaceAll("*", "")));
+      }
     } else {
-      return role.some((r) => user.role && r.includes(user.role));
+      // if the list is empty, then it is a free pass for another check
+      return true;
     }
   } else {
-    if (exact) {
+    if (!role.includes("*")) {
       return role === user.role;
     } else {
-      return role.includes(user.role);
+      return user.role.includes(role.replaceAll("*", ""));
     }
   }
 }
@@ -84,11 +95,7 @@ export function userNotBlocked(user: typeof authState.user, userId: string | str
   }
 }
 
-export function roleNotBlocked(
-  user: typeof authState.user,
-  role: string | string[],
-  exact = true
-) {
+export function roleNotBlocked(user: typeof authState.user, role: string | string[]) {
   if (!user) {
     return false;
   } else if (!user.role) {
@@ -96,16 +103,16 @@ export function roleNotBlocked(
   } else if (isAdmin(user)) {
     return true;
   } else if (Array.isArray(role)) {
-    if (exact) {
+    if (!role.some((r) => r.includes("*"))) {
       return !role.includes(user.role);
     } else {
-      return role.every((r) => user.role && !r.includes(user.role));
+      return role.every((r) => user.role && !user.role.includes(r.replaceAll("*", "")));
     }
   } else {
-    if (exact) {
+    if (!role.includes("*")) {
       return role !== user.role;
     } else {
-      return !role.includes(user.role);
+      return !user.role.includes(role.replaceAll("*", ""));
     }
   }
 }
