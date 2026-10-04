@@ -1,8 +1,8 @@
 import { form, query } from "$app/server";
 import { formatDate } from "$lib/date/utils";
 import { db } from "$lib/server/db";
-import { departments, user } from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import { departments, status, user } from "$lib/server/db/schema";
+import { eq, sql } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getDepartments = query(async () => {
@@ -50,3 +50,15 @@ export const changeRole = form(
     }
   }
 );
+
+export const setSystemFirstDay = form(v.object({ date: v.string() }), async (data) => {
+  await db
+    .insert(status)
+    .values({ item: "first_date", value_timestamp: new Date(data.date) })
+    .onConflictDoUpdate({
+      target: status.item,
+      set: {
+        value_timestamp: sql`excluded.value_timestamp`,
+      },
+    });
+});
