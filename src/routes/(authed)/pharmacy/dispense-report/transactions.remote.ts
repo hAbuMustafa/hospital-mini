@@ -1,5 +1,4 @@
 import { form, getRequestEvent, query } from "$app/server";
-import { PUBLIC_store_id } from "$env/static/public";
 import { db } from "$lib/server/db";
 import {
   drugs,
@@ -36,7 +35,7 @@ export const getDrugsTransactionAmountTotals = query(
         and(
           currentUser?.role === "admin"
             ? isNotNull(transactionTickets.store_id)
-            : eq(transactionTickets.store_id, Number(PUBLIC_store_id)),
+            : eq(transactionTickets.store_id, currentUser?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to)
         )

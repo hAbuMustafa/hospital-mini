@@ -24,8 +24,6 @@ import {
   lte,
   isNull,
   sql,
-  not,
-  like,
   notLike,
   inArray,
   or,
@@ -33,7 +31,6 @@ import {
 } from "drizzle-orm";
 import * as v from "valibot";
 import { isReturnable } from "./utils";
-import { PUBLIC_store_id } from "$env/static/public";
 
 export const getPatient = query(v.string(), async (patientId) => {
   const [patient] = await db
@@ -204,7 +201,7 @@ export const getTickets = query(
         and(
           currentUser?.role === "admin"
             ? isNotNull(transactionTickets.store_id)
-            : eq(transactionTickets.store_id, Number(PUBLIC_store_id)),
+            : eq(transactionTickets.store_id, currentUser?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
           lte(transactionTickets.timestamp, data.to),
           data.patient_id
@@ -259,7 +256,7 @@ export const getTicket = query(v.number(), async (ticketId) => {
     error(404, "التذكرة المطلوبة غير موجودة");
   }
 
-  if (!(currentUser?.role === "admin" || ticket.store_id === Number(PUBLIC_store_id))) {
+  if (!(currentUser?.role === "admin" || ticket.store_id === currentUser?.affiliation)) {
     error(401, "التذكرة المطلوبة لا تخص جهتك");
   }
 
@@ -303,7 +300,7 @@ export const getTicketForReturn = query(v.number(), async (ticketNumber) => {
       and(
         currentUser?.role === "admin"
           ? isNotNull(transactionTickets.store_id)
-          : eq(transactionTickets.store_id, Number(PUBLIC_store_id)),
+          : eq(transactionTickets.store_id, currentUser?.affiliation!),
         eq(transactionTickets.is_dispense, true),
         isNull(transactionTickets.return_on_ticket_id),
         gt(transactionTickets.timestamp, new Date(new Date().getDate() - 2)),
@@ -356,8 +353,8 @@ export const returnItems = form(
           .insert(transactionTickets)
           .values({
             is_dispense: false,
-            store_id: Number(PUBLIC_store_id),
             user_id: currentUser?.id!,
+            store_id: originalTicket.store_id,
             patient_id: originalTicket.patient_id,
             return_on_ticket_id: originalTicket.id,
           })
