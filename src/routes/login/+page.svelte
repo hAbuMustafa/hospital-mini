@@ -3,12 +3,14 @@
   import { goto } from "$app/navigation";
   import { authState } from "$lib/auth-client/auth.svelte";
   import Password from "$lib/components/Forms/Password.svelte";
+  import { getDuration } from "$lib/date/utils";
   import {
     egyptianPhoneNumber,
     emailPattern,
-    triadicArabicName,
     usernamePattern,
   } from "$lib/utils/patterns";
+  import { toast } from "svelte-sonner";
+  import { getLastPatientFetch } from "../(authed)/CONSTANTS.remote";
 
   let error = $state("");
 
@@ -33,6 +35,13 @@
     return async ({ result }) => {
       if (result.type === "success") {
         await authState.refresh();
+
+        const lastPatientFetch = await getLastPatientFetch();
+        if (!lastPatientFetch) {
+          toast.warning("يرجى إمداد قاعدة البيانات ببيانات المرضى");
+        } else if (getDuration(lastPatientFetch, new Date(), "hours") > 24) {
+          toast.warning("لم يتم تحديث بيانات المرضى منذ مدة");
+        }
         goto("/");
       } else if (result.type === "failure") {
         error = (result.data?.message as string | undefined) ?? "فشل تسجيل الدخول";
