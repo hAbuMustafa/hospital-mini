@@ -1,0 +1,1 @@
+ALTER TABLE `status` ADD `value_timestamp` integer;

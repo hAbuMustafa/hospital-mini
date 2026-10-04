@@ -213,6 +213,7 @@ export const status = sqliteTable("status", {
   id: int().primaryKey({ autoIncrement: true }),
   item: text().unique(),
   value: int(),
+  value_timestamp: int({ mode: "timestamp" }),
 });
 
 // Special table to bypass user phone-number update through OTP only

@@ -225,6 +225,13 @@
       "when": 1790459471953,
       "tag": "0031_purple_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1791105109977,
+      "tag": "0032_minor_iceman",
+      "breakpoints": true
     }
   ]
 }
