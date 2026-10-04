@@ -9,3 +9,9 @@ export const getSystemFirstDate = query(async () => {
       ?.value_timestamp ?? new Date()
   );
 });
+
+export const getLastPatientFetch = query(async () => {
+  return (
+    await db.select().from(status).where(eq(status.item, "last_patient_fetch"))
+  )?.[0]?.value_timestamp;
+});
