@@ -38,6 +38,18 @@ export async function syncPatients() {
     throw new Error("لا يمكن تحديث البيانات الآن.");
   }
 
+  const lastFetch = await db
+    .select()
+    .from(status)
+    .where(eq(status.item, "last_patient_fetch"));
+
+  if (
+    lastFetch.length &&
+    new Date().getTime() - lastFetch[0].value_timestamp!.getTime() < 60000 // one minute
+  ) {
+    throw new Error("تم تحديث البيانات بالفعل.");
+  }
+
   // 1. Get your numbers ready
   const latestRows = await db
     .select({ item: status.item, value: status.value })
@@ -280,9 +292,33 @@ export async function syncPatients() {
       .set({ value: sql`${status.value} + ${unsyncedNarcoticDispenses.length}` })
       .where(eq(status.item, "narcotics_dispensed"));
   }
+
+  await db
+    .insert(status)
+    .values({ item: "last_patient_fetch", value_timestamp: new Date() })
+    .onConflictDoUpdate({
+      target: status.item,
+      set: {
+        value_timestamp: sql`excluded.value_timestamp`,
+      },
+    });
 }
 
 export async function syncDrugs() {
+  // 0. Check if can fetch?
+
+  const lastFetch = await db
+    .select()
+    .from(status)
+    .where(eq(status.item, "last_drug_fetch"));
+
+  if (
+    lastFetch.length &&
+    new Date().getTime() - lastFetch[0].value_timestamp!.getTime() < 60000 // one minute
+  ) {
+    throw new Error("تم تحديث البيانات بالفعل.");
+  }
+
   // 1. FETCH
   const fetchedDrugs = await getSheetRange(drugs_spreadsheetId, "الأدوية!A:P");
 
@@ -312,4 +348,14 @@ export async function syncDrugs() {
     fetchedDrugs.values.length,
     "drugs."
   );
+
+  await db
+    .insert(status)
+    .values({ item: "last_drug_fetch", value_timestamp: new Date() })
+    .onConflictDoUpdate({
+      target: status.item,
+      set: {
+        value_timestamp: sql`excluded.value_timestamp`,
+      },
+    });
 }

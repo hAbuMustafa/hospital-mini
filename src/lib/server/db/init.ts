@@ -193,6 +193,14 @@ export async function initialize() {
       { item: "discharges", value: fetchedPatient.Discharges.values.length },
       { item: "updates", value: fetchedPatient.Changelog.values.length },
       { item: "narcotics_dispensed", value: fetchedNarcoticsDispensed.values.length },
+      { item: "last_patient_fetch", value_timestamp: new Date() },
+      { item: "last_drug_fetch", value_timestamp: new Date() },
     ])
-    .onConflictDoUpdate({ target: status.item, set: { value: sql`excluded.value` } });
+    .onConflictDoUpdate({
+      target: status.item,
+      set: {
+        value: sql`excluded.value`,
+        value_timestamp: sql`excluded.value_timestamp`,
+      },
+    });
 }
