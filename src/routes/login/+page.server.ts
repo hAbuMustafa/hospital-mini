@@ -1,5 +1,4 @@
 import { formatDate } from "$lib/date/utils";
-import { syncDrugs, syncPatients } from "$lib/server/db/sync";
 import { auth } from "$lib/server/utils/auth";
 import { egyptianPhoneNumber, emailPattern, usernamePattern } from "$lib/utils/patterns";
 import { fail } from "@sveltejs/kit";
@@ -70,22 +69,6 @@ export const actions = {
           message: loginErrorMessage,
         });
       }
-
-      Promise.all([syncDrugs(), syncPatients()]).then(
-        () => {
-          console.log(
-            formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-            "✔️ Sync on login Success"
-          );
-        },
-        (e) => {
-          console.error(
-            formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"),
-            "⚠️ Error in sync at login:"
-          );
-          console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
-        }
-      );
     } catch (e) {
       console.error(formatDate(new Date(), "YYYY-MM-DD (HH:mm:ss)"), e);
 
