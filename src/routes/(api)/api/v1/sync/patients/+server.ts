@@ -17,6 +17,6 @@ export async function GET() {
       "⚠️ Patient Sync Failed:\n",
       e
     );
-    error(500, { message: (e as { message: string }).message });
+    error(429, (e as { message: string }).message);
   }
 }
