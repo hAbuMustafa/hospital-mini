@@ -19,12 +19,12 @@
     loading = true;
 
     fetch(endpoint)
-      .then((r) => {
+      .then(async (r) => {
         if (r.ok) {
           toast.success("تم تحديث البيانات");
         } else {
-          // todo: use passed error message from server
-          toast.error("لا يمكن تحديث البيانات الآن");
+          const error = await r.json();
+          toast.error(error.message);
         }
       })
       .catch((e) => console.error(e))
