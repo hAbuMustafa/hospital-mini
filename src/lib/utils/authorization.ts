@@ -16,8 +16,7 @@ export function departmentIsAllowed(
     if (department.length) {
       return department.includes(user.affiliation);
     } else {
-      // if the list is empty, then it is a free pass for another check
-      return true;
+      return false;
     }
   } else {
     return department === user.affiliation;
@@ -33,8 +32,7 @@ export function userIsAllowed(user: typeof authState.user, userId: string | stri
     if (userId.length) {
       return userId.includes(user.id);
     } else {
-      // if the list is empty, then it is a free pass for another check
-      return true;
+      return false;
     }
   } else {
     return userId === user.id;
@@ -56,8 +54,7 @@ export function roleIsAllowed(user: typeof authState.user, role: string | string
         return role.some((r) => user.role && user.role.includes(r.replaceAll("*", "")));
       }
     } else {
-      // if the list is empty, then it is a free pass for another check
-      return true;
+      return false;
     }
   } else {
     if (!role.includes("*")) {
