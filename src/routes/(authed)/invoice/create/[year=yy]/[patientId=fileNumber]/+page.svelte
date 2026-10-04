@@ -164,13 +164,16 @@
         </ul>
       {:else}
         <span>
-          لا يوجد منصرف ل{patient.name} في الفترة المحددة.
-          {formatDate(patient.transfers[from].timestamp!)}
-          {formatDate(
-            to < lastTransferIndex
-              ? patient.transfers[to].timestamp!
-              : (patient.discharge_date ?? new Date())
-          )}
+          لا يوجد منصرف ل{patient.name} في الفترة المحددة: من
+          <span class="from">{formatDate(patient.transfers[from].timestamp!,"YYYY/MM/DD")}</span>
+           إلى
+          <span class="to">
+            {formatDate(
+              to < lastTransferIndex
+                ? patient.transfers[to].timestamp!
+                : (patient.discharge_date ?? new Date()),"YYYY/MM/DD"
+            )}
+          </span>
         </span>
       {/if}
     </Dialog>
