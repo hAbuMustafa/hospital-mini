@@ -69,10 +69,10 @@
         <li>
           <Recording />
         </li>
-        <li>
-          <SyncAll />
-        </li>
       </Filter>
+      <li>
+        <SyncAll />
+      </li>
       <li>أهلا يا <a href="/account">{authState.user!.displayUsername}</a>!</li>
       <li>
         <button
