@@ -11,6 +11,7 @@
   } from "$lib/utils/patterns";
   import { toast } from "svelte-sonner";
   import { getLastPatientFetch } from "../(authed)/CONSTANTS.remote";
+  import { page } from "$app/state";
 
   let error = $state("");
 
@@ -25,6 +26,8 @@
       return { type: "text", pattern: egyptianPhoneNumber.source };
     }
   });
+
+  const redirectToAfterLogin = page.url.searchParams.get("redirect_to");
 </script>
 
 <h1>تسجيل الدخول</h1>
@@ -42,7 +45,7 @@
         } else if (getDuration(lastPatientFetch, new Date(), "hours") > 24) {
           toast.warning("لم يتم تحديث بيانات المرضى منذ مدة");
         }
-        goto("/");
+        goto(redirectToAfterLogin ?? "/");
       } else if (result.type === "failure") {
         error = (result.data?.message as string | undefined) ?? "فشل تسجيل الدخول";
       }
