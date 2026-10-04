@@ -9,5 +9,6 @@
       "group": "HospitalMini",
       "database": "./local.db"
     }
-  ]
+  ],
+  "js/ts.experimental.useTsgo": true
 }
