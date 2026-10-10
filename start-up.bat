@@ -7,17 +7,9 @@ exit /b 0
 setlocal
 
 REM --- Configuration ---
-set "TARGET_DIR=%USERPROFILE%\Desktop\hospital-mini"
-set "ALT_TARGET_DIR=%USERPROFILE%\hospital-mini"
 set "SESSION_NAME=dev"
+set "WORK_DIR=%~dp0"
 
-REM --- Resolve working directory ---
-set "WORK_DIR=%ALT_TARGET_DIR%"
-if not exist "%WORK_DIR%\" set "WORK_DIR=%TARGET_DIR%"
-if not exist "%WORK_DIR%\" (
-    echo No valid target directory found.
-    exit /b 1
-)
 cd /d "%WORK_DIR%"
 
 REM --- Check if session already exists, attach if so ---
