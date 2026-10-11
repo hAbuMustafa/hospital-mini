@@ -1,6 +1,5 @@
-export function load({ data }) {
+export function load() {
   return {
     title: "بيان المرضى بالأقسام",
-    ...data,
   };
 }

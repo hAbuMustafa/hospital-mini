@@ -9,14 +9,9 @@
   import { getUnlinkedTickets } from "../pharmacy/ticket.remote.js";
   import DispenseToUnregisteredPatient from "../../DispenseToUnregisteredPatient.svelte";
   import { authState } from "$lib/auth-client/auth.svelte.js";
+  import { getPatientsByWard } from "./patient.remote.js";
 
-  let { data } = $props();
-
-  const patientsByWard = Object.groupBy(
-    // svelte-ignore state_referenced_locally
-    data.patients,
-    (p) => (p.ward_recent || p.ward_on_admission)!
-  );
+  const patientsByWard = await getPatientsByWard();
 
   const wards = [
     "رعاية أ",
