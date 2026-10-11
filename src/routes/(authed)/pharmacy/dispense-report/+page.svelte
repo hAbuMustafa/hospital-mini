@@ -52,10 +52,12 @@
   {/if}
 </h2>
 
-<DateTimeControls from={urlFrom} to={urlTo} />
-<FilterBox bind:query bind:regex={qRegex} placeholder="بحث عن دواء 🔍" />
+<div class="controls-wrapper">
+  <DateTimeControls from={urlFrom} to={urlTo} />
+  <FilterBox bind:query bind:regex={qRegex} placeholder="بحث عن دواء 🔍" />
 
-<TradeNameToggle bind:useTradeName />
+  <TradeNameToggle bind:useTradeName />
+</div>
 
 <ul class="totals">
   {#each totals as item, i (i)}
@@ -79,6 +81,12 @@
 </ul>
 
 <style>
+  .controls-wrapper {
+    display: grid;
+    gap: 1rem;
+    justify-items: center;
+  }
+
   .totals {
     list-style: none;
     margin-block: 0;
