@@ -9,9 +9,8 @@ import {
   unsyncedNarcotics,
 } from "$lib/server/db/schema";
 import { saveNarcoticTicketToGoogleSheet } from "$lib/server/gcp/sheets";
-import { totalAndAmount } from "$lib/utils/query";
 import { invalid } from "@sveltejs/kit";
-import { and, eq, getTableColumns, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, isNotNull, lte, sql, sum, gt } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getDrugsTransactionAmountTotals = query(
@@ -28,7 +27,7 @@ export const getDrugsTransactionAmountTotals = query(
         item_tradename: drugs.tradename_ar,
         item_name_en: drugs.name,
         item_tradename_en: drugs.tradename,
-        ...totalAndAmount(false),
+        amount: sum(transactions.qty_remaining),
       })
       .from(transactions)
       .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
@@ -39,11 +38,11 @@ export const getDrugsTransactionAmountTotals = query(
             ? isNotNull(transactionTickets.store_id)
             : eq(transactionTickets.store_id, currentUser?.affiliation!),
           gte(transactionTickets.timestamp, data.from),
-          lte(transactionTickets.timestamp, data.to)
+          lte(transactionTickets.timestamp, data.to),
+          gt(transactions.qty_remaining, 0)
         )
       )
       .groupBy(transactions.item_id)
-      .having((thisTable) => ne(thisTable.amount, 0))
       .orderBy(drugs.category);
 
     return totals;

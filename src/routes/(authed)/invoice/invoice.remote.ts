@@ -11,7 +11,6 @@ import {
   transactionTickets,
   user,
 } from "$lib/server/db/schema";
-import { totalAndAmount } from "$lib/utils/query";
 import { error, invalid } from "@sveltejs/kit";
 import {
   and,
@@ -23,6 +22,7 @@ import {
   isNotNull,
   lte,
   sql,
+  sum,
 } from "drizzle-orm";
 import * as v from "valibot";
 import { getSystemFirstDate } from "../CONSTANTS.remote";
@@ -176,7 +176,8 @@ export const getPeriodExtraItems = query(
       .select({
         id: drugs.id,
         name: drugs.name_ar,
-        ...totalAndAmount(),
+        amount: sum(transactions.qty_remaining),
+        total: sql<number>`SUM(${transactions.qty_remaining}) * ${transactions.unit_price}`,
       })
       .from(transactions)
       .leftJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))

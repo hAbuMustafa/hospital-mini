@@ -7,8 +7,7 @@ import {
   transactions,
   transactionTickets,
 } from "$lib/server/db/schema";
-import { totalAndAmount } from "$lib/utils/query";
-import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, sql, sum } from "drizzle-orm";
 
 export async function load({ url }) {
   const today = new Date();
@@ -56,7 +55,7 @@ export async function load({ url }) {
   const hasNarcotics = await db
     .select({
       patient_id: transactionTickets.patient_id,
-      ...totalAndAmount(false),
+      amount: sum(transactions.qty_remaining),
     })
     .from(transactions)
     .innerJoin(transactionTickets, eq(transactions.ticket_id, transactionTickets.id))
