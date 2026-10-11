@@ -26,6 +26,8 @@ export const getDrugsTransactionAmountTotals = query(
       .select({
         item_name: drugs.name_ar,
         item_tradename: drugs.tradename_ar,
+        item_name_en: drugs.name,
+        item_tradename_en: drugs.tradename,
         ...totalAndAmount(false),
       })
       .from(transactions)

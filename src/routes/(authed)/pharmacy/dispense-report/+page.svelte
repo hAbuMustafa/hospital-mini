@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import DateTimeControls from "$lib/components/DateTimeControls.svelte";
+  import FilterBox from "$lib/components/FilterBox.svelte";
   import TradeNameToggle from "$lib/components/TradeNameToggle.svelte";
   import { formatDate } from "$lib/date/utils";
   import { getDrugsTransactionAmountTotals } from "./transactions.remote";
@@ -23,7 +24,20 @@
 
   let totals = await totalsGetter;
 
+  console.log(totals);
+
   let useTradeName = $state(false);
+
+  let query = $state("");
+
+  let qRegex = $state(new RegExp(""));
+
+  const NAME_COLUMNS = [
+    "item_name",
+    "item_tradename",
+    "item_name_en",
+    "item_tradename_en",
+  ] as const;
 </script>
 
 <h1>عرض المنصرف</h1>
@@ -39,13 +53,27 @@
 </h2>
 
 <DateTimeControls from={urlFrom} to={urlTo} />
+<FilterBox bind:query bind:regex={qRegex} placeholder="بحث عن دواء 🔍" />
+
 <TradeNameToggle bind:useTradeName />
 
 <ul class="totals">
   {#each totals as item, i (i)}
-    <li title={useTradeName ? item.item_name : item.item_tradename}>
+    <li
+      title={useTradeName ? item.item_name : item.item_tradename}
+      class:filtered-out={query && NAME_COLUMNS.every((col) => !qRegex.test(item[col]!))}
+    >
       <span class="item-qty">{item.amount}</span>
-      <span class="item-name">{useTradeName ? item.item_tradename : item.item_name}</span>
+      <span class="item-name">
+        {#if query}
+          {@html (useTradeName ? item.item_tradename : item.item_name)?.replaceAll(
+            qRegex,
+            (match) => `<mark>${match}</mark>`
+          )}
+        {:else}
+          {useTradeName ? item.item_tradename : item.item_name}
+        {/if}
+      </span>
     </li>
   {/each}
 </ul>
@@ -78,5 +106,9 @@
     color: var(--main-bg-color);
     border-radius: 4px;
     padding: 0.05rem 0.25rem;
+  }
+
+  .filtered-out {
+    display: none;
   }
 </style>
