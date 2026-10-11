@@ -77,7 +77,7 @@
             bind:checked={
               () => from <= i && to >= i,
               (v) => {
-                if (v && i <= to) {
+                if (i <= to) {
                   from = i;
                 } else {
                   return false;
@@ -94,7 +94,7 @@
             bind:checked={
               () => from <= i && to >= i,
               (v) => {
-                if (v && i >= from) {
+                if (i >= from) {
                   to = i;
                 } else {
                   return false;

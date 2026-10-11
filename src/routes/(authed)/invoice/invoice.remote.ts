@@ -345,39 +345,20 @@ export const createInvoice = form(
     department: v.optional(v.number()),
   }),
   async (data, issue) => {
-    const [patient] = await db
-      .select()
-      .from(patients_view)
-      .where(eq(patients_view.id, data.patientId));
+    const currentUser = getRequestEvent().locals.user!;
+
+    const { transfers, ...patient } = await getPatientWithTransfers(data.patientId);
 
     if (!patient) invalid(issue.patientId("لا يوجد مريض مسجل برقم الملف المطلوب"));
 
-    const transfers = await db
-      .select()
-      .from(patientTransfers)
-      .where(
-        and(
-          eq(patientTransfers.patient_id, data.patientId),
-          gte(patientTransfers.id, data.fromTransferId)
-        )
-      )
-      .orderBy(patientTransfers.timestamp);
-
-    if (!transfers.length) invalid(issue("الفترة المختارة خارج فترة إقامة المريض"));
-
     const endTransferIndex = transfers.findIndex((t) => t.id === data.toTransferId);
 
-    const from = transfers[0].timestamp!;
-    const to =
-      endTransferIndex < transfers.length - 1
-        ? transfers[endTransferIndex]?.timestamp!
-        : (patient.discharge_date ?? new Date());
+    const from = transfers.find((t) => t.id === data.fromTransferId)?.from!;
+    const to = transfers.find((t) => t.id === data.toTransferId)?.to ?? new Date();
 
-    const issued_by = getRequestEvent().locals.user?.id!;
+    const issued_by = currentUser.id;
     const issuing_department =
-      getRequestEvent().locals.user?.role === "admin"
-        ? data.department
-        : getRequestEvent().locals.user?.affiliation!;
+      currentUser.role === "admin" ? data.department : currentUser.affiliation!;
 
     if (!issuing_department)
       invalid(issue("أنت غير تابع لأي جهة. لا يمكنك تسجيل فواتير"));
@@ -392,10 +373,10 @@ export const createInvoice = form(
           period_ward:
             transfers.length > 1
               ? transfers
-                  .filter((_, i) => i < transfers.length - 1 && i < endTransferIndex)
-                  .map((p) => p.to_ward)
+                  .filter((t) => t.id >= data.fromTransferId && t.id <= data.toTransferId)
+                  .map((p) => p.ward)
                   .join(" - ")
-              : transfers[0].to_ward!,
+              : transfers[0].ward!,
           issued_by,
           issuing_department,
           is_closed: !data.keepOpen,
