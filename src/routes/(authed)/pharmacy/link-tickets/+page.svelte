@@ -143,8 +143,19 @@
     font-size: 1.25rem;
   }
 
+  form {
+    display: grid;
+    gap: 1rem;
+  }
+
   table {
     width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border: var(--main-border);
   }
 
   th {
@@ -157,6 +168,7 @@
 
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 0.5rem;
   }
 
@@ -186,6 +198,5 @@
 
   input[type="submit"] {
     width: 100%;
-    margin-block-start: 1rem;
   }
 </style>
