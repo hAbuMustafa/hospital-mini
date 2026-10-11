@@ -5,6 +5,7 @@ import {
   drugs,
   invoiceExtraItems,
   invoices,
+  patientDischarges,
   patients_view,
   patientTransfers,
   transactions,
@@ -43,7 +44,16 @@ export const getPatientWithTransfers = query(v.string(), async (patientId) => {
     .where(eq(patients_view.id, patientId));
 
   const transfers = await db
-    .select()
+    .select({
+      id: patientTransfers.id,
+      patient_id: patientTransfers.patient_id,
+      ward: patientTransfers.to_ward,
+      is_admission: patientTransfers.is_admission,
+      from: patientTransfers.timestamp,
+      to: sql<Date>`COALESCE(LEAD(${patientTransfers.timestamp}) OVER (ORDER BY ${patientTransfers.timestamp}), (SELECT ${patientDischarges.timestamp} FROM ${patientDischarges} WHERE ${patientDischarges.patient_id} = ${patientId}))`
+        .mapWith((v) => (v ? new Date(v * 1000) : null))
+        .as("to"),
+    })
     .from(patientTransfers)
     .where(eq(patientTransfers.patient_id, patientId))
     .orderBy(patientTransfers.timestamp);

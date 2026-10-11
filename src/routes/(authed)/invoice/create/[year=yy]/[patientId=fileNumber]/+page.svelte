@@ -37,11 +37,7 @@
   let to = $state(lastTransferIndex);
 
   let fromTransferId = $derived(patient.transfers[from].id);
-  let toTransferId = $derived(
-    to < lastTransferIndex
-      ? patient.transfers[to].id
-      : patient.transfers[lastTransferIndex].id
-  );
+  let toTransferId = $derived(patient.transfers[to].id);
 
   let saving = $state(false);
 
@@ -81,7 +77,7 @@
             bind:checked={
               () => from <= i && to >= i,
               (v) => {
-                if (i <= to) {
+                if (v && i <= to) {
                   from = i;
                 } else {
                   return false;
@@ -98,7 +94,7 @@
             bind:checked={
               () => from <= i && to >= i,
               (v) => {
-                if (i >= from) {
+                if (v && i >= from) {
                   to = i;
                 } else {
                   return false;
@@ -107,17 +103,15 @@
             }
           />
         </td>
-        <td>{stay.to_ward}</td>
-        <td class:from={i === from}>{getDate(stay.timestamp)}</td>
+        <td>{stay.ward}</td>
+        <td class:from={i === from}>{getDate(stay.from)}</td>
         <td class:to={i === to}>
           {#if i === lastTransferIndex}
-            {#if patient.discharge_date}
-              {getDate(patient.discharge_date)}
-            {:else}
+            {#if !stay.to}
               الآن
             {/if}
           {:else}
-            {getDate(patient.transfers[i + 1]?.timestamp)}
+            {getDate(stay.to)}
           {/if}
         </td>
       </tr>
@@ -126,13 +120,15 @@
 </table>
 
 <div class="pricing-range">
-  من <span class="from">{getDate(patient.transfers[from].timestamp)}</span> إلى
+  من <span class="from">{getDate(patient.transfers[from].from)}</span> إلى
   <span class="to">
-    {#if to < lastTransferIndex}
-      {getDate(patient.transfers[to + 1].timestamp)}
-    {:else if patient.discharge_date}{getDate(patient.discharge_date)}{:else}الآن{/if}
+    {#if patient.transfers[to].to}
+      {getDate(patient.transfers[to].to)}
+{:else}
+الآن
+{/if}
   </span>
-  {#if patient.transfers[from].timestamp! >= systemFirstDate}
+  {#if patient.transfers[from].from! >= systemFirstDate}
     <button
       type="button"
       command="show-modal"
@@ -146,11 +142,10 @@
     <Dialog id="period-dispenses">
       {const dispenses = await getDispenses({
         patientId: patient.id,
-        fromDate: patient.transfers[from].timestamp!,
+        fromDate: patient.transfers[from].from!,
         toDate:
-          to < lastTransferIndex
-            ? patient.transfers[to].timestamp!
-            : (patient.discharge_date ?? new Date()),
+           patient.transfers[to].to
+            ??  new Date(),
       })}
 
       {#if dispenses.dispenses.length}
@@ -166,14 +161,12 @@
         <span>
           لا يوجد منصرف ل{patient.name} في الفترة المحددة: من
           <span class="from"
-            >{formatDate(patient.transfers[from].timestamp!, "YYYY/MM/DD")}</span
+            >{formatDate(patient.transfers[from].from!, "YYYY/MM/DD")}</span
           >
           إلى
           <span class="to">
             {formatDate(
-              to < lastTransferIndex
-                ? patient.transfers[to].timestamp!
-                : (patient.discharge_date ?? new Date()),
+               patient.transfers[to].to ?? new Date(),
               "YYYY/MM/DD"
             )}
           </span>
@@ -246,7 +239,7 @@
     {...createInvoice.fields.toTransferId.as("hidden", toTransferId)}
   />
 
-  {#if systemFirstDate > patient.admission_date && systemFirstDate > patient.transfers[from].timestamp!}
+  {#if systemFirstDate > patient.admission_date && systemFirstDate > patient.transfers[from].from!}
     <label
       title="هذا الاختيار يظهر فقط في حال كانت الفاتورة تبدأ من فترة تسبق فترة تشغيل المنظومة"
     >
