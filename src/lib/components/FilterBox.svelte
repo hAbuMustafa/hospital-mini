@@ -21,7 +21,7 @@
           .replaceAll(/ةه/g, "[ةه]")
           .replaceAll(/يى/g, "[يى]")
           .replaceAll(/\s+/g, ".*"),
-        "g"
+        "gi"
       );
     }
   }
