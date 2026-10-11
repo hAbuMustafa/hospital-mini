@@ -45,7 +45,8 @@ export const getPatientWithTransfers = query(v.string(), async (patientId) => {
   const transfers = await db
     .select()
     .from(patientTransfers)
-    .where(eq(patientTransfers.patient_id, patientId));
+    .where(eq(patientTransfers.patient_id, patientId))
+    .orderBy(patientTransfers.timestamp);
 
   return { ...patient, transfers };
 });
@@ -286,7 +287,7 @@ export const getDispenses = query(
             lte(patientTransfers.timestamp, data.fromDate)
           )
         )
-        .orderBy(desc(patientTransfers.id))
+        .orderBy(desc(patientTransfers.timestamp))
         .limit(1);
 
       const dispenses = await db
