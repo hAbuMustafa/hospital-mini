@@ -80,31 +80,48 @@
     {/if}
 
     <h2>أسماء المرضى على التذاكر</h2>
-    <ul>
-      {#each unlinked.patientNames as patientName, i (i)}
-        <li>
-          <label>
-            <input
-              bind:group={selectedNames}
-              {...linkTickets.fields.patient_names.as("checkbox", patientName!)}
-            />
-            {patientName}
-          </label>
-          <ul class="ticket-numbers">
-            {#each unlinked.tickets.filter((t) => t.patient_id === patientName) as ticket, j (ticket.id)}
-              <li>
-                <TicketNumber number={ticket.id} />
-              </li>
-            {/each}
-            <li>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>الاسم على التذكرة</th>
+          <th>التذاكر المرتبطة</th>
+          <th>تذكرة جديدة بنفس الاسم</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each unlinked.patientNames as patientName, i (i)}
+          <tr>
+            <td>
+              <input
+                id="name-{i}"
+                bind:group={selectedNames}
+                {...linkTickets.fields.patient_names.as("checkbox", patientName!)}
+              />
+            </td>
+            <td>
+              <label for="name-{i}">
+                {patientName}
+              </label>
+            </td>
+            <td>
+              <ul class="ticket-numbers">
+                {#each unlinked.tickets.filter((t) => t.patient_id === patientName) as ticket, j (ticket.id)}
+                  <li>
+                    <TicketNumber number={ticket.id} />
+                  </li>
+                {/each}
+              </ul>
+            </td>
+            <td>
               <a href="/dispense/{THIS_YEAR}/0?patient_name={patientName}" class="btn">
-                جديد
+                صرف
               </a>
-            </li>
-          </ul>
-        </li>
-      {/each}
-    </ul>
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
 
     <input
       type="submit"
@@ -126,6 +143,14 @@
     font-size: 1.25rem;
   }
 
+  table {
+    width: 100%;
+  }
+
+  th {
+    width: min-content;
+  }
+
   ul {
     list-style: none;
     padding-inline: 0;
@@ -141,7 +166,7 @@
     justify-content: space-between;
   }
 
-  li > .ticket-numbers {
+  ul.ticket-numbers {
     display: flex;
     flex-direction: row;
     gap: 1ch;
@@ -152,7 +177,7 @@
     }
   }
 
-  li > .btn {
+  td > .btn {
     --bg: green;
     font-size: 1em;
     font-weight: normal;
