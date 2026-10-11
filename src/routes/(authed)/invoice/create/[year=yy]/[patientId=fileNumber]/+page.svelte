@@ -39,7 +39,7 @@
   let fromTransferId = $derived(patient.transfers[from].id);
   let toTransferId = $derived(
     to < lastTransferIndex
-      ? patient.transfers[to + 1].id
+      ? patient.transfers[to].id
       : patient.transfers[lastTransferIndex].id
   );
 
@@ -165,13 +165,16 @@
       {:else}
         <span>
           لا يوجد منصرف ل{patient.name} في الفترة المحددة: من
-          <span class="from">{formatDate(patient.transfers[from].timestamp!,"YYYY/MM/DD")}</span>
-           إلى
+          <span class="from"
+            >{formatDate(patient.transfers[from].timestamp!, "YYYY/MM/DD")}</span
+          >
+          إلى
           <span class="to">
             {formatDate(
               to < lastTransferIndex
                 ? patient.transfers[to].timestamp!
-                : (patient.discharge_date ?? new Date()),"YYYY/MM/DD"
+                : (patient.discharge_date ?? new Date()),
+              "YYYY/MM/DD"
             )}
           </span>
         </span>
@@ -221,14 +224,13 @@
     }
   })}
 >
-
-{#if authState.user?.role === "admin"}
-  <select {...createInvoice.fields.department.as("number")}>
-    {#each await getDepartments() as dep,i (dep.id) }
-      <option value="{dep.id}">{dep.name}</option>
-    {/each}
-  </select>
-{/if}
+  {#if authState.user?.role === "admin"}
+    <select {...createInvoice.fields.department.as("number")}>
+      {#each await getDepartments() as dep, i (dep.id)}
+        <option value={dep.id}>{dep.name}</option>
+      {/each}
+    </select>
+  {/if}
 
   <input readonly {...createInvoice.fields.patientId.as("hidden", patient.id)} />
 
@@ -306,7 +308,7 @@
                 {...copyInvoice.for(invoice.id).enhance(async (form) => {
                   const { promise, resolve, reject } = Promise.withResolvers();
 
-                  toast.promise(promise as Promise<typeof form.result> , {
+                  toast.promise(promise as Promise<typeof form.result>, {
                     success: (newInvoiceId) => {
                       goto(`/invoice/patch/${newInvoiceId}`);
                       return "تم نسخ الفاتورة بنجاح";
