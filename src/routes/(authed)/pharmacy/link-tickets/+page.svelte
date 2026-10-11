@@ -45,39 +45,7 @@
       }
     })}
   >
-    {#if selectedId}
-      <button
-        type="button"
-        class="selected-patient"
-        onclick={() => {
-          selectedId = "";
-          selectedPatientName = "";
-        }}
-      >
-        {selectedId}
-        {selectedPatientName}
-      </button>
-      <hr />
-    {/if}
     <input {...linkTickets.fields.link_to_id.as("hidden", selectedId)} readonly />
-    {#if !selectedId}
-      <Combobox
-        bind:query={patientQuery}
-        endpoint={`/api/v1/patient?q=${patientQuery}`}
-        placeholder="بحث عن مريض"
-      >
-        {#snippet itemSnippet(patient: PatientT)}
-          <SelectItemPatient
-            {patient}
-            query={patientQuery}
-            onSelect={() => {
-              selectedId = patient.id;
-              selectedPatientName = patient.name!;
-            }}
-          />
-        {/snippet}
-      </Combobox>
-    {/if}
 
     <h2>أسماء المرضى على التذاكر</h2>
     <table>
@@ -122,6 +90,38 @@
         {/each}
       </tbody>
     </table>
+
+    {#if selectedId}
+      <button
+        type="button"
+        class="selected-patient"
+        onclick={() => {
+          selectedId = "";
+          selectedPatientName = "";
+        }}
+      >
+        {selectedId}
+        {selectedPatientName}
+      </button>
+      <hr />
+    {:else}
+      <Combobox
+        bind:query={patientQuery}
+        endpoint={`/api/v1/patient?q=${patientQuery}`}
+        placeholder="ربط التذاكر المختارة بالمريض"
+      >
+        {#snippet itemSnippet(patient: PatientT)}
+          <SelectItemPatient
+            {patient}
+            query={patientQuery}
+            onSelect={() => {
+              selectedId = patient.id;
+              selectedPatientName = patient.name!;
+            }}
+          />
+        {/snippet}
+      </Combobox>
+    {/if}
 
     <input
       type="submit"
@@ -186,5 +186,6 @@
 
   input[type="submit"] {
     width: 100%;
+    margin-block-start: 1rem;
   }
 </style>
