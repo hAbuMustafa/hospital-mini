@@ -103,7 +103,6 @@
         {selectedId}
         {selectedPatientName}
       </button>
-      <hr />
     {:else}
       <Combobox
         bind:query={patientQuery}
