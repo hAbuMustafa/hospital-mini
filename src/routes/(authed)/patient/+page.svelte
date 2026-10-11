@@ -10,6 +10,7 @@
   import DispenseToUnregisteredPatient from "../../DispenseToUnregisteredPatient.svelte";
   import { authState } from "$lib/auth-client/auth.svelte.js";
   import { getPatientsByWard } from "./patient.remote.js";
+  import FilterBox from "$lib/components/FilterBox.svelte";
 
   const patientsByWard = await getPatientsByWard();
 
@@ -32,16 +33,7 @@
 
   let query = $state("");
 
-  let qRegex = $derived(
-    new RegExp(
-      query
-        .replaceAll(/اأإآ/g, "[اأإآ]")
-        .replaceAll(/ةه/g, "[ةه]")
-        .replaceAll(/يى/g, "[يى]")
-        .replaceAll(/\s+/g, ".*"),
-      "g"
-    )
-  );
+  let qRegex = $state(new RegExp(""));
 
   let headerHight = $state(0);
 
@@ -56,7 +48,7 @@
 <header bind:clientHeight={headerHight}>
   <h1>بيان بالمرضى بالأقسام</h1>
 
-  <input type="search" bind:value={query} placeholder="بحث عن مريض محجوز 🔍" />
+  <FilterBox bind:query bind:regex={qRegex} placeholder="بحث عن مريض محجوز 🔍" />
 </header>
 
 <ul class="nav" role="navigation">
@@ -234,11 +226,6 @@
       width: 100%;
       margin-block: 0.2rem;
     }
-  }
-
-  input[type="search"] {
-    text-align: center;
-    font-size: 1.5rem;
   }
 
   h2 {
