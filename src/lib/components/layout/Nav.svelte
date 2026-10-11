@@ -20,6 +20,7 @@
         >
         <ul id="admin-nav-list" popover="hint">
           <li><a href="/admin/users">المستخدمين</a></li>
+          <li><a href="/admin/sessions">الجلسات المفتوحة</a></li>
           <hr />
           <li><a href="/admin/system">إعدادات النظام</a></li>
         </ul>

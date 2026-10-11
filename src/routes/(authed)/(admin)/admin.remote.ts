@@ -1,4 +1,4 @@
-import { form, query } from "$app/server";
+import { command, form, query } from "$app/server";
 import {
   drugs_spreadsheetId,
   narcotics_spreadsheetId,
@@ -15,6 +15,7 @@ import {
   transactionTickets,
   departments,
   user,
+  session,
 } from "$lib/server/db/schema";
 import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
 import {
@@ -24,7 +25,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
-import { eq, ne, sql } from "drizzle-orm";
+import { eq, getTableColumns, ne, sql } from "drizzle-orm";
 import { reportSheetFetch, reportSheetMultiFetch } from "$lib/server/db/utils";
 import { formatDate, getDuration, getTermed } from "$lib/date/utils";
 import * as v from "valibot";
@@ -289,3 +290,18 @@ export const startSeed = form(
     return `تمت التغذية بنجاح في ${getTermed(Math.floor(duration), "دقيقة", "دقائق")} و ${getTermed((duration % 1) * 60, "ثانية", "ثوان")}`;
   }
 );
+
+export const getSessions = query(async () => {
+  return await db
+    .select({
+      ...getTableColumns(session),
+      user_name: user.name,
+    })
+    .from(session)
+    .leftJoin(user, eq(session.userId, user.id));
+});
+
+export const deleteSession = command(v.string(), async (sessionId) => {
+  await db.delete(session).where(eq(session.id, sessionId));
+  void getSessions().refresh();
+});
