@@ -27,7 +27,11 @@
 
       toast.promise(promise, {
         loading: "جار ربط تذاكر الصرف بالملف رقم " + selectedId + "...",
-        success: "تم ربط تذاكر الصرف",
+        success: () => {
+          selectedId = "";
+          selectedPatientName = "";
+          return "تم ربط تذاكر الصرف";
+        },
         error: () => {
           form.fields.allIssues()?.forEach((issue) => {
             toast.warning(issue.message, { duration: Number.POSITIVE_INFINITY });
