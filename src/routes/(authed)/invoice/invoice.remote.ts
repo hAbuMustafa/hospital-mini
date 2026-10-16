@@ -204,6 +204,40 @@ export const getPeriodExtraItems = query(
   }
 );
 
+export const getDischargesByPeriod = query(
+  v.object({
+    from: v.date(),
+    to: v.date(),
+  }),
+  async (data) => {
+    return await db
+      .select({
+        id: patients_view.id,
+        name: patients_view.name,
+        insured: patients_view.insured,
+        ward_on_admission: patients_view.ward_on_admission,
+        admission_date: patients_view.admission_date,
+        discharge_date: patients_view.discharge_date,
+        wards:
+          sql<string>`(SELECT string_agg(${patientTransfers.to_ward}, ' - ') FROM ${patientTransfers} WHERE ${patientTransfers}.${patientTransfers.patient_id} = ${patients_view}.${patients_view.id} GROUP BY ${patientTransfers}.${patientTransfers.patient_id})`.as(
+            "wards"
+          ),
+        narcotic_tickets:
+          sql<number>`(SELECT SUM(${transactions.qty_remaining}) FROM ${transactions} INNER JOIN ${transactionTickets} ON ${transactions.ticket_id} = ${transactionTickets}.${transactionTickets.id} INNER JOIN ${drugs} ON ${transactions.item_id} = ${drugs}.${drugs.id} WHERE ${patients_view}.${patients_view.id} = ${transactionTickets}.${transactionTickets.patient_id} AND ${drugs.category} = 'مخدرات' GROUP BY ${transactionTickets}.${transactionTickets.patient_id})`.as(
+            "narcotic_tickets"
+          ),
+      })
+      .from(patients_view)
+      .where(
+        and(
+          gte(patients_view.discharge_date, data.from),
+          lte(patients_view.discharge_date, data.to)
+        )
+      )
+      .orderBy(patients_view.admission_date);
+  }
+);
+
 export const addInvoiceExtraItem = command(
   v.object({
     invoiceId: v.number(),

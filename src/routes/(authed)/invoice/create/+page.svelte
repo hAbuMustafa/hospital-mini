@@ -1,25 +1,55 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import Combobox from "$lib/components/Combobox.svelte";
   import DateControls from "$lib/components/DateControls.svelte";
   import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
-  import { formatDate } from "$lib/date/utils";
+  import { formatDate, setToEndOfDay, setToStartOfDay } from "$lib/date/utils";
   import { queryPatient } from "../../query.remote.js";
+  import { getDischargesByPeriod } from "../invoice.remote.js";
 
-  let { data } = $props();
+  const urlFrom = $derived(page.url.searchParams.get("f"));
+  const urlTo = $derived(page.url.searchParams.get("t"));
 
-  let isSameDay = $derived(data.dateFrom === data.dateTo);
+  const today = new Date();
+  const theOtherDay = new Date(today);
+  theOtherDay.setDate(today.getDate() - 2);
+
+  const dischargesFrom = $derived.by(() => {
+    const newFrom = urlFrom ? new Date(urlFrom) : theOtherDay;
+    setToStartOfDay(newFrom);
+
+    return newFrom;
+  });
+  const dischargesTo = $derived.by(() => {
+    const newTo = urlTo ? new Date(urlTo) : theOtherDay;
+    setToEndOfDay(newTo);
+
+    return newTo;
+  });
+
+  const stringFrom = $derived(formatDate(dischargesFrom));
+  const stringTo = $derived(formatDate(dischargesTo));
+
+  let isSameDay = $derived(urlFrom === urlTo);
 
   let patientQuery = $state("");
+
+  const discharges = $derived(
+    await getDischargesByPeriod({
+      from: dischargesFrom,
+      to: dischargesTo,
+    })
+  );
 </script>
 
 <h1>إصدار فاتورة</h1>
 <h2>
   مرضى الداخلي الخروج {isSameDay
-    ? `يوم ${data.dateFrom.split("-").reverse().join("-")}`
-    : `في الفترة من ${data.dateFrom.split("-").reverse().join("-")} إلى ${data.dateTo.split("-").reverse().join("-")}`}
+    ? `يوم ${stringFrom.split("-").reverse().join("-")}`
+    : `في الفترة من ${stringFrom.split("-").reverse().join("-")} إلى ${stringTo.split("-").reverse().join("-")}`}
 </h2>
 
-<DateControls from={data.dateFrom} to={data.dateTo} />
+<DateControls from={stringFrom} to={stringTo} />
 
 <table>
   <thead>
@@ -35,21 +65,12 @@
     </tr>
   </thead>
   <tbody>
-    {#each data.patients as patient, i (patient.id)}
-      {@const hasNarcotics =
-        (data.hasNarcotics.find((p) => p.patient_id === patient.id)?.amount ?? 0) > 0}
-      {@const patientWards = Array.from(
-        new Set([
-          patient.ward_on_admission,
-          ...(data.wards?.find((p) => p.patient_id === patient.id)?.wards?.split(" - ") ||
-            []),
-        ])
-      ).join(" - ")}
+    {#each discharges as patient, i (patient.id)}
       <tr
         class="patient-card"
         class:is-economic={patient.insured ||
           ["رعاية أ", "رعاية ب", "ثاني ج", "ثاني د"].some((w) =>
-            patientWards.includes(w)
+            patient.wards.includes(w)
           )}
       >
         <td>
@@ -63,8 +84,8 @@
           {/if}
         </td>
         <td>{patient.insured ? "✔️" : "➖"}</td>
-        <td>{patientWards}</td>
-        <td>{hasNarcotics ? "✔️" : "➖"}</td>
+        <td>{patient.wards}</td>
+        <td>{patient.narcotic_tickets > 0 ? "✔️" : "➖"}</td>
         <td>
           <a href="/invoice/create/{patient.id}" class="btn">فاتورة</a>
         </td>
