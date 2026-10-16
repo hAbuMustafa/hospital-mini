@@ -232,6 +232,13 @@
       "when": 1791105109977,
       "tag": "0032_minor_iceman",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1792164187727,
+      "tag": "0033_spooky_true_believers",
+      "breakpoints": true
     }
   ]
 }

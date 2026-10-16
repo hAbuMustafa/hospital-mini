@@ -8,6 +8,7 @@ import {
   numeric,
   integer,
   index,
+  unique,
 } from "drizzle-orm/sqlite-core";
 
 export const drugs = sqliteTable("drugs", {
@@ -62,6 +63,26 @@ export const stores = sqliteTable("stores", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text(),
 });
+
+export const stockDrugs = sqliteTable(
+  "stockDrugs",
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    drug_id: int().notNull(),
+    pharmacy_id: int().notNull(),
+    initial_qty: int().notNull().default(0),
+    qty_current: int().notNull().default(0),
+    batch_number: text(),
+    expiry_date: int({ mode: "timestamp" }),
+  },
+  (table) => [
+    unique("unique_item_in_a_pharmacy_per_batch").on(
+      table.drug_id,
+      table.pharmacy_id,
+      table.batch_number
+    ),
+  ]
+);
 
 export const transactionTickets = sqliteTable("transactionTickets", {
   id: int().primaryKey({ autoIncrement: true }),
