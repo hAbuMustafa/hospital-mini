@@ -4,6 +4,11 @@
   import DrugIcon from "@lucide/svelte/icons/pill";
   import SyncButton from "./SyncButton.svelte";
   import Filter from "../AuthzFilter.svelte";
+  import {
+    startDrugSync,
+    startPatientsSync,
+    startSync,
+  } from "../../../routes/(authed)/sync.remote";
 
   let AllIsLoading = $state(false);
   let patientsIsLoading = $state(false);
@@ -16,7 +21,7 @@
   <Filter allowRole={["*-ph-*"]}>
     <SyncButton
       bind:loading={AllIsLoading}
-      endpoint="/api/v1/sync/all"
+      endpoint={startSync}
       aria-label="تحديث جميع البيانات"
       title="تحديث جميع البيانات"
       disabled={loading}
@@ -27,7 +32,7 @@
 
   <SyncButton
     bind:loading={patientsIsLoading}
-    endpoint="/api/v1/sync/patients"
+    endpoint={startPatientsSync}
     aria-label="تحديث بيانات المرضى"
     title="تحديث بيانات المرضى"
     disabled={loading}
@@ -41,7 +46,7 @@
   <Filter allowRole={["*-ph-*"]}>
     <SyncButton
       bind:loading={drugsIsLoading}
-      endpoint="/api/v1/sync/drugs"
+      endpoint={startDrugSync}
       aria-label="تحديث بيانات الأدوية"
       title="تحديث بيانات الأدوية"
       disabled={loading}

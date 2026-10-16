@@ -1,11 +1,15 @@
 <script lang="ts">
+  import type { RemoteQueryFunction } from "@sveltejs/kit";
   import type { Snippet } from "svelte";
   import { toast } from "svelte-sonner";
   import type { HTMLButtonAttributes } from "svelte/elements";
 
   type PropsT = {
     loading: boolean;
-    endpoint: string;
+    endpoint: RemoteQueryFunction<
+      void,
+      { success: boolean; error?: undefined } | { success?: undefined; error: string }
+    >;
     children: Snippet;
   } & HTMLButtonAttributes;
 
@@ -15,22 +19,18 @@
 <button
   type="button"
   class:loading
-  onclick={() => {
+  onclick={async () => {
     loading = true;
 
-    fetch(endpoint)
-      .then(async (r) => {
-        if (r.ok) {
-          toast.success("تم تحديث البيانات");
-        } else {
-          const error = await r.json();
-          toast.error(error.message);
-        }
-      })
-      .catch((e) => console.error(e))
-      .finally(() => {
-        loading = false;
-      });
+    const result = await endpoint();
+
+    if (result.success) {
+      toast.success("تم تحديث البيانات");
+    } else if (result.error) {
+      toast.error(result.error);
+    }
+
+    loading = false;
   }}
   {...rest}
 >
