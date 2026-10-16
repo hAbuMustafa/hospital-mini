@@ -21,6 +21,7 @@
   import { browser } from "$app/env";
   import { authState } from "$lib/auth-client/auth.svelte";
   import { getDepartments } from "../../../(admin)/admin.remote";
+  import { queryDrug } from "../../../query.remote";
 
   const patientId = `${page.params.y}/${page.params.id}`;
 
@@ -133,9 +134,8 @@
     <Combobox
       bind:query={drugQuery}
       filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
-      endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
+      endpoint={queryDrug}
       placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-      className="hide-in-print"
       onSelect={(drug: DrugT) => selectDrug(drug)}
     >
       {#snippet itemSnippet(drug: DrugT)}

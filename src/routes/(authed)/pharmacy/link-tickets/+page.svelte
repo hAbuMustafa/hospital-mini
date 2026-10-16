@@ -5,6 +5,7 @@
   import { getUnlinkedTickets, linkTickets } from "../ticket.remote";
   import { page } from "$app/state";
   import TicketNumber from "$lib/components/TicketNumber.svelte";
+  import { queryPatient } from "../../query.remote";
 
   let unlinked = $derived(await getUnlinkedTickets());
 
@@ -110,7 +111,7 @@
     {:else}
       <Combobox
         bind:query={patientQuery}
-        endpoint={`/api/v1/patient?q=${patientQuery}`}
+        endpoint={queryPatient}
         placeholder="ربط التذاكر المختارة بالمريض"
       >
         {#snippet itemSnippet(patient: PatientT)}

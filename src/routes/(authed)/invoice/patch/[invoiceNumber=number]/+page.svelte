@@ -23,6 +23,7 @@
     closeInvoice,
   } from "../../invoice.remote";
   import { goto } from "$app/navigation";
+  import { queryDrug } from "../../../query.remote";
 
   const invoice = $derived(await getInvoiceMetadata(Number(page.params.invoiceNumber)));
 
@@ -133,9 +134,8 @@
   <div class="item-controls-wrapper">
     <Combobox
       bind:query={drugQuery}
-      endpoint="/api/v1/drug?q={encodeURIComponent(drugQuery.replaceAll('%', '%'))}"
+      endpoint={queryDrug}
       placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-      className="hide-in-print"
       onSelect={(drug: DrugT) => selectDrug(drug)}
     >
       {#snippet itemSnippet(drug: DrugT)}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import Combobox from "$lib/components/Combobox.svelte";
   import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
+  import { queryPatient } from "../../query.remote";
 
   let query = $state("");
 </script>
@@ -9,7 +10,7 @@
 
 <Combobox
   bind:query
-  endpoint={`/api/v1/patient?q=${query}`}
+  endpoint={queryPatient}
   placeholder="اسم المريض/رقم الملف/ رقم الهوية"
 >
   {#snippet itemSnippet(patient: PatientT)}

@@ -3,17 +3,27 @@
     returnToInputAfterSelection,
     useComboboxKeyboardNavigation,
   } from "$lib/attachments";
+  import type { RemoteQueryFunction } from "@sveltejs/kit";
   import debounce from "lodash-es/debounce";
+  import type { Snippet } from "svelte";
+  import type { HTMLInputAttributes } from "svelte/elements";
+
+  type PropsT = {
+    itemSnippet: Snippet<[any]>;
+    query: string;
+    endpoint: RemoteQueryFunction<string, unknown[]>;
+    filterFn?: (value: any, index?: number, array?: any[]) => boolean;
+    onSelect?: (item: any) => void;
+  } & HTMLInputAttributes;
 
   let {
     itemSnippet,
     query = $bindable(""),
     endpoint,
     filterFn = () => true,
-    className = "",
     onSelect: select = () => null,
     ...rest
-  } = $props();
+  }: PropsT = $props();
 
   let matches: any[] = $state([]);
 
@@ -21,7 +31,7 @@
   let resultsNode: HTMLUListElement | undefined = $state();
 </script>
 
-<div class="lookup-wrapper {className}">
+<div class="lookup-wrapper hide-in-print">
   <input
     type="search"
     bind:value={query}
@@ -29,9 +39,7 @@
     oninput={debounce(async () => {
       if (query === "") return;
 
-      matches = await fetch(endpoint)
-        .then((data) => data.json())
-        .then((arr) => arr.filter(filterFn));
+      matches = await endpoint(query).then((arr) => arr.filter(filterFn));
     }, 500)}
     onkeydown={(e) => {
       if (e.key === "ArrowDown") {

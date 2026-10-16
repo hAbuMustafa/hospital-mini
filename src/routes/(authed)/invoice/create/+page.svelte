@@ -3,6 +3,7 @@
   import DateControls from "$lib/components/DateControls.svelte";
   import SelectItemPatient from "$lib/components/SelectItem_Patient.svelte";
   import { formatDate } from "$lib/date/utils";
+  import { queryPatient } from "../../query.remote.js";
 
   let { data } = $props();
 
@@ -74,11 +75,7 @@
 
 <br style="margin-block-start: 1rem;" />
 
-<Combobox
-  bind:query={patientQuery}
-  endpoint={`/api/v1/patient?q=${patientQuery}`}
-  placeholder="بحث عن مريض"
->
+<Combobox bind:query={patientQuery} endpoint={queryPatient} placeholder="بحث عن مريض">
   {#snippet itemSnippet(patient: PatientT)}
     <SelectItemPatient {patient} query={patientQuery} href={`create/${patient.id}`} />
   {/snippet}
