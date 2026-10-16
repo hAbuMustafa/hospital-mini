@@ -109,6 +109,8 @@
           {#if i === lastTransferIndex}
             {#if !stay.to}
               الآن
+              {:else}
+              {getDate(stay.to)}
             {/if}
           {:else}
             {getDate(stay.to)}
