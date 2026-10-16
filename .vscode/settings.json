@@ -10,5 +10,6 @@
       "database": "./local.db"
     }
   ],
-  "js/ts.experimental.useTsgo": true
+  "js/ts.experimental.useTsgo": true,
+  "svelte.enable-ts-plugin": true
 }
