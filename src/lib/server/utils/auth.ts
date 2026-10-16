@@ -7,7 +7,8 @@ import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
 import { BETTER_AUTH_SECRET } from "$env/static/private";
 import { egyptianPhoneNumber } from "$lib/utils/patterns";
-import { otp } from "../db/schema";
+import { otp, user } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 const sessionEndTimes = [8, 14, 20];
 
@@ -56,18 +57,6 @@ export const auth = betterAuth({
       defaultRole: "user",
       adminRole: "admin",
     }),
-    customSession(async ({ session, user }) => {
-      if (getRequestEvent().locals.user?.role === "admin") return { user, session };
-
-      const nextEndTimestamp = getNextExpiration();
-      return {
-        user,
-        session: {
-          ...session,
-          expiresAt: new Date(nextEndTimestamp),
-        },
-      };
-    }),
     username({
       maxUsernameLength: 15,
     }),
@@ -91,20 +80,12 @@ export const auth = betterAuth({
     session: {
       create: {
         before: async (session) => {
-          if (getRequestEvent().locals.user?.role === "admin") return { data: session };
+          const [currentUser] = await db
+            .select()
+            .from(user)
+            .where(eq(user.id, session.userId));
 
-          const nextEndTimestamp = getNextExpiration();
-          return {
-            data: {
-              ...session,
-              expiresAt: new Date(nextEndTimestamp),
-            },
-          };
-        },
-      },
-      update: {
-        before: async (session) => {
-          if (getRequestEvent().locals.user?.role === "admin") return { data: session };
+          if (currentUser.role === "admin") return { data: session };
 
           const nextEndTimestamp = getNextExpiration();
           return {
