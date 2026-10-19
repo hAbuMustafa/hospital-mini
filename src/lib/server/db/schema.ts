@@ -68,9 +68,9 @@ export const stockDrugs = sqliteTable(
   "stockDrugs",
   {
     id: int().primaryKey({ autoIncrement: true }),
-    drug_id: int().notNull(),
     pharmacy_id: int().notNull(),
-    initial_qty: int().notNull().default(0),
+    drug_id: int().notNull(),
+    qty_initial: int().notNull().default(0),
     qty_current: int().notNull().default(0),
     batch_number: text(),
     expiry_date: int({ mode: "timestamp" }),

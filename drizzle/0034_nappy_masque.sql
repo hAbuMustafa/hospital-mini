@@ -1,0 +1,1 @@
+ALTER TABLE `stockDrugs` RENAME COLUMN "initial_qty" TO "qty_initial";
