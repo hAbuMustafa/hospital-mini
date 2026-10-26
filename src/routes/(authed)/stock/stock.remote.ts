@@ -76,8 +76,53 @@ export const editStock = form(
         batch_number: data.batch_number,
         expiry_date: data.expiry_date ? new Date(data.expiry_date) : undefined,
       })
-      .where(eq(stockDrugs.id, data.stock_id))
-      .returning();
+      .where(eq(stockDrugs.id, data.stock_id));
+
+    void getPharmacyStock().refresh();
+  }
+);
+
+export const addStock = form(
+  v.object({
+    pharmacy_id: v.optional(v.number()),
+
+    drug_id: v.number(),
+    qty: v.number(),
+    batch_number: v.string(),
+    expiry_date: v.string(),
+  }),
+  async (data, issue) => {
+    const currentUser = getRequestEvent().locals.user!;
+
+    if (currentUser.role === "admin" && data.pharmacy_id) {
+      const [pharmacy] = await db
+        .select()
+        .from(departments)
+        .where(eq(departments.id, data.pharmacy_id));
+
+      if (!pharmacy) invalid(issue.pharmacy_id("الصيدلية المختارة غير موجودة"));
+    }
+
+    const [item] = await db.select().from(drugs).where(eq(drugs.id, data.drug_id));
+
+    if (!item) invalid(issue.drug_id("الصنف غير موجود"));
+
+    if (data.qty < 1) invalid(issue.qty("الكمية المضافة لا يمكن أن تكون أقل من 1"));
+
+    try {
+      await db.insert(stockDrugs).values({
+        pharmacy_id:
+          currentUser.role === "admin" ? data.pharmacy_id! : currentUser.affiliation,
+        drug_id: data.drug_id,
+        qty: data.qty!,
+        batch_number: data.batch_number ? data.batch_number : undefined,
+        expiry_date: data.expiry_date ? new Date(data.expiry_date) : undefined,
+      });
+    } catch (err) {
+      if (err instanceof Error) {
+        invalid(err.message);
+      }
+    }
 
     void getPharmacyStock().refresh();
   }
