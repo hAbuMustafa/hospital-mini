@@ -29,7 +29,7 @@
           </AuthzFilter>
           <td>{item.name}</td>
           <td>
-            {item.qty}
+            {item.qty ?? 0}
 
             <AuthzFilter allowRole={["*-ph-manager"]}>
               <button
@@ -37,8 +37,7 @@
                 class="edit btn"
                 title="تعديل"
                 command="show-modal"
-                commandfor="edit-qty-{item.stock_id}"
-              >
+                commandfor="edit-qty-{item.stock_id}">
                 <EditIcon size="1rem" />
               </button>
               <Dialog id="edit-qty-{item.stock_id}">
@@ -52,24 +51,21 @@
                     type="number"
                     name="qty-{item.stock_id}"
                     id="qty-{item.stock_id}"
-                    value={item.qty}
-                  />
+                    value={item.qty} />
 
                   <label for="batch-{item.stock_id}">التشغيلة</label>
                   <input
                     type="text"
                     name="batch-{item.stock_id}"
                     id="batch-{item.stock_id}"
-                    value={item.batch_number}
-                  />
+                    value={item.batch_number} />
 
                   <label for="expiry-{item.stock_id}">الصلاحية</label>
                   <input
                     type="date"
                     name="expiry-{item.stock_id}"
                     id="expiry-{item.stock_id}"
-                    value={item.expiry_date}
-                  />
+                    value={item.expiry_date} />
 
                   <input type="submit" class="btn" value="حفظ" />
                 </form>
