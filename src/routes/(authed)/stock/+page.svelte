@@ -18,6 +18,10 @@
       <th>الرصيد</th>
       <th>التشغيلة</th>
       <th>الصلاحية</th>
+      <AuthzFilter allowRole={["*-ph-manager"]}>
+        <th>تعديل</th>
+        <th>إضافة</th>
+      </AuthzFilter>
     </tr>
   </thead>
   <tbody>
@@ -30,14 +34,6 @@
           <td>{item.name}</td>
           <td>
             {item.qty ?? 0}
-
-            <AuthzFilter allowRole={["*-ph-manager"]}>
-              {#if item.qty !== null}
-                <EditStock {item} />
-              {:else}
-                <AddStock {item} />
-              {/if}
-            </AuthzFilter>
           </td>
           <td>{item.batch_number}</td>
           <td>
@@ -45,6 +41,17 @@
               {formatDate(item.expiry_date)}
             {/if}
           </td>
+          <AuthzFilter allowRole={["*-ph-manager"]}>
+            <td>
+              {#if item.qty !== null}
+                <EditStock {item} />
+              {/if}
+            </td>
+
+            <td>
+              <AddStock {item} />
+            </td>
+          </AuthzFilter>
         </tr>
       {/each}
     {:else}
