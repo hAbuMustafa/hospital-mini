@@ -20,11 +20,11 @@ export const getPharmacyStock = query(async () => {
       expiry_date: stockDrugs.expiry_date,
     })
     .from(drugs)
-    .fullJoin(stockDrugs, eq(stockDrugs.drug_id, drugs.id))
+    .leftJoin(stockDrugs, eq(drugs.id, stockDrugs.drug_id))
     .leftJoin(departments, eq(stockDrugs.pharmacy_id, departments.id))
     .where(
       currentUser.role === "admin"
-        ? isNotNull(stockDrugs.id)
+        ? isNotNull(drugs.id)
         : eq(stockDrugs.pharmacy_id, currentUser.affiliation)
     )
     .orderBy((t) => [t.category, t.id]);
