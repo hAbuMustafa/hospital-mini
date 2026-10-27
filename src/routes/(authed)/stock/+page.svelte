@@ -16,6 +16,13 @@
   const isPharmacyManager = isAdmin || authState.user?.role?.includes("-ph-manager");
 </script>
 
+<h1>
+  مخزون
+  {#if !isAdmin}
+    {stock?.[0]?.pharmacy_name}
+  {/if}
+</h1>
+
 <table>
   <thead>
     <tr>
