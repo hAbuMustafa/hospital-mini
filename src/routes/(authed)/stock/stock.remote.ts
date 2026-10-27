@@ -4,7 +4,6 @@ import { departments, drugs, stockDrugs } from "$lib/server/db/schema";
 import { invalid } from "@sveltejs/kit";
 import { and, eq, isNotNull } from "drizzle-orm";
 import * as v from "valibot";
-import { getDepartments } from "../(admin)/admin.remote";
 
 export const getPharmacyStock = query(async () => {
   const currentUser = getRequestEvent().locals.user!;
