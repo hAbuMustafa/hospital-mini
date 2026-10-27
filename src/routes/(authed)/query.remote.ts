@@ -35,20 +35,19 @@ export const queryPatient = query(v.string(), async (query) => {
     .orderBy(desc(patients_view.admission_date));
 });
 
+function getDrugConditionsForFuzzyQuery(queryString: string) {
+  return or(
+    sql`${drugs.name_ar} LIKE ${queryString} ESCAPE '\\'`,
+    sql`${drugs.name} LIKE ${queryString} ESCAPE '\\'`,
+    sql`${drugs.tradename_ar} LIKE ${queryString} ESCAPE '\\'`,
+    sql`${drugs.tradename} LIKE ${queryString} ESCAPE '\\'`
+  );
+}
+
 export const queryDrug = query(v.string(), async (query) => {
   const fuzzy = fuzzyQuery(query);
 
-  return await db
-    .select()
-    .from(drugs)
-    .where(
-      or(
-        sql`${drugs.name_ar} LIKE ${fuzzy} ESCAPE '\\'`,
-        sql`${drugs.name} LIKE ${fuzzy} ESCAPE '\\'`,
-        sql`${drugs.tradename_ar} LIKE ${fuzzy} ESCAPE '\\'`,
-        sql`${drugs.tradename} LIKE ${fuzzy} ESCAPE '\\'`
-      )
-    );
+  return await db.select().from(drugs).where(getDrugConditionsForFuzzyQuery(fuzzy));
 });
 
 export const queryDrugFromStock = query(v.string(), async (query) => {
@@ -71,12 +70,7 @@ export const queryDrugFromStock = query(v.string(), async (query) => {
               eq(stockDrugs.pharmacy_id, currentUser.affiliation),
               isNull(stockDrugs.pharmacy_id)
             ),
-        or(
-          sql`${drugs.name_ar} LIKE ${fuzzy} ESCAPE '\\'`,
-          sql`${drugs.name} LIKE ${fuzzy} ESCAPE '\\'`,
-          sql`${drugs.tradename_ar} LIKE ${fuzzy} ESCAPE '\\'`,
-          sql`${drugs.tradename} LIKE ${fuzzy} ESCAPE '\\'`
-        )
+        getDrugConditionsForFuzzyQuery(fuzzy)
       )
     );
 });
