@@ -8,7 +8,7 @@
 
   const { count = 5, onSelect }: PropsT = $props();
 
-  const topPicksGetter = getTopPicks(count);
+  const topPicksGetter = $derived(getTopPicks(count));
 </script>
 
 <svelte:boundary>
