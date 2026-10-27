@@ -68,7 +68,7 @@
 
     <label for="add-qty-{item.id}">الرصيد</label>
     <input
-      {...addStock.for(formName).fields.qty.as("number", item.qty ?? 0)}
+      {...addStock.for(formName).fields.qty.as("number", 0)}
       id="add-qty-{item.id}" />
 
     <label for="add-batch-{item.id}">التشغيلة</label>
