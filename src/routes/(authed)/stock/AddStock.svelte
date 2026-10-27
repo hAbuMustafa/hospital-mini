@@ -58,9 +58,9 @@
       <label for="add-pharmacy-id-{item.id}">الصيدلية</label>
       <select
         id="add-pharmacy-id-{item.id}"
-        {...addStock.for(formName).fields.pharmacy_id}>
+        {...addStock.for(formName).fields.pharmacy_id.as("select")}>
         {#each await getDepartments() as dep, i (i)}
-          <option value={dep.id} disabled={item.pharmacy_id === dep.id}
+          <option value={String(dep.id)} disabled={item.pharmacy_id === dep.id}
             >{dep.name}</option>
         {/each}
       </select>

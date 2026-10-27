@@ -4,6 +4,7 @@ import { departments, drugs, stockDrugs } from "$lib/server/db/schema";
 import { invalid } from "@sveltejs/kit";
 import { and, eq, isNotNull } from "drizzle-orm";
 import * as v from "valibot";
+import { getDepartments } from "../(admin)/admin.remote";
 
 export const getPharmacyStock = query(async () => {
   const currentUser = getRequestEvent().locals.user!;
@@ -82,9 +83,14 @@ export const editStock = form(
   }
 );
 
+const departmentsIds = await db
+  .select()
+  .from(departments)
+  .then((deps) => deps.map((dep) => String(dep.id)));
+
 export const addStock = form(
   v.object({
-    pharmacy_id: v.optional(v.number()),
+    pharmacy_id: v.optional(v.picklist(departmentsIds)),
 
     drug_id: v.number(),
     qty: v.number(),
@@ -92,13 +98,14 @@ export const addStock = form(
     expiry_date: v.string(),
   }),
   async (data, issue) => {
+    console.info(data);
     const currentUser = getRequestEvent().locals.user!;
 
     if (currentUser.role === "admin" && data.pharmacy_id) {
       const [pharmacy] = await db
         .select()
         .from(departments)
-        .where(eq(departments.id, data.pharmacy_id));
+        .where(eq(departments.id, Number(data.pharmacy_id)));
 
       if (!pharmacy) invalid(issue.pharmacy_id("الصيدلية المختارة غير موجودة"));
     }
@@ -109,10 +116,14 @@ export const addStock = form(
 
     if (data.qty < 1) invalid(issue.qty("الكمية المضافة لا يمكن أن تكون أقل من 1"));
 
+    if (!data.batch_number) invalid(issue.batch_number("يجب كتابة رقم التشغيلة"));
+
     try {
       await db.insert(stockDrugs).values({
         pharmacy_id:
-          currentUser.role === "admin" ? data.pharmacy_id! : currentUser.affiliation,
+          currentUser.role === "admin"
+            ? Number(data.pharmacy_id!)
+            : currentUser.affiliation,
         drug_id: data.drug_id,
         qty: data.qty!,
         batch_number: data.batch_number ? data.batch_number : undefined,
