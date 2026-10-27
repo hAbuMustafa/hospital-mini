@@ -59,6 +59,7 @@ export const queryDrugFromStock = query(v.string(), async (query) => {
     .select({
       ...getTableColumns(drugs),
       qty: stockDrugs.qty,
+      stock_id: stockDrugs.id,
     })
     .from(drugs)
     .leftJoin(stockDrugs, eq(drugs.id, stockDrugs.drug_id))
