@@ -28,8 +28,21 @@
         <summary>الأصناف الأكثر استخدامًا</summary>
         <div class="top-picks-wrapper">
           {#each topPicks as item, i (item.drugs?.id)}
-            <button type="button" onclick={() => onSelect(item.drugs)}>
+            <button
+              type="button"
+              onclick={() =>
+                onSelect({
+                  ...item.drugs,
+                  qty: item.stockDrugs?.qty,
+                  stock_id: item.stockDrugs?.id,
+                })}>
               <span>{item.drugs?.tradename_ar}</span>
+              <span>
+                <span>الرصيد:</span>
+                <span class:unavailable={!item.stockDrugs?.qty}
+                  >{item.stockDrugs?.qty ?? 0}</span>
+                <span>{item.drugs?.unit}</span>
+              </span>
             </button>
           {/each}
         </div>
@@ -44,12 +57,22 @@
 
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: 3rem;
+    grid-template-rows: 4rem;
     justify-content: center;
     gap: 0.5rem;
   }
 
   details {
     text-align: center;
+  }
+
+  button {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .unavailable {
+    color: light-dark(maroon, salmon);
   }
 </style>
