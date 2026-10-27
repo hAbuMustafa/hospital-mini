@@ -23,11 +23,11 @@
   class="add btn"
   title="إضافة رصيد"
   command="show-modal"
-  commandfor="add-qty-{item.stock_id}">
+  commandfor="add-qty-{item.id}">
   <AddIcon size="1rem" />
 </button>
 
-<Dialog id="add-qty-{item.stock_id}">
+<Dialog id="add-qty-{item.id}">
   <h2>{item.name}</h2>
   <h3>{item.pharmacy_name}</h3>
 
