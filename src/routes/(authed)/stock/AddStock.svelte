@@ -1,6 +1,4 @@
 <script lang="ts">
-  import AddIcon from "@lucide/svelte/icons/circle-plus";
-
   import Dialog from "$lib/components/Dialog.svelte";
   import { addStock, type getPharmacyStock } from "./stock.remote";
   import { toast } from "svelte-sonner";
@@ -13,26 +11,14 @@
 
   const { item }: PropsT = $props();
 
-  const formName = $derived(`add-${item.id}-${item.stock_id}`);
-
   let dialog: HTMLDialogElement | undefined = $state();
 </script>
 
-<button
-  type="button"
-  class="add btn"
-  title="إضافة رصيد"
-  command="show-modal"
-  commandfor="add-qty-{item.id}">
-  <AddIcon size="1rem" />
-</button>
-
-<Dialog id="add-qty-{item.id}">
+<Dialog id="add-stock">
   <h2>{item.name}</h2>
-  <h3>{item.pharmacy_name}</h3>
 
   <form
-    {...addStock.for(formName).enhance(async (form) => {
+    {...addStock.enhance(async (form) => {
       const { promise, resolve, reject } = Promise.withResolvers();
 
       toast.promise(promise as Promise<typeof form.result>, {
@@ -55,10 +41,8 @@
       dialog?.close();
     })}>
     <AuthzFilter>
-      <label for="add-pharmacy-id-{item.id}">الصيدلية</label>
-      <select
-        id="add-pharmacy-id-{item.id}"
-        {...addStock.for(formName).fields.pharmacy_id.as("select")}>
+      <label for="add-pharmacy-id">الصيدلية</label>
+      <select id="add-pharmacy-id" {...addStock.fields.pharmacy_id.as("select")}>
         {#each await getDepartments() as dep, i (i)}
           <option value={String(dep.id)} disabled={item.pharmacy_id === dep.id}
             >{dep.name}</option>
@@ -66,34 +50,22 @@
       </select>
     </AuthzFilter>
 
-    <input {...addStock.for(formName).fields.drug_id.as("hidden", item.id)} />
+    <input {...addStock.fields.drug_id.as("hidden", item.id)} />
 
-    <label for="add-qty-{item.id}">الرصيد</label>
-    <input
-      {...addStock.for(formName).fields.qty.as("number", 0)}
-      id="add-qty-{item.id}" />
+    <label for="add-qty">الرصيد</label>
+    <input {...addStock.fields.qty.as("number", 0)} id="add-qty" />
 
-    <label for="add-batch-{item.id}">التشغيلة</label>
-    <input
-      {...addStock.for(formName).fields.batch_number.as("text", "")}
-      id="add-batch-{item.id}" />
+    <label for="add-batch">التشغيلة</label>
+    <input {...addStock.fields.batch_number.as("text", "")} id="add-batch" />
 
-    <label for="add-expiry-{item.id}">الصلاحية</label>
-    <input
-      {...addStock.for(formName).fields.expiry_date.as("date", "")}
-      id="add-expiry-{item.id}" />
+    <label for="add-expiry">الصلاحية</label>
+    <input {...addStock.fields.expiry_date.as("date", "")} id="add-expiry" />
 
     <input type="submit" class="btn" value="حفظ" />
   </form>
 </Dialog>
 
 <style>
-  .add.btn {
-    --bg: green;
-    height: 1.5rem;
-    margin-inline-start: 0.5rem;
-  }
-
   form {
     display: grid;
     grid-template-columns: 1fr 3fr;

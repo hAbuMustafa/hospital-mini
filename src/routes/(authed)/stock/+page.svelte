@@ -4,8 +4,13 @@
   import { formatDate } from "$lib/date/utils";
   import AddStock from "./AddStock.svelte";
   import EditStock from "./EditStock.svelte";
+  import EditIcon from "@lucide/svelte/icons/square-pen";
+  import AddIcon from "@lucide/svelte/icons/circle-plus";
 
   const stock = $derived(await getPharmacyStock());
+
+  let selectedItemForAddition: (typeof stock)[0] | undefined = $derived(stock[0]);
+  let selectedItemForEdit: (typeof stock)[0] | undefined = $derived(stock[0]);
 </script>
 
 <table>
@@ -44,12 +49,28 @@
           <AuthzFilter allowRole={["*-ph-manager"]}>
             <td>
               {#if item.qty !== null}
-                <EditStock {item} />
+                <button
+                  type="button"
+                  class="edit btn"
+                  title="تعديل"
+                  command="show-modal"
+                  commandfor="edit-stock"
+                  onclick={() => (selectedItemForEdit = item)}>
+                  <EditIcon size="1rem" />
+                </button>
               {/if}
             </td>
 
             <td>
-              <AddStock {item} />
+              <button
+                type="button"
+                class="add btn"
+                title="إضافة رصيد"
+                command="show-modal"
+                commandfor="add-stock"
+                onclick={() => (selectedItemForAddition = item)}>
+                <AddIcon size="1rem" />
+              </button>
             </td>
           </AuthzFilter>
         </tr>
@@ -62,10 +83,27 @@
   </tbody>
 </table>
 
+<AuthzFilter allowRole={["*-ph-manager"]}>
+  <EditStock item={selectedItemForEdit} />
+  <AddStock item={selectedItemForAddition} />
+</AuthzFilter>
+
 <style>
   th,
   td {
     border: var(--main-border);
     padding: 0.25rem 0.5rem;
+  }
+
+  .edit.btn {
+    --bg: gold;
+    height: 1.5rem;
+    margin-inline-start: 0.5rem;
+  }
+
+  .add.btn {
+    --bg: green;
+    height: 1.5rem;
+    margin-inline-start: 0.5rem;
   }
 </style>
