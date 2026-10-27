@@ -57,16 +57,14 @@
       }
       if (e.key === "Escape") matches = [];
     }}
-    {...rest}
-  />
+    {...rest} />
   {#if matches.length}
     <ul
       class="match-list"
       bind:this={resultsNode}
       {@attach useComboboxKeyboardNavigation(inputNode, resultsNode!)}
-      {@attach returnToInputAfterSelection(inputNode)}
-    >
-      {#each matches as item (item.id)}
+      {@attach returnToInputAfterSelection(inputNode)}>
+      {#each matches as item, indx (indx)}
         <li>
           {@render itemSnippet(item)}
         </li>
