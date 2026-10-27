@@ -2,6 +2,7 @@ import { form, getRequestEvent, query } from "$app/server";
 import { isNarcotic, unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
 import {
+  departments,
   drugs,
   patientAdmissions,
   patients_view,
@@ -74,10 +75,15 @@ export const getItemLastDispensed = query(
   }
 );
 
+const departmentsIds = await db
+  .select()
+  .from(departments)
+  .then((deps) => deps.map((dep) => String(dep.id)));
+
 export const postTicket = form(
   v.object({
     patientId: v.pipe(v.string(), v.nonEmpty()),
-    department: v.optional(v.number()),
+    department: v.optional(v.picklist(departmentsIds)),
 
     drugs: v.array(
       v.object({
@@ -90,6 +96,7 @@ export const postTicket = form(
     ),
   }),
   async (data, issue) => {
+    console.info(data);
     const hasInvalidBoxQt = data.drugs.findIndex((d) =>
       unacceptedAmount(d.item_id, d.qty)
     );
@@ -122,7 +129,7 @@ export const postTicket = form(
             patient_id: data.patientId,
             store_id:
               currentUser?.role === "admin"
-                ? data.department!
+                ? Number(data.department!)
                 : currentUser?.affiliation!,
             user_id: currentUser?.id!,
             is_dispense: true,

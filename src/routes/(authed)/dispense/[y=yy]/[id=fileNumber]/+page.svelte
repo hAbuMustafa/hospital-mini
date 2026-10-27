@@ -319,9 +319,11 @@
     </table>
 
     {#if authState.user?.role === "admin"}
-      <select {...postTicket.fields.department} bind:value={selectedPharmacy}>
+      <select
+        {...postTicket.fields.department.as("select")}
+        bind:value={selectedPharmacy}>
         {#each await getDepartments() as dep, i (dep.id)}
-          <option value={dep.id}>{dep.name}</option>
+          <option value={String(dep.id)}>{dep.name}</option>
         {/each}
       </select>
     {/if}
