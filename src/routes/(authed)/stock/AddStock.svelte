@@ -66,6 +66,8 @@
       </select>
     </AuthzFilter>
 
+    <input {...addStock.for(formName).fields.drug_id.as("hidden", item.id)} />
+
     <label for="add-qty-{item.id}">الرصيد</label>
     <input
       {...addStock.for(formName).fields.qty.as("number", 0)}
