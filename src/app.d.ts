@@ -15,7 +15,6 @@ declare global {
     // interface Platform {}
   }
 
-  type DrugT = typeof drugs.$inferSelect;
   type PatientT = typeof patients_view.$inferSelect;
 }
 
