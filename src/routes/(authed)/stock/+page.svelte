@@ -9,8 +9,8 @@
 
   const stock = $derived(await getPharmacyStock());
 
-  let selectedItemForAddition: (typeof stock)[0] | undefined = $derived(stock[0]);
-  let selectedItemForEdit: (typeof stock)[0] | undefined = $derived(stock[0]);
+  let selectedItemForAddition: (typeof stock)[0] = $derived(stock[0]);
+  let selectedItemForEdit: (typeof stock)[0] = $derived(stock[0]);
 </script>
 
 <table>
