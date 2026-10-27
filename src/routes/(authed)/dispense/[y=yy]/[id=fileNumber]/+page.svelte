@@ -23,6 +23,8 @@
   import { getDepartments } from "../../../(admin)/admin.remote";
   import { queryDrugFromStock } from "../../../query.remote";
 
+  type DrugItem = Awaited<ReturnType<typeof queryDrugFromStock>>[0];
+
   const patientId = `${page.params.y}/${page.params.id}`;
 
   const isForNonRegisteredPatient = page.params.id === "0";
@@ -46,12 +48,12 @@
 
   let ticketItemsBody: HTMLElement | undefined = $state();
 
-  let ticketDrugs: (DrugT & {
+  let ticketDrugs: (DrugItem & {
     amount: number;
     lastDispensed: Awaited<ReturnType<typeof getItemLastDispensed>> | null;
   })[] = $state([]);
 
-  async function selectDrug(item: DrugT) {
+  async function selectDrug(item: DrugItem) {
     const foundItemIndexInList = ticketDrugs.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
       ticketDrugs[foundItemIndexInList].amount++;
@@ -134,11 +136,11 @@
   <div class="item-controls-wrapper">
     <Combobox
       bind:query={drugQuery}
-      filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
+      filterFn={(d: DrugItem) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
       endpoint={queryDrugFromStock}
       placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-      onSelect={(drug: DrugT) => selectDrug(drug)}>
-      {#snippet itemSnippet(drug: DrugT & { qty: number | null })}
+      onSelect={(drug: DrugItem) => selectDrug(drug)}>
+      {#snippet itemSnippet(drug: DrugItem)}
         <button
           type="button"
           class="drug-select"
