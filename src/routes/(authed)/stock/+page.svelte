@@ -1,41 +1,46 @@
 <script lang="ts">
-  import AuthzFilter from "$lib/components/AuthzFilter.svelte";
   import { getPharmacyStock } from "./stock.remote";
   import { formatDate } from "$lib/date/utils";
   import AddStock from "./AddStock.svelte";
   import EditStock from "./EditStock.svelte";
   import EditIcon from "@lucide/svelte/icons/square-pen";
   import AddIcon from "@lucide/svelte/icons/circle-plus";
+  import { authState } from "$lib/auth-client/auth.svelte";
 
   const stock = $derived(await getPharmacyStock());
 
   let selectedItemForAddition: (typeof stock)[0] = $derived(stock[0]);
   let selectedItemForEdit: (typeof stock)[0] = $derived(stock[0]);
+
+  const isAdmin = authState.user?.role === "admin";
+  const isPharmacyManager = isAdmin || authState.user?.role?.includes("-ph-manager");
 </script>
 
 <table>
   <thead>
     <tr>
-      <AuthzFilter>
+      {#if isAdmin}
         <th>الصيدلية</th>
-      </AuthzFilter>
+      {/if}
+
       <th>اسم الصنف</th>
       <th>الرصيد</th>
       <th>التشغيلة</th>
       <th>الصلاحية</th>
-      <AuthzFilter allowRole={["*-ph-manager"]}>
+      {#if isPharmacyManager}
         <th>تعديل</th>
         <th>إضافة</th>
-      </AuthzFilter>
+      {/if}
     </tr>
   </thead>
   <tbody>
     {#if stock.length}
       {#each stock as item, i (i)}
         <tr>
-          <AuthzFilter>
+          {#if isAdmin}
             <td>{item.pharmacy_name}</td>
-          </AuthzFilter>
+          {/if}
+
           <td>{item.name}</td>
           <td>
             {item.qty ?? 0}
@@ -46,7 +51,8 @@
               {formatDate(item.expiry_date)}
             {/if}
           </td>
-          <AuthzFilter allowRole={["*-ph-manager"]}>
+
+          {#if isPharmacyManager}
             <td>
               {#if item.qty !== null}
                 <button
@@ -72,7 +78,7 @@
                 <AddIcon size="1rem" />
               </button>
             </td>
-          </AuthzFilter>
+          {/if}
         </tr>
       {/each}
     {:else}
@@ -83,10 +89,10 @@
   </tbody>
 </table>
 
-<AuthzFilter allowRole={["*-ph-manager"]}>
+{#if isPharmacyManager}
   <EditStock item={selectedItemForEdit} />
   <AddStock item={selectedItemForAddition} />
-</AuthzFilter>
+{/if}
 
 <style>
   th,
