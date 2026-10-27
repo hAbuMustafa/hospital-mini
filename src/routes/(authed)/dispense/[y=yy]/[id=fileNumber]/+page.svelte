@@ -239,6 +239,13 @@
               </td>
               <td>
                 <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
+                {#if drug.stock_id}
+                  <input
+                    {...postTicket.fields.drugs[i].stock_id.as(
+                      "hidden",
+                      drug.stock_id
+                    )} />
+                {/if}
                 <input
                   {...postTicket.fields.drugs[i].item_name.as("hidden", drug.name_ar!)} />
                 <input

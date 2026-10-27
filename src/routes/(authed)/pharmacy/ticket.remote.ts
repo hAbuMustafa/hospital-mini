@@ -88,6 +88,7 @@ export const postTicket = form(
     drugs: v.array(
       v.object({
         item_id: v.number(),
+        stock_id: v.optional(v.number()),
         item_name: v.string(),
         category: v.string(),
         qty: v.number(),
@@ -96,7 +97,6 @@ export const postTicket = form(
     ),
   }),
   async (data, issue) => {
-    console.info(data);
     const hasInvalidBoxQt = data.drugs.findIndex((d) =>
       unacceptedAmount(d.item_id, d.qty)
     );
@@ -121,6 +121,8 @@ export const postTicket = form(
 
     const currentUser = getRequestEvent().locals.user;
 
+    // todo: check if stock item is related to user
+
     const { ticket: insertedTicket, ticketItems: insertedItems } = await db.transaction(
       async (tx) => {
         const [ticket] = await tx
@@ -140,6 +142,8 @@ export const postTicket = form(
           .insert(transactions)
           .values(data.drugs.map((d) => ({ ...d, ticket_id: ticket.id })))
           .returning();
+
+        // todo: subtract from stock (USE UPSERT)
 
         return { ticket, ticketItems };
       }
