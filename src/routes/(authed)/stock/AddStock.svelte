@@ -13,7 +13,7 @@
 
   const { item }: PropsT = $props();
 
-  const formName = $derived(`add-${item.id}`);
+  const formName = $derived(`add-${item.id}-${item.stock_id}`);
 
   let dialog: HTMLDialogElement | undefined = $state();
 </script>
