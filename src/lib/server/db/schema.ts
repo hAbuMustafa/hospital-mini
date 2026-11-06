@@ -93,7 +93,7 @@ export const stockDrugTransferTicket = sqliteTable("stockDrugTransferTicket", {
   user_id: text().notNull(),
 });
 
-export const stockDrugTransfer = sqliteTable("stockDrugTransfer", {
+export const stockDrugTransferItems = sqliteTable("stockDrugTransferItems", {
   id: int().primaryKey({ autoIncrement: true }),
   ticket_id: int().references(() => stockDrugTransferTicket.id),
   stock_id: int()
@@ -105,7 +105,7 @@ export const stockDrugTransfer = sqliteTable("stockDrugTransfer", {
 export const stockDrugTransferStatus = sqliteTable("stockDrugTransferStatus", {
   id: int().primaryKey({ autoIncrement: true }),
   transfer_id: int()
-    .references(() => stockDrugTransfer.id)
+    .references(() => stockDrugTransferItems.id)
     .notNull(),
   is_accepted: int({ mode: "boolean" }).notNull(),
   timestamp: int({ mode: "timestamp" }).notNull(),
