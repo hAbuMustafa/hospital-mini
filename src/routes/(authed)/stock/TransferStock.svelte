@@ -126,7 +126,14 @@
                 {formatDate(item.expiry_date, "YYYY/MM/DD")}
               {/if}
             </td>
-            <td>{item.unit_price?.toFixed(3)}</td>
+            <td>
+              {item.unit_price?.toFixed(3)}
+              <input
+                {...transferStock.fields.items[i].unit_price.as(
+                  "hidden",
+                  item.unit_price!
+                )} />
+            </td>
             <td
               >{(item.unit_price! * (quantities.get(item.stock_id!) ?? 0)).toFixed(
                 3

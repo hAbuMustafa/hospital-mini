@@ -152,6 +152,7 @@ export const transferStock = form(
     items: v.array(
       v.object({
         stock_id: v.number(),
+        unit_price: v.number(),
         qty: v.number(),
       })
     ),
@@ -201,6 +202,7 @@ export const transferStock = form(
         data.items.map((item) => ({
           ticket_id: ticket.id,
           stock_id: item.stock_id,
+          unit_price: item.unit_price,
           qty: item.qty,
         }))
       );

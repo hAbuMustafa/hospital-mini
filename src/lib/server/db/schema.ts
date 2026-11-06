@@ -101,6 +101,7 @@ export const stockDrugTransferItems = sqliteTable("stockDrugTransferItems", {
   stock_id: int()
     .references(() => stockDrugs.id)
     .notNull(),
+  unit_price: real().notNull(),
   qty: int().notNull(),
 });
 
