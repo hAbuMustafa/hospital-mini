@@ -1,8 +1,14 @@
 import { form, getRequestEvent, query } from "$app/server";
 import { db } from "$lib/server/db";
-import { departments, drugs, stockDrugs } from "$lib/server/db/schema";
+import {
+  departments,
+  drugs,
+  stockDrugs,
+  stockDrugTransferItems,
+  stockDrugTransferTicket,
+} from "$lib/server/db/schema";
 import { invalid } from "@sveltejs/kit";
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import * as v from "valibot";
 
 export const getPharmacyStock = query(async () => {
@@ -20,6 +26,7 @@ export const getPharmacyStock = query(async () => {
       qty: stockDrugs.qty,
       batch_number: stockDrugs.batch_number,
       expiry_date: stockDrugs.expiry_date,
+      unit_price: drugs.price,
     })
     .from(drugs)
     .leftJoin(stockDrugs, eq(drugs.id, stockDrugs.drug_id))
@@ -135,5 +142,90 @@ export const addStock = form(
     }
 
     void getPharmacyStock().refresh();
+  }
+);
+
+export const transferStock = form(
+  v.object({
+    record_id: v.number(),
+    to_pharmacy_id: v.picklist(departmentsIds),
+    items: v.array(
+      v.object({
+        stock_id: v.number(),
+        qty: v.number(),
+      })
+    ),
+  }),
+  async (data, issue) => {
+    const currentUser = getRequestEvent().locals.user!;
+
+    const stockItems = await db
+      .select()
+      .from(stockDrugs)
+      .where(
+        inArray(
+          stockDrugs.id,
+          data.items.map((item) => item.stock_id)
+        )
+      );
+
+    if (stockItems.length < data.items.length) {
+      invalid(issue.items("بعض الأصناف لا تخص جهتك"));
+    }
+
+    for (let i = 0; i < data.items.length; i++) {
+      const subtractedAmount = data.items[i].qty;
+      const stockAmount = stockItems.find(
+        (item) => item.id === data.items[i].stock_id
+      )!.qty;
+
+      if (subtractedAmount > stockAmount) {
+        invalid(
+          issue.items[i].qty(`الكمية المحولة أكبر من الرصيد الحالي (${stockAmount})`)
+        );
+      }
+    }
+
+    const transferTicketId = await db.transaction(async (tx) => {
+      const [ticket] = await tx
+        .insert(stockDrugTransferTicket)
+        .values({
+          to_pharmacy_id: Number(data.to_pharmacy_id),
+          user_id: currentUser.id,
+          record_id: data.record_id,
+        })
+        .returning();
+
+      // insert transfer items
+      await tx.insert(stockDrugTransferItems).values(
+        data.items.map((item) => ({
+          ticket_id: ticket.id,
+          stock_id: item.stock_id,
+          qty: item.qty,
+        }))
+      );
+
+      // subtract transferred items qty from current stock
+      await tx
+        .insert(stockDrugs)
+        .values(
+          data.items.map((item) => ({
+            id: item.stock_id,
+            qty: -item.qty,
+            // arbitrary numbers for required column because we only need the `on conflict` clause
+            drug_id: 0,
+            pharmacy_id: 0,
+          }))
+        )
+        .onConflictDoUpdate({
+          target: stockDrugs.id,
+          set: {
+            qty: sql`qty + excluded.qty`,
+          },
+        });
+      return ticket.id;
+    });
+
+    return { success: true, transferTicketId };
   }
 );

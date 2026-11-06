@@ -5,15 +5,24 @@
   import EditStock from "./EditStock.svelte";
   import EditIcon from "@lucide/svelte/icons/square-pen";
   import AddIcon from "@lucide/svelte/icons/circle-plus";
+  import AddToTransferIcon from "@lucide/svelte/icons/arrow-big-left-dash";
+  import RemoveFromTransferIcon from "@lucide/svelte/icons/square-x";
   import { authState } from "$lib/auth-client/auth.svelte";
+  import { SvelteSet } from "svelte/reactivity";
+  import TransferStock from "./TransferStock.svelte";
+  import { toast } from "svelte-sonner";
 
   const stock = $derived(await getPharmacyStock());
 
-  let selectedItemForAddition: (typeof stock)[0] = $derived(stock[0]);
-  let selectedItemForEdit: (typeof stock)[0] = $derived(stock[0]);
+  type StockItemT = Awaited<ReturnType<typeof getPharmacyStock>>[number];
+
+  let selectedItemForAddition: StockItemT = $derived(stock[0]);
+  let selectedItemForEdit: StockItemT = $derived(stock[0]);
 
   const isAdmin = authState.user?.role === "admin";
   const isPharmacyManager = isAdmin || authState.user?.role?.includes("-ph-manager");
+
+  let transferItems = $state(new SvelteSet<StockItemT>());
 </script>
 
 <h1>
@@ -38,6 +47,7 @@
         <th>تعديل</th>
         <th>إضافة</th>
       {/if}
+      <th>تحويل</th>
     </tr>
   </thead>
   <tbody>
@@ -86,6 +96,40 @@
               </button>
             </td>
           {/if}
+          <td>
+            {#if transferItems.has(item)}
+              <button
+                type="button"
+                class="remove btn"
+                title="حذف من طلبية التحويل"
+                onclick={() => {
+                  transferItems.delete(item);
+                }}>
+                <RemoveFromTransferIcon size="1rem" />
+              </button>
+            {:else}
+              {#if item.qty}
+                <button
+                  type="button"
+                  class="add btn"
+                  title="إضافة إلى طلبية تحويل"
+                  onclick={() => {
+                    if (transferItems.size) {
+                      const [firstItem] = transferItems;
+                      if (firstItem && firstItem.pharmacy_id !== item.pharmacy_id) {
+                        toast.error(
+                          "يمكن التحويل من رصيد جهة واحدة فقط في الطلبية الواحدة"
+                        );
+                        return;
+                      }
+                    }
+                    transferItems.add(item);
+                  }}>
+                  <AddToTransferIcon size="1rem" />
+                </button>
+              {/if}
+            {/if}
+          </td>
         </tr>
       {/each}
     {:else}
@@ -101,6 +145,10 @@
   <AddStock item={selectedItemForAddition} />
 {/if}
 
+{#if stock.length && transferItems.size}
+  <TransferStock bind:items={transferItems} pharmacyId={stock[0].pharmacy_id!} />
+{/if}
+
 <style>
   th,
   td {
@@ -108,15 +156,20 @@
     padding: 0.25rem 0.5rem;
   }
 
-  .edit.btn {
-    --bg: gold;
+  .btn {
     height: 1.5rem;
     margin-inline-start: 0.5rem;
   }
 
+  .edit.btn {
+    --bg: gold;
+  }
+
   .add.btn {
     --bg: green;
-    height: 1.5rem;
-    margin-inline-start: 0.5rem;
+  }
+
+  .remove.btn {
+    --bg: maroon;
   }
 </style>
