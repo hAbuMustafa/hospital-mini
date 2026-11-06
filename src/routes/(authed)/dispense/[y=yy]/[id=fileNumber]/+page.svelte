@@ -238,7 +238,7 @@
                 </button>
               </td>
               <td>
-                <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
+                <input {...postTicket.fields.drugs[i].drug_id.as("hidden", drug.id)} />
                 {#if drug.stock_id}
                   <input
                     {...postTicket.fields.drugs[i].stock_id.as(
@@ -247,7 +247,7 @@
                     )} />
                 {/if}
                 <input
-                  {...postTicket.fields.drugs[i].item_name.as("hidden", drug.name_ar!)} />
+                  {...postTicket.fields.drugs[i].drug_name.as("hidden", drug.name_ar!)} />
                 <input
                   {...postTicket.fields.drugs[i].category.as("hidden", drug.category!)} />
                 <label for="amount-{drug.id}" title={drug.tradename_ar}>

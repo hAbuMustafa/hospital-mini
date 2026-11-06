@@ -7,6 +7,7 @@ import {
   patientAdmissions,
   patients_view,
   status,
+  stockDrugs,
   transactions,
   transactionTickets,
   unsyncedNarcotics,
@@ -87,9 +88,9 @@ export const postTicket = form(
 
     drugs: v.array(
       v.object({
-        item_id: v.number(),
+        drug_id: v.number(),
+        drug_name: v.string(),
         stock_id: v.optional(v.number()),
-        item_name: v.string(),
         category: v.string(),
         qty: v.number(),
         unit_price: v.number(),
@@ -98,7 +99,7 @@ export const postTicket = form(
   }),
   async (data, issue) => {
     const hasInvalidBoxQt = data.drugs.findIndex((d) =>
-      unacceptedAmount(d.item_id, d.qty)
+      unacceptedAmount(d.drug_id, d.qty)
     );
     if (hasInvalidBoxQt > -1) {
       invalid(issue.drugs[hasInvalidBoxQt]("الصنف يصرف بالعلبة وليس بالوحدة الصغرى"));
@@ -121,7 +122,25 @@ export const postTicket = form(
 
     const currentUser = getRequestEvent().locals.user;
 
-    // todo: check if stock item is related to user
+    const havingStockIds = data.drugs.filter((d) => d.stock_id).map((d) => d.stock_id!);
+
+    if (havingStockIds.length) {
+      const stockItems = await db
+        .select()
+        .from(stockDrugs)
+        .where(
+          and(
+            currentUser?.role === "admin"
+              ? undefined
+              : eq(stockDrugs.pharmacy_id, currentUser?.affiliation!),
+            inArray(stockDrugs.id, havingStockIds)
+          )
+        );
+
+      if (stockItems.length < havingStockIds.length) {
+        invalid(issue.drugs("بعض الأصناف لا تخص جهتك"));
+      }
+    }
 
     const { ticket: insertedTicket, ticketItems: insertedItems } = await db.transaction(
       async (tx) => {
@@ -140,7 +159,9 @@ export const postTicket = form(
 
         const ticketItems = await tx
           .insert(transactions)
-          .values(data.drugs.map((d) => ({ ...d, ticket_id: ticket.id })))
+          .values(
+            data.drugs.map((d) => ({ ...d, ticket_id: ticket.id, item_id: d.drug_id }))
+          )
           .returning();
 
         // todo: subtract from stock (USE UPSERT)
@@ -154,7 +175,7 @@ export const postTicket = form(
         insertedTicket.timestamp!,
         insertedTicket.patient_id!,
         null,
-        data.drugs[0].item_name,
+        data.drugs[0].drug_name,
         data.drugs[0].qty,
       ]);
 
@@ -168,7 +189,7 @@ export const postTicket = form(
           ticket_id: insertedTicket.id,
           ticket_timestamp: insertedTicket.timestamp!,
           patient_id: insertedTicket.patient_id!,
-          item_name: data.drugs[0].item_name,
+          item_name: data.drugs[0].drug_name,
           qty: insertedItems[0].qty,
         });
 
