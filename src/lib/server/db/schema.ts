@@ -95,7 +95,9 @@ export const stockDrugTransferTicket = sqliteTable("stockDrugTransferTicket", {
 
 export const stockDrugTransferItems = sqliteTable("stockDrugTransferItems", {
   id: int().primaryKey({ autoIncrement: true }),
-  ticket_id: int().references(() => stockDrugTransferTicket.id),
+  ticket_id: int()
+    .references(() => stockDrugTransferTicket.id)
+    .notNull(),
   stock_id: int()
     .references(() => stockDrugs.id)
     .notNull(),
