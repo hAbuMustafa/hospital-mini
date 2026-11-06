@@ -88,6 +88,8 @@
                 item.item_unit_price!
               )} />
             <input
+              {...returnItems.fields.items[i].stockId.as("hidden", item.stock_id!)} />
+            <input
               {...returnItems.fields.items[i].transactionId.as(
                 "hidden",
                 item.transaction_id!

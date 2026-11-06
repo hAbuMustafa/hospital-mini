@@ -346,6 +346,7 @@ export const getTicketForReturn = query(v.number(), async (ticketNumber) => {
       item_unit_price: drugs.price,
       qty: transactions.qty,
       qty_returned: transactions.qty_returned,
+      stock_id: transactions.stock_id,
       is_dispense: transactionTickets.is_dispense,
     })
     .from(transactionTickets)
@@ -377,6 +378,7 @@ export const returnItems = form(
         itemId: v.number(),
         itemUnitPrice: v.number(),
         transactionId: v.number(),
+        stockId: v.optional(v.number()),
         returnedAmount: v.optional(v.number()),
       })
     ),
@@ -419,6 +421,7 @@ export const returnItems = form(
             item_id: item.itemId,
             unit_price: item.itemUnitPrice,
             qty: item.returnedAmount!,
+            stock_id: item.stockId,
           }))
         );
 
@@ -430,6 +433,23 @@ export const returnItems = form(
             })
             .where(eq(transactions.id, item.transactionId));
         }
+
+        await tx
+          .insert(stockDrugs)
+          .values(
+            data.items.map((d) => ({
+              id: d.stockId,
+              pharmacy_id: originalTicket.store_id,
+              drug_id: d.itemId,
+              qty: d.returnedAmount,
+            }))
+          )
+          .onConflictDoUpdate({
+            target: stockDrugs.id,
+            set: {
+              qty: sql`qty + excluded.qty`,
+            },
+          });
 
         return {
           success: true,
