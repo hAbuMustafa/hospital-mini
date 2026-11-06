@@ -16,6 +16,7 @@ import {
   departments,
   user,
   session,
+  department_group,
 } from "$lib/server/db/schema";
 import { getSheetRange, getSheetRanges } from "$lib/server/gcp/sheets";
 import {
@@ -25,7 +26,7 @@ import {
   drugRowToObject,
   narcoticDispenseRowToObject,
 } from "$lib/server/gcp/utils";
-import { eq, getTableColumns, ne, sql } from "drizzle-orm";
+import { eq, getTableColumns, like, ne, sql } from "drizzle-orm";
 import { reportSheetFetch, reportSheetMultiFetch } from "$lib/server/db/utils";
 import { formatDate, getDuration, getTermed } from "$lib/date/utils";
 import * as v from "valibot";
@@ -33,6 +34,22 @@ import { invalid } from "@sveltejs/kit";
 
 export const getDepartments = query(async () => {
   return await db.select().from(departments);
+});
+
+export const getStockDepartments = query(async () => {
+  return await db
+    .select({ ...getTableColumns(departments) })
+    .from(departments)
+    .leftJoin(department_group, eq(departments.department_group_id, department_group.id))
+    .where(eq(department_group.has_stock, true));
+});
+
+export const getPharmacies = query(async () => {
+  return await db.select().from(departments).where(like(departments.name, "صيدلية%"));
+});
+
+export const getWarehouses = query(async () => {
+  return await db.select().from(departments).where(like(departments.name, "مخزن%"));
 });
 
 export const getUsers = query(async () => {
