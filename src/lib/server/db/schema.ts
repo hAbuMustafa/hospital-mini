@@ -83,20 +83,32 @@ export const stockDrugs = sqliteTable(
   ]
 );
 
-export const stockDrugTransfer = sqliteTable("stockDrugTransfer", {
+export const stockDrugTransferTicket = sqliteTable("stockDrugTransferTicket", {
   id: int().primaryKey({ autoIncrement: true }),
   timestamp: int({ mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
+  to_pharmacy_id: int().notNull(),
+  user_id: text().notNull(),
+});
+
+export const stockDrugTransfer = sqliteTable("stockDrugTransfer", {
+  id: int().primaryKey({ autoIncrement: true }),
+  ticket_id: int().references(() => stockDrugTransferTicket.id),
   stock_id: int()
     .references(() => stockDrugs.id)
     .notNull(),
-  to_pharmacy_id: int().notNull(),
-  user_id: text().notNull(),
   qty: int().notNull(),
+});
 
-  received_at: int({ mode: "timestamp" }),
-  received_by: text(),
+export const stockDrugTransferStatus = sqliteTable("stockDrugTransferStatus", {
+  id: int().primaryKey({ autoIncrement: true }),
+  transfer_id: int()
+    .references(() => stockDrugTransfer.id)
+    .notNull(),
+  is_accepted: int({ mode: "boolean" }).notNull(),
+  timestamp: int({ mode: "timestamp" }).notNull(),
+  user_id: text().notNull(),
 });
 
 export const transactionTickets = sqliteTable("transactionTickets", {
