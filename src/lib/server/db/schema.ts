@@ -85,6 +85,7 @@ export const stockDrugs = sqliteTable(
 
 export const stockDrugTransferTicket = sqliteTable("stockDrugTransferTicket", {
   id: int().primaryKey({ autoIncrement: true }),
+  record_id: int(), // رقم الطلبية في السركي
   timestamp: int({ mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

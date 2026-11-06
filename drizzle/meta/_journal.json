@@ -274,6 +274,13 @@
       "when": 1793972526115,
       "tag": "0038_small_jetstream",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "6",
+      "when": 1793972983696,
+      "tag": "0039_mean_shatterstar",
+      "breakpoints": true
     }
   ]
 }
