@@ -4,12 +4,12 @@
   import { getPendingTransfers } from "../stock.remote";
   import { authState } from "$lib/auth-client/auth.svelte";
 
-  const pendingTransfers = $derived(await getPendingTransfers());
+  const transfers = $derived(await getPendingTransfers());
 </script>
 
 <h1>استلام وارد</h1>
 
-{#if pendingTransfers.length}
+{#if transfers.length}
   <table>
     <thead>
       <tr>
@@ -24,7 +24,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each pendingTransfers as transfer, i (transfer.id)}
+      {#each transfers as transfer, i (transfer.id)}
         <tr
           class:incoming={transfer.to_pharmacy_id === authState.user?.affiliation}
           class:outgoing={transfer.from_pharmacy_id === authState.user?.affiliation}>
