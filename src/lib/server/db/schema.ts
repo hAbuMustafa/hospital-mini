@@ -99,6 +99,7 @@ export const transactionTickets = sqliteTable("transactionTickets", {
 export const transactions = sqliteTable("transactions", {
   id: int().primaryKey({ autoIncrement: true }),
   item_id: int().notNull(),
+  stock_id: int(),
   qty: int().notNull(),
   qty_returned: int().notNull().default(0),
   qty_remaining: int().generatedAlwaysAs(() => sql`qty - qty_returned`, {

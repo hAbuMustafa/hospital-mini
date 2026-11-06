@@ -253,6 +253,13 @@
       "when": 1792403080804,
       "tag": "0035_grey_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1793967848688,
+      "tag": "0036_worried_blue_blade",
+      "breakpoints": true
     }
   ]
 }
