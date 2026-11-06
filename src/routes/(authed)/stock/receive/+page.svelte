@@ -52,6 +52,7 @@
                 type="button"
                 class="btn"
                 style:--bg="green"
+                title="قبول الصنف"
                 onclick={() => {
                   // todo: fire accept command on `transfer.id`
                 }}>
@@ -65,6 +66,7 @@
                 type="button"
                 class="btn"
                 style:--bg="maroon"
+                title="رفض الصنف"
                 onclick={() => {
                   // todo: fire reject command on `transfer.id`
                 }}>
