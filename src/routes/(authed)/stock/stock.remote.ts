@@ -1,14 +1,16 @@
-import { form, getRequestEvent, query } from "$app/server";
+import { command, form, getRequestEvent, query } from "$app/server";
 import { db } from "$lib/server/db";
 import {
   departments,
   drugs,
   stockDrugs,
   stockDrugTransferItems,
+  stockDrugTransferStatus,
   stockDrugTransferTicket,
 } from "$lib/server/db/schema";
 import { invalid } from "@sveltejs/kit";
-import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import * as v from "valibot";
 
 export const getPharmacyStock = query(async () => {
@@ -37,6 +39,56 @@ export const getPharmacyStock = query(async () => {
         : eq(stockDrugs.pharmacy_id, currentUser.affiliation)
     )
     .orderBy((t) => [t.category, t.id]);
+});
+
+export const getPendingTransfers = query(async () => {
+  const currentUser = getRequestEvent().locals.user!;
+
+  const fromPharmacy = alias(departments, "d1");
+  const toPharmacy = alias(departments, "d2");
+
+  return await db
+    .select({
+      record_id: stockDrugTransferTicket.record_id,
+      ticket_id: stockDrugTransferTicket.id,
+      id: stockDrugTransferItems.id,
+
+      from_pharmacy_name: fromPharmacy.name,
+      from_pharmacy_id: fromPharmacy.id,
+
+      to_pharmacy_name: toPharmacy.name,
+      to_pharmacy_id: toPharmacy.id,
+
+      stock_id: stockDrugs.id,
+      drug_id: drugs.id,
+      drug_name: drugs.name_ar,
+
+      qty: stockDrugTransferItems.qty,
+      status: stockDrugTransferStatus.is_accepted,
+      status_time: stockDrugTransferStatus.timestamp,
+      status_by: stockDrugTransferStatus.user_id,
+    })
+    .from(stockDrugTransferItems)
+    .leftJoin(
+      stockDrugTransferTicket,
+      eq(stockDrugTransferItems.ticket_id, stockDrugTransferTicket.id)
+    )
+    .leftJoin(stockDrugs, eq(stockDrugTransferItems.stock_id, stockDrugs.id))
+    .leftJoin(toPharmacy, eq(stockDrugTransferTicket.to_pharmacy_id, toPharmacy.id))
+    .leftJoin(fromPharmacy, eq(stockDrugs.pharmacy_id, fromPharmacy.id))
+    .leftJoin(drugs, eq(stockDrugs.drug_id, drugs.id))
+    .leftJoin(
+      stockDrugTransferStatus,
+      eq(stockDrugTransferItems.id, stockDrugTransferStatus.transfer_id)
+    )
+    .where(
+      currentUser.role === "admin"
+        ? undefined
+        : or(
+            eq(toPharmacy.id, currentUser.affiliation!),
+            eq(fromPharmacy.id, currentUser.affiliation!)
+          )
+    );
 });
 
 export const editStock = form(
@@ -231,3 +283,19 @@ export const transferStock = form(
     return { success: true, transferTicketId };
   }
 );
+
+export const acceptTransferItem = command(v.number(), async (transferItemId) => {
+  // todo: implement command
+  // 1. check authorization
+  // 2. check if already fulfilled (accepted/rejected)
+  // 3. mark accepted
+  // 4. add stock to target store
+});
+
+export const rejectTransferItem = command(v.number(), async (transferItemId) => {
+  // todo: implement command
+  // 1. check authorization
+  // 2. check if already fulfilled (accepted/rejected)
+  // 3. mark rejected
+  // 4. return stock to original store
+});
