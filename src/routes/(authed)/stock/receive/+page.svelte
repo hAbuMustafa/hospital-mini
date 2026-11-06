@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CheckCheckIcon from "@lucide/svelte/icons/check-check";
+  import CheckIcon from "@lucide/svelte/icons/check";
   import RejectIcon from "@lucide/svelte/icons/x";
   import { getPendingTransfers } from "../stock.remote";
   import { authState } from "$lib/auth-client/auth.svelte";
@@ -55,7 +55,7 @@
                 onclick={() => {
                   // todo: fire accept command on `transfer.id`
                 }}>
-                <CheckCheckIcon size="1rem" />
+                <CheckIcon size="1rem" />
               </button>
             {/if}
           </td>
