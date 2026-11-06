@@ -83,6 +83,22 @@ export const stockDrugs = sqliteTable(
   ]
 );
 
+export const stockDrugTransfer = sqliteTable("stockDrugTransfer", {
+  id: int().primaryKey({ autoIncrement: true }),
+  timestamp: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  stock_id: int()
+    .references(() => stockDrugs.id)
+    .notNull(),
+  to_pharmacy_id: int().notNull(),
+  user_id: text().notNull(),
+  qty: int().notNull(),
+
+  received_at: int({ mode: "timestamp" }),
+  received_by: text(),
+});
+
 export const transactionTickets = sqliteTable("transactionTickets", {
   id: int().primaryKey({ autoIncrement: true }),
   timestamp: int({ mode: "timestamp" })
@@ -91,7 +107,6 @@ export const transactionTickets = sqliteTable("transactionTickets", {
   store_id: int().notNull(),
   user_id: text().notNull(),
   patient_id: text(),
-  entity: text(), // if it is a transfer from or to an other entity (not a dispense/return to/from a patient)
   is_dispense: int({ mode: "boolean" }).notNull(), // `true` for sale, `false` for returns
   return_on_ticket_id: int(), // if it is a return ticket, insert its id
 });
