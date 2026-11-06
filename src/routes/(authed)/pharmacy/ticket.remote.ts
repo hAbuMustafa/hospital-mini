@@ -142,33 +142,54 @@ export const postTicket = form(
       }
     }
 
-    const { ticket: insertedTicket, ticketItems: insertedItems } = await db.transaction(
-      async (tx) => {
-        const [ticket] = await tx
-          .insert(transactionTickets)
-          .values({
-            patient_id: data.patientId,
-            store_id:
+    const {
+      ticket: insertedTicket,
+      ticketItems: insertedItems,
+      stockAdded: affectedStock,
+    } = await db.transaction(async (tx) => {
+      const [ticket] = await tx
+        .insert(transactionTickets)
+        .values({
+          patient_id: data.patientId,
+          store_id:
+            currentUser?.role === "admin"
+              ? Number(data.department!)
+              : currentUser?.affiliation!,
+          user_id: currentUser?.id!,
+          is_dispense: true,
+        })
+        .returning();
+
+      const ticketItems = await tx
+        .insert(transactions)
+        .values(
+          data.drugs.map((d) => ({ ...d, ticket_id: ticket.id, item_id: d.drug_id }))
+        )
+        .returning();
+
+      const stockAdded = await tx
+        .insert(stockDrugs)
+        .values(
+          data.drugs.map((d) => ({
+            drug_id: d.drug_id,
+            qty: d.qty * -1,
+            id: d.stock_id,
+            pharmacy_id:
               currentUser?.role === "admin"
                 ? Number(data.department!)
                 : currentUser?.affiliation!,
-            user_id: currentUser?.id!,
-            is_dispense: true,
-          })
-          .returning();
+          }))
+        )
+        .onConflictDoUpdate({
+          target: stockDrugs.id,
+          set: {
+            qty: sql`qty + excluded.qty`,
+          },
+        })
+        .returning();
 
-        const ticketItems = await tx
-          .insert(transactions)
-          .values(
-            data.drugs.map((d) => ({ ...d, ticket_id: ticket.id, item_id: d.drug_id }))
-          )
-          .returning();
-
-        // todo: subtract from stock (USE UPSERT)
-
-        return { ticket, ticketItems };
-      }
-    );
+      return { ticket, ticketItems, stockAdded };
+    });
 
     if (hasNarcotics && insertedTicket.id) {
       const sheetPostResult = await saveNarcoticTicketToGoogleSheet(insertedTicket.id, [
