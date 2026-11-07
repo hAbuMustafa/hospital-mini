@@ -50,8 +50,8 @@
                 مرفوض
               {/if}
             </td>
-            <td>
-              {#if (authState.user?.role === "admin" || authState.user?.affiliation === transfer.to_pharmacy_id) && transfer.status === null}
+            {#if (authState.user?.role === "admin" || authState.user?.affiliation === transfer.to_pharmacy_id) && transfer.status === null}
+              <td>
                 <button
                   type="button"
                   class="btn"
@@ -62,10 +62,8 @@
                   }}>
                   <CheckIcon size="1rem" />
                 </button>
-              {/if}
-            </td>
-            <td>
-              {#if (authState.user?.role === "admin" || authState.user?.affiliation === transfer.to_pharmacy_id) && transfer.status === null}
+              </td>
+              <td>
                 <button
                   type="button"
                   class="btn"
@@ -76,8 +74,10 @@
                   }}>
                   <RejectIcon size="1rem" />
                 </button>
-              {/if}
-            </td>
+              </td>
+            {:else}
+              <td colspan="2">{transfer.status_by}</td>
+            {/if}
           </tr>
         {/each}
       </tbody>
