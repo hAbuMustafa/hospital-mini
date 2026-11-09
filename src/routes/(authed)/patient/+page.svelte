@@ -4,6 +4,7 @@
   import Female from "@lucide/svelte/icons/venus";
   import Inmate from "@lucide/svelte/icons/tally-5";
   import Student from "@lucide/svelte/icons/graduation-cap";
+  import Insured from "@lucide/svelte/icons/shield-user";
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
   import { getUnlinkedTickets } from "../pharmacy/ticket.remote.js";
@@ -115,7 +116,7 @@
           </td>
           <td>
             <span class="patient-card">
-              <span class="patient-name pii" class:insured={patient.insured}>
+              <span class="patient-name pii">
                 {#if query}
                   {@html patient.name?.replaceAll(
                     qRegex,
@@ -147,6 +148,11 @@
                 {#if patient.admission_notes?.includes("طالب")}
                   <span title="طالب">
                     <Student size="1em" />
+                  </span>
+                {/if}
+                {#if patient.insured}
+                  <span title="مؤمن عليه">
+                    <Insured color="orange" size="1em" />
                   </span>
                 {/if}
               </span>
@@ -271,17 +277,6 @@
               display: flex;
               justify-content: space-between;
               gap: 0.5rem;
-            }
-
-            .patient-name.insured::after {
-              content: "";
-              display: inline-block;
-              margin-inline-start: 4px;
-              border-radius: 50%;
-              background-color: orange;
-              width: 8px;
-              height: 8px;
-              vertical-align: super;
             }
           }
 
