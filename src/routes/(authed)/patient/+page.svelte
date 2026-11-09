@@ -115,7 +115,7 @@
           </td>
           <td>
             <span class="patient-card">
-              <span class="patient-name pii">
+              <span class="patient-name pii" class:insured={patient.insured}>
                 {#if query}
                   {@html patient.name?.replaceAll(
                     qRegex,
@@ -130,8 +130,7 @@
                 {#if patient.nationality !== "EG"}
                   <span
                     class="nationality flag"
-                    title={countryMap.get(patient.nationality)}
-                  >
+                    title={countryMap.get(patient.nationality)}>
                     {getFlagEmoji(patient.nationality)}
                   </span>
                 {/if}
@@ -177,8 +176,7 @@
     title="إلغاء البحث"
     onclick={() => {
       query = "";
-    }}
-  >
+    }}>
     <ClearFiltersIcon />
   </button>
 {/if}
@@ -268,10 +266,23 @@
         td {
           padding: 0.5rem 0.25rem;
 
-          .patient-card:has(> .patient-tags > :first-child) {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.5rem;
+          .patient-card {
+            &:has(> .patient-tags > :first-child) {
+              display: flex;
+              justify-content: space-between;
+              gap: 0.5rem;
+            }
+
+            .patient-name.insured::after {
+              content: "";
+              display: inline-block;
+              margin-inline-start: 4px;
+              border-radius: 50%;
+              background-color: orange;
+              width: 8px;
+              height: 8px;
+              vertical-align: super;
+            }
           }
 
           .patient-tags:not(:has(> :first-child)) {
