@@ -9,6 +9,7 @@
   import { authState } from "$lib/auth-client/auth.svelte";
   import { toast } from "svelte-sonner";
   import type { ValidationError } from "@sveltejs/kit";
+  import { formatDate } from "$lib/date/utils";
 
   const transfers = $derived(await getPendingTransfers());
 
@@ -28,6 +29,8 @@
           <th>إلى</th>
           <th>الصنف</th>
           <th>الكمية</th>
+          <th>تشغيلة</th>
+          <th>صلاحية</th>
           <th>الحالة</th>
           <th>قبول</th>
           <th>رفض</th>
@@ -43,6 +46,12 @@
             <td>{transfer.to_pharmacy_name}</td>
             <td>{transfer.drug_name}</td>
             <td>{transfer.qty}</td>
+            <td>{transfer.batch_number}</td>
+            <td>
+              {#if transfer.expiry_date}
+                {formatDate(transfer.expiry_date, "YYYY/MM/DD")}
+              {/if}
+            </td>
             <td
               class="status"
               class:pending={transfer.status === null}

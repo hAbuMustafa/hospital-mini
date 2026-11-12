@@ -65,6 +65,9 @@ export const getPendingTransfers = query(async () => {
       drug_name: drugs.name_ar,
 
       qty: stockDrugTransferItems.qty,
+      batch_number: stockDrugs.batch_number,
+      expiry_date: stockDrugs.expiry_date,
+
       status: stockDrugTransferStatus.is_accepted,
       status_time: stockDrugTransferStatus.timestamp,
       status_by: user.id,
@@ -401,4 +404,12 @@ export const rejectTransferItem = command(v.number(), async (transferItemId) => 
   void getPendingTransfers().refresh();
 
   return { success: true };
+});
+
+export const acceptTransferNumber = command(v.number(), async (transferNumber) => {
+  // todo: implement acceptance of a whole transfer with its number (N.B. use transfer `id` not `record_id`)
+});
+
+export const rejectTransferNumber = command(v.number(), async (transferNumber) => {
+  // todo: implement rejection of a whole transfer with its number (N.B. use transfer `id` not `record_id`)
 });
