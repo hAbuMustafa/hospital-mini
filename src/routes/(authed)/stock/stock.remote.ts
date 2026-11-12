@@ -7,6 +7,7 @@ import {
   stockDrugTransferItems,
   stockDrugTransferStatus,
   stockDrugTransferTicket,
+  user,
 } from "$lib/server/db/schema";
 import { invalid } from "@sveltejs/kit";
 import { and, eq, inArray, isNotNull, or, sql } from "drizzle-orm";
@@ -66,7 +67,8 @@ export const getPendingTransfers = query(async () => {
       qty: stockDrugTransferItems.qty,
       status: stockDrugTransferStatus.is_accepted,
       status_time: stockDrugTransferStatus.timestamp,
-      status_by: stockDrugTransferStatus.user_id,
+      status_by: user.id,
+      status_by_name: user.name,
     })
     .from(stockDrugTransferItems)
     .leftJoin(
@@ -81,6 +83,7 @@ export const getPendingTransfers = query(async () => {
       stockDrugTransferStatus,
       eq(stockDrugTransferItems.id, stockDrugTransferStatus.transfer_id)
     )
+    .leftJoin(user, eq(stockDrugTransferStatus.user_id, user.id))
     .where(
       currentUser.role === "admin"
         ? undefined
@@ -284,18 +287,118 @@ export const transferStock = form(
   }
 );
 
+async function getTransferItem(transferItemId: number) {
+  const currentUser = getRequestEvent().locals.user!;
+
+  const [transferItem] = await db
+    .select()
+    .from(stockDrugTransferItems)
+    .leftJoin(stockDrugs, eq(stockDrugTransferItems.stock_id, stockDrugs.id))
+    .leftJoin(
+      stockDrugTransferTicket,
+      eq(stockDrugTransferItems.ticket_id, stockDrugTransferTicket.id)
+    )
+    .leftJoin(
+      stockDrugTransferStatus,
+      eq(stockDrugTransferItems.id, stockDrugTransferStatus.transfer_id)
+    )
+    .where(
+      and(
+        eq(stockDrugTransferItems.id, transferItemId),
+        currentUser.role === "admin"
+          ? undefined
+          : eq(stockDrugTransferTicket.to_pharmacy_id, currentUser.affiliation)
+      )
+    );
+
+  return transferItem;
+}
+
 export const acceptTransferItem = command(v.number(), async (transferItemId) => {
-  // todo: implement command
   // 1. check authorization
+  const currentUser = getRequestEvent().locals.user!;
+
+  const transferItem = await getTransferItem(transferItemId);
+
+  if (!transferItem) {
+    console.error("⚠️ NO TXN");
+    invalid("التحويل المطلوب غير موجود");
+  }
+
   // 2. check if already fulfilled (accepted/rejected)
-  // 3. mark accepted
-  // 4. add stock to target store
+  if (transferItem.stockDrugTransferStatus !== null) {
+    console.error("⚠️ ALREADY FULFILLED");
+    invalid(
+      `الصنف المختار تم ${transferItem.stockDrugTransferStatus?.is_accepted ? "قبول" : "رفض"}ه سابقًا.`
+    );
+  }
+
+  await db.transaction(async (tx) => {
+    // 3. mark accepted
+    await tx.insert(stockDrugTransferStatus).values({
+      transfer_id: transferItemId,
+      user_id: currentUser.id,
+      is_accepted: true,
+    });
+
+    // 4. add stock to target store
+    await tx
+      .insert(stockDrugs)
+      .values({
+        pharmacy_id: transferItem.stockDrugTransferTicket?.to_pharmacy_id!,
+        batch_number: transferItem.stockDrugs?.batch_number,
+        expiry_date: transferItem.stockDrugs?.expiry_date,
+        qty: transferItem.stockDrugTransferItems.qty,
+        drug_id: transferItem.stockDrugs?.drug_id!,
+      })
+      .onConflictDoUpdate({
+        target: [stockDrugs.drug_id, stockDrugs.pharmacy_id, stockDrugs.batch_number],
+        set: {
+          qty: sql`qty + excluded.qty`,
+        },
+      });
+  });
+
+  void getPendingTransfers().refresh();
+
+  return { success: true };
 });
 
 export const rejectTransferItem = command(v.number(), async (transferItemId) => {
-  // todo: implement command
   // 1. check authorization
+  const currentUser = getRequestEvent().locals.user!;
+
+  const transferItem = await getTransferItem(transferItemId);
+
+  if (!transferItem) {
+    console.error("⚠️ NO TXN");
+    invalid("التحويل المطلوب غير موجود");
+  }
+
   // 2. check if already fulfilled (accepted/rejected)
-  // 3. mark rejected
-  // 4. return stock to original store
+  if (transferItem.stockDrugTransferStatus !== null) {
+    console.error("⚠️ ALREADY FULFILLED");
+    invalid(
+      `الصنف المختار تم ${transferItem.stockDrugTransferStatus?.is_accepted ? "قبول" : "رفض"}ه سابقًا.`
+    );
+  }
+
+  await db.transaction(async (tx) => {
+    // 3. mark rejected
+    await tx.insert(stockDrugTransferStatus).values({
+      transfer_id: transferItemId,
+      user_id: currentUser.id,
+      is_accepted: false,
+    });
+
+    // 4. return stock to original store
+    await tx
+      .update(stockDrugs)
+      .set({ qty: sql`qty + ${transferItem.stockDrugTransferItems.qty}` })
+      .where(eq(stockDrugs.id, transferItem.stockDrugTransferItems.stock_id));
+  });
+
+  void getPendingTransfers().refresh();
+
+  return { success: true };
 });

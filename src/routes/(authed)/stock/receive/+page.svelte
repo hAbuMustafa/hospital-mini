@@ -1,8 +1,14 @@
 <script lang="ts">
   import CheckIcon from "@lucide/svelte/icons/check";
   import RejectIcon from "@lucide/svelte/icons/x";
-  import { getPendingTransfers } from "../stock.remote";
+  import {
+    acceptTransferItem,
+    getPendingTransfers,
+    rejectTransferItem,
+  } from "../stock.remote";
   import { authState } from "$lib/auth-client/auth.svelte";
+  import { toast } from "svelte-sonner";
+  import type { ValidationError } from "@sveltejs/kit";
 
   const transfers = $derived(await getPendingTransfers());
 
@@ -57,8 +63,21 @@
                   class="btn"
                   style:--bg="green"
                   title="قبول الصنف"
-                  onclick={() => {
-                    // todo: fire accept command on `transfer.id`
+                  onclick={async () => {
+                    toast.promise(acceptTransferItem(transfer.id), {
+                      loading: "جار قبول الصنف من الطلبية...",
+                      success: "تم قبول الصنف",
+                      error: (err) => {
+                        const issues = (err as ValidationError).issues;
+                        if (issues?.length) {
+                          for (const issue of issues) {
+                            toast.error(issue.message);
+                          }
+                        }
+
+                        return "حدث خطأ ما أثناء استلام الصنف";
+                      },
+                    });
                   }}>
                   <CheckIcon size="1rem" />
                 </button>
@@ -69,14 +88,27 @@
                   class="btn"
                   style:--bg="maroon"
                   title="رفض الصنف"
-                  onclick={() => {
-                    // todo: fire reject command on `transfer.id`
+                  onclick={async () => {
+                    toast.promise(rejectTransferItem(transfer.id), {
+                      loading: "جار رفض الصنف من الطلبية...",
+                      success: "تم رفض الصنف",
+                      error: (err) => {
+                        const issues = (err as ValidationError).issues;
+                        if (issues?.length) {
+                          for (const issue of issues) {
+                            toast.error(issue.message);
+                          }
+                        }
+
+                        return "حدث خطأ ما أثناء رفض الصنف";
+                      },
+                    });
                   }}>
                   <RejectIcon size="1rem" />
                 </button>
               </td>
             {:else}
-              <td colspan="2">{transfer.status_by}</td>
+              <td colspan="2">{transfer.status_by_name}</td>
             {/if}
           </tr>
         {/each}
