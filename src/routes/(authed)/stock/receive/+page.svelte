@@ -13,6 +13,7 @@
   import type { ValidationError } from "@sveltejs/kit";
   import { formatDate } from "$lib/date/utils";
 
+  // todo: improve transfers structure so ticket metadata is separate from ticket items
   const transfers = $derived(await getPendingTransfers());
 
   const groupedTransfers = $derived(Object.groupBy(transfers, (item) => item.ticket_id!));
