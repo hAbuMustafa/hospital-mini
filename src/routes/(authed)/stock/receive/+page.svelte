@@ -3,8 +3,10 @@
   import RejectIcon from "@lucide/svelte/icons/x";
   import {
     acceptTransferItem,
+    acceptTransferNumber,
     getPendingTransfers,
     rejectTransferItem,
+    rejectTransferNumber,
   } from "../stock.remote";
   import { authState } from "$lib/auth-client/auth.svelte";
   import { toast } from "svelte-sonner";
@@ -19,8 +21,62 @@
 <h1>استلام وارد</h1>
 
 {#if transfers.length}
-  {#each Object.entries(groupedTransfers) as [ticketId, gTransfers], j (ticketId)}
-    <h2>طلبية رقم {gTransfers![0].record_id}</h2>
+  {#each Object.entries(groupedTransfers).sort(([_, e1], [__, e2]) => e2![0].ticket_timestamp!.getTime() - e1![0].ticket_timestamp!.getTime()) as [ticketId, gTransfers], j (ticketId)}
+    <h2 title={ticketId}>
+      طلبية رقم {gTransfers![0].record_id}
+
+      {#if gTransfers?.some((t) => t.status === null) && (authState.user?.role === "admin" || authState.user?.affiliation === gTransfers[0].to_pharmacy_id)}
+        <span class="ticket-controls">
+          <button
+            type="button"
+            class="btn"
+            style:--bg="green"
+            title="قبول جميع أصناف الطلبية"
+            onclick={async () => {
+              toast.promise(acceptTransferNumber(Number(ticketId)), {
+                loading: "جار قبول أصناف الطلبية...",
+                success: "تم قبول الطلبية",
+                error: (err) => {
+                  const issues = (err as ValidationError).issues;
+                  if (issues?.length) {
+                    for (const issue of issues) {
+                      toast.error(issue.message);
+                    }
+                  }
+
+                  return "حدث خطأ ما أثناء استلام الطلبية";
+                },
+              });
+            }}>
+            <CheckIcon size="1rem" />
+          </button>
+
+          <button
+            type="button"
+            class="btn"
+            style:--bg="maroon"
+            title="رفض جميع أصناف الطلبية"
+            onclick={async () => {
+              toast.promise(rejectTransferNumber(Number(ticketId)), {
+                loading: "جار رفض أصناف الطلبية...",
+                success: "تم رفض الطلبية",
+                error: (err) => {
+                  const issues = (err as ValidationError).issues;
+                  if (issues?.length) {
+                    for (const issue of issues) {
+                      toast.error(issue.message);
+                    }
+                  }
+
+                  return "حدث خطأ ما أثناء رفض الطلبية";
+                },
+              });
+            }}>
+            <RejectIcon size="1rem" />
+          </button>
+        </span>
+      {/if}
+    </h2>
     <table>
       <thead>
         <tr>
@@ -129,6 +185,17 @@
 {/if}
 
 <style>
+  h2 {
+    display: flex;
+    gap: 1rem;
+
+    .ticket-controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+    }
+  }
+
   th,
   td {
     padding: 0.25rem 0.5rem;
@@ -157,6 +224,6 @@
   }
 
   .status.rejected {
-    --bg: red;
+    --bg: maroon;
   }
 </style>

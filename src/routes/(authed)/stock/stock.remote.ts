@@ -52,6 +52,8 @@ export const getPendingTransfers = query(async () => {
     .select({
       record_id: stockDrugTransferTicket.record_id,
       ticket_id: stockDrugTransferTicket.id,
+      ticket_timestamp: stockDrugTransferTicket.timestamp,
+
       id: stockDrugTransferItems.id,
 
       from_pharmacy_name: fromPharmacy.name,
@@ -407,9 +409,124 @@ export const rejectTransferItem = command(v.number(), async (transferItemId) => 
 });
 
 export const acceptTransferNumber = command(v.number(), async (transferNumber) => {
-  // todo: implement acceptance of a whole transfer with its number (N.B. use transfer `id` not `record_id`)
+  // 1. check authorization
+  const currentUser = getRequestEvent().locals.user!;
+
+  const transfers = await db
+    .select()
+    .from(stockDrugTransferTicket)
+    .leftJoin(
+      stockDrugTransferItems,
+      eq(stockDrugTransferItems.ticket_id, transferNumber)
+    )
+    .leftJoin(stockDrugs, eq(stockDrugTransferItems.stock_id, stockDrugs.id))
+    .leftJoin(
+      stockDrugTransferStatus,
+      eq(stockDrugTransferItems.id, stockDrugTransferStatus.transfer_id)
+    )
+    .where(
+      and(
+        eq(stockDrugTransferTicket.id, transferNumber),
+        currentUser.role === "admin"
+          ? undefined
+          : eq(stockDrugTransferTicket.to_pharmacy_id, currentUser.affiliation)
+      )
+    )
+    .then((transferItems) =>
+      // 2. filter out fulfilled items
+      transferItems?.filter((item) => item.stockDrugTransferStatus === null)
+    );
+
+  if (!transfers.length) {
+    console.error("⚠️ NO TICKET");
+    invalid("الطلبية المطلوبة غير موجودة");
+  }
+
+  for (const transfer of transfers) {
+    await db.transaction(async (tx) => {
+      // 3. mark accepted
+      await tx.insert(stockDrugTransferStatus).values({
+        transfer_id: transfer.stockDrugTransferItems?.id!,
+        user_id: currentUser.id,
+        is_accepted: true,
+      });
+
+      // 4. add stock to target store
+      await tx
+        .insert(stockDrugs)
+        .values({
+          pharmacy_id: transfer.stockDrugTransferTicket?.to_pharmacy_id!,
+          batch_number: transfer.stockDrugs?.batch_number,
+          expiry_date: transfer.stockDrugs?.expiry_date,
+          qty: transfer.stockDrugTransferItems!.qty,
+          drug_id: transfer.stockDrugs?.drug_id!,
+        })
+        .onConflictDoUpdate({
+          target: [stockDrugs.drug_id, stockDrugs.pharmacy_id, stockDrugs.batch_number],
+          set: {
+            qty: sql`qty + excluded.qty`,
+          },
+        });
+    });
+  }
+
+  void getPendingTransfers().refresh();
+
+  return { success: true };
 });
 
 export const rejectTransferNumber = command(v.number(), async (transferNumber) => {
-  // todo: implement rejection of a whole transfer with its number (N.B. use transfer `id` not `record_id`)
+  // 1. check authorization
+  const currentUser = getRequestEvent().locals.user!;
+
+  const transfers = await db
+    .select()
+    .from(stockDrugTransferTicket)
+    .leftJoin(
+      stockDrugTransferItems,
+      eq(stockDrugTransferItems.ticket_id, transferNumber)
+    )
+    .leftJoin(stockDrugs, eq(stockDrugTransferItems.stock_id, stockDrugs.id))
+    .leftJoin(
+      stockDrugTransferStatus,
+      eq(stockDrugTransferItems.id, stockDrugTransferStatus.transfer_id)
+    )
+    .where(
+      and(
+        eq(stockDrugTransferTicket.id, transferNumber),
+        currentUser.role === "admin"
+          ? undefined
+          : eq(stockDrugTransferTicket.to_pharmacy_id, currentUser.affiliation)
+      )
+    )
+    .then((transferItems) =>
+      // 2. filter out fulfilled items
+      transferItems?.filter((item) => item.stockDrugTransferStatus === null)
+    );
+
+  if (!transfers.length) {
+    console.error("⚠️ NO TICKET");
+    invalid("الطلبية المطلوبة غير موجودة");
+  }
+
+  for (const transfer of transfers) {
+    await db.transaction(async (tx) => {
+      // 3. mark rejected
+      await tx.insert(stockDrugTransferStatus).values({
+        transfer_id: transfer.stockDrugTransferItems?.id!,
+        user_id: currentUser.id,
+        is_accepted: false,
+      });
+
+      // 4. return stock to original store
+      await tx
+        .update(stockDrugs)
+        .set({ qty: sql`qty + ${transfer.stockDrugTransferItems!.qty}` })
+        .where(eq(stockDrugs.id, transfer.stockDrugTransferItems!.stock_id));
+    });
+  }
+
+  void getPendingTransfers().refresh();
+
+  return { success: true };
 });
