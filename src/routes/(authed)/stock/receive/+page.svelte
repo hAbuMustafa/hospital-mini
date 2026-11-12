@@ -1,5 +1,7 @@
 <script lang="ts">
-  import CheckIcon from "@lucide/svelte/icons/check";
+  import AcceptAllIcon from "@lucide/svelte/icons/check-check";
+  import AcceptIcon from "@lucide/svelte/icons/check";
+  import RejectAllIcon from "@lucide/svelte/icons/copy-x";
   import RejectIcon from "@lucide/svelte/icons/x";
   import {
     acceptTransferItem,
@@ -49,7 +51,7 @@
                 },
               });
             }}>
-            <CheckIcon size="1rem" />
+            <AcceptAllIcon size="1rem" />
           </button>
 
           <button
@@ -73,7 +75,7 @@
                 },
               });
             }}>
-            <RejectIcon size="1rem" />
+            <RejectAllIcon size="1rem" />
           </button>
         </span>
       {/if}
@@ -145,7 +147,7 @@
                       },
                     });
                   }}>
-                  <CheckIcon size="1rem" />
+                  <AcceptIcon size="1rem" />
                 </button>
               </td>
               <td>
