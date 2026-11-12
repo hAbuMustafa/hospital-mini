@@ -62,7 +62,7 @@
           <td>
             {item.qty ?? 0}
           </td>
-          <td>{item.batch_number}</td>
+          <td class="mono">{item.batch_number}</td>
           <td>
             {#if item.expiry_date}
               {formatDate(item.expiry_date)}

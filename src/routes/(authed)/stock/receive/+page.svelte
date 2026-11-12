@@ -46,7 +46,7 @@
             <td>{transfer.to_pharmacy_name}</td>
             <td>{transfer.drug_name}</td>
             <td>{transfer.qty}</td>
-            <td>{transfer.batch_number}</td>
+            <td class="mono">{transfer.batch_number}</td>
             <td>
               {#if transfer.expiry_date}
                 {formatDate(transfer.expiry_date, "YYYY/MM/DD")}
