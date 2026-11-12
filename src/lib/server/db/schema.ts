@@ -111,7 +111,9 @@ export const stockDrugTransferStatus = sqliteTable("stockDrugTransferStatus", {
     .references(() => stockDrugTransferItems.id)
     .notNull(),
   is_accepted: int({ mode: "boolean" }).notNull(),
-  timestamp: int({ mode: "timestamp" }).notNull(),
+  timestamp: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
   user_id: text().notNull(),
 });
 
