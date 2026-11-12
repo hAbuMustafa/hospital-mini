@@ -108,7 +108,7 @@
                 <RemoveFromTransferIcon size="1rem" />
               </button>
             {:else}
-              {#if item.qty}
+              {#if item.qty && item.qty > 0}
                 <button
                   type="button"
                   class="add btn"
