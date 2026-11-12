@@ -53,7 +53,7 @@
   <tbody>
     {#if stock.length}
       {#each stock as item, i (i)}
-        <tr>
+        <tr class:in-transfer-ticket={transferItems.has(item)}>
           {#if isAdmin}
             <td>{item.pharmacy_name}</td>
           {/if}
@@ -154,6 +154,10 @@
   td {
     border: var(--main-border);
     padding: 0.25rem 0.5rem;
+  }
+
+  .in-transfer-ticket {
+    background-color: alpha(from gold / 20%);
   }
 
   .btn {
