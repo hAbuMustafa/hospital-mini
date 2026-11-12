@@ -83,6 +83,40 @@ export const stockDrugs = sqliteTable(
   ]
 );
 
+export const stockDrugTransferTicket = sqliteTable("stockDrugTransferTicket", {
+  id: int().primaryKey({ autoIncrement: true }),
+  record_id: int(), // رقم الطلبية في السركي
+  timestamp: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  to_pharmacy_id: int().notNull(),
+  user_id: text().notNull(),
+});
+
+export const stockDrugTransferItems = sqliteTable("stockDrugTransferItems", {
+  id: int().primaryKey({ autoIncrement: true }),
+  ticket_id: int()
+    .references(() => stockDrugTransferTicket.id)
+    .notNull(),
+  stock_id: int()
+    .references(() => stockDrugs.id)
+    .notNull(),
+  unit_price: real().notNull(),
+  qty: int().notNull(),
+});
+
+export const stockDrugTransferStatus = sqliteTable("stockDrugTransferStatus", {
+  id: int().primaryKey({ autoIncrement: true }),
+  transfer_id: int()
+    .references(() => stockDrugTransferItems.id)
+    .notNull(),
+  is_accepted: int({ mode: "boolean" }).notNull(),
+  timestamp: int({ mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  user_id: text().notNull(),
+});
+
 export const transactionTickets = sqliteTable("transactionTickets", {
   id: int().primaryKey({ autoIncrement: true }),
   timestamp: int({ mode: "timestamp" })
@@ -91,7 +125,6 @@ export const transactionTickets = sqliteTable("transactionTickets", {
   store_id: int().notNull(),
   user_id: text().notNull(),
   patient_id: text(),
-  entity: text(), // if it is a transfer from or to an other entity (not a dispense/return to/from a patient)
   is_dispense: int({ mode: "boolean" }).notNull(), // `true` for sale, `false` for returns
   return_on_ticket_id: int(), // if it is a return ticket, insert its id
 });
@@ -99,6 +132,7 @@ export const transactionTickets = sqliteTable("transactionTickets", {
 export const transactions = sqliteTable("transactions", {
   id: int().primaryKey({ autoIncrement: true }),
   item_id: int().notNull(),
+  stock_id: int(),
   qty: int().notNull(),
   qty_returned: int().notNull().default(0),
   qty_remaining: int().generatedAlwaysAs(() => sql`qty - qty_returned`, {

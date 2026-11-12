@@ -1,0 +1,1 @@
+ALTER TABLE `stockDrugTransferTicket` ADD `record_id` integer;

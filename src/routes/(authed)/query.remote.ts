@@ -1,8 +1,18 @@
-import { query } from "$app/server";
+import { getRequestEvent, query } from "$app/server";
 import { db } from "$lib/server/db";
-import { drugs, patients_view } from "$lib/server/db/schema";
+import { drugs, patients_view, stockDrugs } from "$lib/server/db/schema";
 import { fuzzyQuery } from "$lib/server/db/utils";
-import { desc, eq, like, or, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+  like,
+  or,
+  sql,
+} from "drizzle-orm";
 import * as v from "valibot";
 
 export const queryPatient = query(v.string(), async (query) => {
@@ -25,18 +35,43 @@ export const queryPatient = query(v.string(), async (query) => {
     .orderBy(desc(patients_view.admission_date));
 });
 
+function getDrugConditionsForFuzzyQuery(queryString: string) {
+  return or(
+    sql`${drugs.name_ar} LIKE ${queryString} ESCAPE '\\'`,
+    sql`${drugs.name} LIKE ${queryString} ESCAPE '\\'`,
+    sql`${drugs.tradename_ar} LIKE ${queryString} ESCAPE '\\'`,
+    sql`${drugs.tradename} LIKE ${queryString} ESCAPE '\\'`
+  );
+}
+
 export const queryDrug = query(v.string(), async (query) => {
   const fuzzy = fuzzyQuery(query);
 
+  return await db.select().from(drugs).where(getDrugConditionsForFuzzyQuery(fuzzy));
+});
+
+export const queryDrugFromStock = query(v.string(), async (query) => {
+  const currentUser = getRequestEvent().locals.user!;
+
+  const fuzzy = fuzzyQuery(query);
+
   return await db
-    .select()
+    .select({
+      ...getTableColumns(drugs),
+      qty: stockDrugs.qty,
+      stock_id: stockDrugs.id,
+    })
     .from(drugs)
+    .leftJoin(stockDrugs, eq(drugs.id, stockDrugs.drug_id))
     .where(
-      or(
-        sql`${drugs.name_ar} LIKE ${fuzzy} ESCAPE '\\'`,
-        sql`${drugs.name} LIKE ${fuzzy} ESCAPE '\\'`,
-        sql`${drugs.tradename_ar} LIKE ${fuzzy} ESCAPE '\\'`,
-        sql`${drugs.tradename} LIKE ${fuzzy} ESCAPE '\\'`
+      and(
+        currentUser.role === "admin"
+          ? isNotNull(drugs.id)
+          : or(
+              eq(stockDrugs.pharmacy_id, currentUser.affiliation),
+              isNull(stockDrugs.pharmacy_id)
+            ),
+        getDrugConditionsForFuzzyQuery(fuzzy)
       )
     );
 });

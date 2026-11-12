@@ -25,6 +25,8 @@
   import { goto } from "$app/navigation";
   import { queryDrug } from "../../../query.remote";
 
+  type DrugItem = Awaited<ReturnType<typeof queryDrug>>[0];
+
   const invoice = $derived(await getInvoiceMetadata(Number(page.params.invoiceNumber)));
 
   const invoiceItemsGetter = $derived(getInvoiceExtraItems(invoice.id));
@@ -43,7 +45,7 @@
 
   let invoiceItemsBody: HTMLElement | undefined = $state();
 
-  async function selectDrug(item: DrugT) {
+  async function selectDrug(item: DrugItem) {
     const foundItem = invoiceItems.find((d) => d.item_id === item.id);
 
     if (!foundItem) {
@@ -136,15 +138,13 @@
       bind:query={drugQuery}
       endpoint={queryDrug}
       placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-      onSelect={(drug: DrugT) => selectDrug(drug)}
-    >
-      {#snippet itemSnippet(drug: DrugT)}
+      onSelect={(drug: DrugItem) => selectDrug(drug)}>
+      {#snippet itemSnippet(drug: DrugItem)}
         <SelectItemDrug
           {drug}
           query={drugQuery}
           isSelected={invoiceItems.findIndex((item) => item.item_id === drug.id) > -1}
-          onclick={() => selectDrug(drug)}
-        />
+          onclick={() => selectDrug(drug)} />
       {/snippet}
     </Combobox>
 
@@ -183,8 +183,7 @@
                     itemId: item.id,
                   });
                 }}
-                class="delete-item"
-              >
+                class="delete-item">
                 {i + 1}
               </button>
             {:else}
@@ -202,13 +201,11 @@
                 <input
                   {...updateInvoiceExtraItem
                     .for(item.id)
-                    .fields.invoiceId.as("hidden", invoice.id)}
-                />
+                    .fields.invoiceId.as("hidden", invoice.id)} />
                 <input
                   {...updateInvoiceExtraItem
                     .for(item.id)
-                    .fields.itemId.as("hidden", item.id)}
-                />
+                    .fields.itemId.as("hidden", item.id)} />
                 <input
                   id="amount-{item.id}"
                   min="1"
@@ -223,8 +220,7 @@
                       updatesToSave[item.id] = v;
                     }
                   }
-                  {@attach useKeyboardNavigation("amount", invoiceItemsBody)}
-                />
+                  {@attach useKeyboardNavigation("amount", invoiceItemsBody)} />
               </form>
             {:else}
               {item.qty}
@@ -282,8 +278,7 @@
       } catch (err) {
         reject();
       }
-    }}
-  >
+    }}>
     <Save size="1em" color="salmon" />
     <Lock size="1em" color="gold" />
     حفظ وقفل الفاتورة

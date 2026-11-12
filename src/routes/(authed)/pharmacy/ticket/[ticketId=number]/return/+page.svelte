@@ -19,7 +19,7 @@
 <h1>
   ارتجاع
   <small class="ticket-number">
-    (<TicketNumber number={items[0].ticket_id} /> )
+    (<TicketNumber number={items[0].ticket_id} />)
   </small>: <span class="pii">{items[0].patient_name ?? items[0].patient_id}</span>
 </h1>
 <h2>{formatDate(items[0].timestamp!, "YYYY/MM/DD (HH:mm)")}</h2>
@@ -63,8 +63,7 @@
     } finally {
       saving = false;
     }
-  })}
->
+  })}>
   <input {...returnItems.fields.originalTicketId.as("hidden", ticketId)} />
   <table>
     <thead>
@@ -81,22 +80,21 @@
         <tr>
           <td>
             <label for="item-{item.item_id}" title={item.item_tradename}
-              >{item.item_name}</label
-            >
+              >{item.item_name}</label>
             <input {...returnItems.fields.items[i].itemId.as("hidden", item.item_id!)} />
             <input
               {...returnItems.fields.items[i].itemUnitPrice.as(
                 "hidden",
                 item.item_unit_price!
-              )}
-            />
+              )} />
+            <input
+              {...returnItems.fields.items[i].stockId.as("hidden", item.stock_id!)} />
             <input
               {...returnItems.fields.items[i].transactionId.as(
                 "hidden",
                 item.transaction_id!
               )}
-              value={item.transaction_id}
-            />
+              value={item.transaction_id} />
           </td>
           <td>
             {item.qty}
@@ -111,8 +109,7 @@
                 {...returnItems.fields.items[i].returnedAmount.as("number")}
                 min="0"
                 max={remaining}
-                value="0"
-              />
+                value="0" />
             {:else if canReturn && remaining === 0}
               <span class="no-return">(صرف {item.qty} وتم ارتجاع الكمية كاملة)</span>
             {:else if !canReturn}

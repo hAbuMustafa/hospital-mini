@@ -1,8 +1,8 @@
 <script lang="ts">
-  let { id, children } = $props();
+  let { id, children, dialog = $bindable() } = $props();
 </script>
 
-<dialog {id} closedby="any">
+<dialog {id} closedby="any" bind:this={dialog}>
   {@render children()}
 </dialog>
 

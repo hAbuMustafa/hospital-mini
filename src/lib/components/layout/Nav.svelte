@@ -16,8 +16,7 @@
     <ul>
       <Filter>
         <button popovertarget="admin-nav-list" interestfor="admin-nav-list"
-          >الإدارة</button
-        >
+          >الإدارة</button>
         <ul id="admin-nav-list" popover="hint">
           <li><a href="/admin/users">المستخدمين</a></li>
           <li><a href="/admin/sessions">الجلسات المفتوحة</a></li>
@@ -29,8 +28,7 @@
       <Filter allowDepartment={[1, 2, 3, 4]}>
         <li>
           <button popovertarget="patient-nav-list" interestfor="patient-nav-list"
-            >المرضى</button
-          >
+            >المرضى</button>
           <ul id="patient-nav-list" popover="hint">
             <li><a href="/patient">بيان المرضى بالأقسام</a></li>
             <Filter allowDepartment={[1, 3]}>
@@ -45,16 +43,15 @@
       <Filter allowDepartment={[1, 2]}>
         <li>
           <button popovertarget="pharmacy-nav-list" interestfor="pharmacy-nav-list"
-            >الصيدلية</button
-          >
+            >الصيدلية</button>
           <ul id="pharmacy-nav-list" popover="hint">
             <li><a href="/pharmacy/ticket">عرض تذاكر الصرف</a></li>
             <li><a href="/pharmacy/dispense-report">المنصرف</a></li>
             <hr />
+            <li><a href="/stock/receive">استلام وارد</a></li>
+            <li><a href="/stock/">رصيد المخزون</a></li>
+            <hr />
             <li><a href="/pharmacy/link-tickets">ربط تذاكر الصرف</a></li>
-            <!-- <hr />
-            <li><a href="/stock/transfer">صرف لجهة</a></li>
-            <li><a href="/stock/receive">استلام وارد</a></li> -->
           </ul>
         </li>
       </Filter>
@@ -82,8 +79,7 @@
           onclick={() => {
             authState.signOut();
             goto("/");
-          }}
-        >
+          }}>
           تسجيل خروج
         </button>
       </li>

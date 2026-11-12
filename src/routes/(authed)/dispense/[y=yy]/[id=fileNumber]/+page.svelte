@@ -12,7 +12,7 @@
   import { scale } from "svelte/transition";
   import { useKeyboardNavigation } from "$lib/attachments";
   import { unacceptedAmount } from "$lib/CONSTANTS";
-  import SelectItemDrug from "$lib/components/SelectItem_Drug.svelte";
+  import Highlight from "$lib/components/Highlight.svelte";
   import Dialog from "$lib/components/Dialog.svelte";
   import TopPicks from "$lib/components/Dispense/TopPicks.svelte";
   import { countryMap, getFlagEmoji } from "$lib/utils/countries";
@@ -21,7 +21,9 @@
   import { browser } from "$app/env";
   import { authState } from "$lib/auth-client/auth.svelte";
   import { getDepartments } from "../../../(admin)/admin.remote";
-  import { queryDrug } from "../../../query.remote";
+  import { queryDrugFromStock } from "../../../query.remote";
+
+  type DrugItem = Awaited<ReturnType<typeof queryDrugFromStock>>[0];
 
   const patientId = `${page.params.y}/${page.params.id}`;
 
@@ -46,12 +48,12 @@
 
   let ticketItemsBody: HTMLElement | undefined = $state();
 
-  let ticketDrugs: (DrugT & {
+  let ticketDrugs: (DrugItem & {
     amount: number;
     lastDispensed: Awaited<ReturnType<typeof getItemLastDispensed>> | null;
   })[] = $state([]);
 
-  async function selectDrug(item: DrugT) {
+  async function selectDrug(item: DrugItem) {
     const foundItemIndexInList = ticketDrugs.findIndex((d) => d.id === item.id);
     if (foundItemIndexInList > -1) {
       ticketDrugs[foundItemIndexInList].amount++;
@@ -71,6 +73,8 @@
   let drugQuery = $state("");
 
   let saving = $state(false);
+
+  let selectedPharmacy: number | undefined = $state();
 </script>
 
 {#if patient}
@@ -101,8 +105,7 @@
         {#if patient.nationality !== "EG"}
           <span
             class="patient_nationality flag"
-            title={countryMap.get(patient.nationality)}
-          >
+            title={countryMap.get(patient.nationality)}>
             {getFlagEmoji(patient.nationality)}
           </span>
         {/if}
@@ -133,18 +136,28 @@
   <div class="item-controls-wrapper">
     <Combobox
       bind:query={drugQuery}
-      filterFn={(d: DrugT) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
-      endpoint={queryDrug}
+      filterFn={(d: DrugItem) => d.is_used !== "لاغي" && !d.is_used?.includes("فواتير")}
+      endpoint={queryDrugFromStock}
       placeholder="اسم الصنف (مثلا: بالميكورت أو أوندانسيترون أو adrenaline)"
-      onSelect={(drug: DrugT) => selectDrug(drug)}
-    >
-      {#snippet itemSnippet(drug: DrugT)}
-        <SelectItemDrug
-          {drug}
-          query={drugQuery}
-          isSelected={ticketDrugs.findIndex((item) => item.id === drug.id) > -1}
-          onclick={() => selectDrug(drug)}
-        />
+      onSelect={(drug: DrugItem) => selectDrug(drug)}>
+      {#snippet itemSnippet(drug: DrugItem)}
+        <button
+          type="button"
+          class="drug-select"
+          class:already-selected={ticketDrugs.findIndex((item) => item.id === drug.id) >
+            -1}
+          onclick={() => selectDrug(drug)}>
+          <strong class="name-ar"
+            ><Highlight text={drug.name_ar!} query={drugQuery} /></strong>
+          <span class="name"
+            ><Highlight text={drug.tradename_ar!} query={drugQuery} /></span>
+          <span class="price">{drug.price_resale?.toFixed(3)} جنيه</span>
+          <span class="stock">
+            <span>الرصيد:</span>
+            <span class:unavailable={!drug.qty}>{drug.qty ?? 0}</span>
+            <span>{drug.unit}</span>
+          </span>
+        </button>
       {/snippet}
     </Combobox>
 
@@ -192,8 +205,7 @@
       } finally {
         saving = false;
       }
-    })}
-  >
+    })}>
     <input {...postTicket.fields.patientId.as("hidden", patient.id)} />
 
     <table class="ticket-items">
@@ -221,25 +233,28 @@
                   onclick={() => {
                     ticketDrugs = ticketDrugs.filter((d) => d.id !== drug.id);
                   }}
-                  class="delete-item"
-                >
+                  class="delete-item">
                   {i + 1}
                 </button>
               </td>
               <td>
-                <input {...postTicket.fields.drugs[i].item_id.as("hidden", drug.id)} />
+                <input {...postTicket.fields.drugs[i].drug_id.as("hidden", drug.id)} />
+                {#if drug.stock_id}
+                  <input
+                    {...postTicket.fields.drugs[i].stock_id.as(
+                      "hidden",
+                      drug.stock_id
+                    )} />
+                {/if}
                 <input
-                  {...postTicket.fields.drugs[i].item_name.as("hidden", drug.name_ar!)}
-                />
+                  {...postTicket.fields.drugs[i].drug_name.as("hidden", drug.name_ar!)} />
                 <input
-                  {...postTicket.fields.drugs[i].category.as("hidden", drug.category!)}
-                />
+                  {...postTicket.fields.drugs[i].category.as("hidden", drug.category!)} />
                 <label for="amount-{drug.id}" title={drug.tradename_ar}>
                   {drug.name_ar}
                 </label>
                 <input
-                  {...postTicket.fields.drugs[i].unit_price.as("hidden", drug.price!)}
-                />
+                  {...postTicket.fields.drugs[i].unit_price.as("hidden", drug.price!)} />
               </td>
               <td>
                 <input
@@ -247,16 +262,14 @@
                   {...postTicket.fields.drugs[i].qty.as("number", drug.amount)}
                   min="1"
                   bind:value={drug.amount}
-                  {@attach useKeyboardNavigation("amount", ticketItemsBody)}
-                />
+                  {@attach useKeyboardNavigation("amount", ticketItemsBody)} />
               </td>
               <td>
                 {#if drug.lastDispensed?.length}
                   <button
                     type="button"
                     command="show-modal"
-                    commandfor="item-{drug.id}-dialog"
-                  >
+                    commandfor="item-{drug.id}-dialog">
                     <span class="old-amount">
                       {drug.lastDispensed[0].qty}
                     </span>
@@ -265,8 +278,7 @@
                       class="old-amount-time"
                       title={formatDate(drug.lastDispensed[0].timestamp!, "hh:mm A")
                         .replace("AM", "ص")
-                        .replace("PM", "م")}
-                    >
+                        .replace("PM", "م")}>
                       {formatDate(drug.lastDispensed[0].timestamp!, "MM/DD")}
                     </span>
                   </button>
@@ -282,8 +294,7 @@
                           <span class="old-amount-time"
                             >{formatDate(dispense.timestamp!, "YYYY/MM/DD hh:mm:ss A")
                               .replace("AM", "ص")
-                              .replace("PM", "م")}</span
-                          >
+                              .replace("PM", "م")}</span>
                           <span>(#{dispense.ticketId})</span>
                         </li>
                       {/each}
@@ -315,9 +326,11 @@
     </table>
 
     {#if authState.user?.role === "admin"}
-      <select {...postTicket.fields.department}>
+      <select
+        {...postTicket.fields.department.as("select")}
+        bind:value={selectedPharmacy}>
         {#each await getDepartments() as dep, i (dep.id)}
-          <option value={dep.id}>{dep.name}</option>
+          <option value={String(dep.id)}>{dep.name}</option>
         {/each}
       </select>
     {/if}
@@ -476,6 +489,26 @@
           }
         }
       }
+    }
+  }
+
+  button.drug-select {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: none;
+
+    &:focus {
+      border: 3px double var(--main-accent-color);
+      outline: none;
+    }
+
+    &.already-selected {
+      background-color: green;
+    }
+
+    .unavailable {
+      color: light-dark(maroon, salmon);
     }
   }
 </style>

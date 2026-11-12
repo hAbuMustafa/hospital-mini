@@ -1,8 +1,9 @@
 <script lang="ts">
+  import type { drugs } from "$lib/server/db/schema";
   import Highlight from "./Highlight.svelte";
 
   type PropsT = {
-    drug: DrugT;
+    drug: typeof drugs.$inferSelect;
     query: string;
     isSelected: boolean;
   } & any;

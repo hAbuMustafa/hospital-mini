@@ -253,6 +253,55 @@
       "when": 1792403080804,
       "tag": "0035_grey_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1793967848688,
+      "tag": "0036_worried_blue_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1793970456859,
+      "tag": "0037_deep_leopardon",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1793972526115,
+      "tag": "0038_small_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "6",
+      "when": 1793972983696,
+      "tag": "0039_mean_shatterstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "6",
+      "when": 1793973164434,
+      "tag": "0040_round_maestro",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "6",
+      "when": 1793973504888,
+      "tag": "0041_numerous_centennial",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "6",
+      "when": 1793999645351,
+      "tag": "0042_broad_whistler",
+      "breakpoints": true
     }
   ]
 }

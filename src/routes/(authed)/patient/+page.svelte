@@ -4,6 +4,7 @@
   import Female from "@lucide/svelte/icons/venus";
   import Inmate from "@lucide/svelte/icons/tally-5";
   import Student from "@lucide/svelte/icons/graduation-cap";
+  import Insured from "@lucide/svelte/icons/shield-user";
   import ClearFiltersIcon from "@lucide/svelte/icons/funnel-x";
   import { fly } from "svelte/transition";
   import { getUnlinkedTickets } from "../pharmacy/ticket.remote.js";
@@ -130,8 +131,7 @@
                 {#if patient.nationality !== "EG"}
                   <span
                     class="nationality flag"
-                    title={countryMap.get(patient.nationality)}
-                  >
+                    title={countryMap.get(patient.nationality)}>
                     {getFlagEmoji(patient.nationality)}
                   </span>
                 {/if}
@@ -148,6 +148,11 @@
                 {#if patient.admission_notes?.includes("طالب")}
                   <span title="طالب">
                     <Student size="1em" />
+                  </span>
+                {/if}
+                {#if patient.insured}
+                  <span title="مؤمن عليه">
+                    <Insured color="orange" size="1em" />
                   </span>
                 {/if}
               </span>
@@ -177,8 +182,7 @@
     title="إلغاء البحث"
     onclick={() => {
       query = "";
-    }}
-  >
+    }}>
     <ClearFiltersIcon />
   </button>
 {/if}
@@ -268,10 +272,12 @@
         td {
           padding: 0.5rem 0.25rem;
 
-          .patient-card:has(> .patient-tags > :first-child) {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.5rem;
+          .patient-card {
+            &:has(> .patient-tags > :first-child) {
+              display: flex;
+              justify-content: space-between;
+              gap: 0.5rem;
+            }
           }
 
           .patient-tags:not(:has(> :first-child)) {

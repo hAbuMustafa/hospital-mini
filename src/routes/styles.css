@@ -78,6 +78,10 @@ table {
   }
 }
 
+.mono {
+  font-family: "Courier New", Courier, monospace;
+}
+
 a.btn,
 button.btn,
 input.btn {

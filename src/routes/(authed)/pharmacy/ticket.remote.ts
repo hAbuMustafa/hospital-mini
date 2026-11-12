@@ -2,10 +2,12 @@ import { form, getRequestEvent, query } from "$app/server";
 import { isNarcotic, unacceptedAmount } from "$lib/CONSTANTS";
 import { db } from "$lib/server/db";
 import {
+  departments,
   drugs,
   patientAdmissions,
   patients_view,
   status,
+  stockDrugs,
   transactions,
   transactionTickets,
   unsyncedNarcotics,
@@ -74,15 +76,21 @@ export const getItemLastDispensed = query(
   }
 );
 
+const departmentsIds = await db
+  .select()
+  .from(departments)
+  .then((deps) => deps.map((dep) => String(dep.id)));
+
 export const postTicket = form(
   v.object({
     patientId: v.pipe(v.string(), v.nonEmpty()),
-    department: v.optional(v.number()),
+    department: v.optional(v.picklist(departmentsIds)),
 
     drugs: v.array(
       v.object({
-        item_id: v.number(),
-        item_name: v.string(),
+        drug_id: v.number(),
+        drug_name: v.string(),
+        stock_id: v.optional(v.number()),
         category: v.string(),
         qty: v.number(),
         unit_price: v.number(),
@@ -91,7 +99,7 @@ export const postTicket = form(
   }),
   async (data, issue) => {
     const hasInvalidBoxQt = data.drugs.findIndex((d) =>
-      unacceptedAmount(d.item_id, d.qty)
+      unacceptedAmount(d.drug_id, d.qty)
     );
     if (hasInvalidBoxQt > -1) {
       invalid(issue.drugs[hasInvalidBoxQt]("الصنف يصرف بالعلبة وليس بالوحدة الصغرى"));
@@ -114,36 +122,81 @@ export const postTicket = form(
 
     const currentUser = getRequestEvent().locals.user;
 
-    const { ticket: insertedTicket, ticketItems: insertedItems } = await db.transaction(
-      async (tx) => {
-        const [ticket] = await tx
-          .insert(transactionTickets)
-          .values({
-            patient_id: data.patientId,
-            store_id:
-              currentUser?.role === "admin"
-                ? data.department!
-                : currentUser?.affiliation!,
-            user_id: currentUser?.id!,
-            is_dispense: true,
-          })
-          .returning();
+    const havingStockIds = data.drugs.filter((d) => d.stock_id).map((d) => d.stock_id!);
 
-        const ticketItems = await tx
-          .insert(transactions)
-          .values(data.drugs.map((d) => ({ ...d, ticket_id: ticket.id })))
-          .returning();
+    if (havingStockIds.length) {
+      const stockItems = await db
+        .select()
+        .from(stockDrugs)
+        .where(
+          and(
+            currentUser?.role === "admin"
+              ? undefined
+              : eq(stockDrugs.pharmacy_id, currentUser?.affiliation!),
+            inArray(stockDrugs.id, havingStockIds)
+          )
+        );
 
-        return { ticket, ticketItems };
+      if (stockItems.length < havingStockIds.length) {
+        invalid(issue.drugs("بعض الأصناف لا تخص جهتك"));
       }
-    );
+    }
+
+    const {
+      ticket: insertedTicket,
+      ticketItems: insertedItems,
+      stockAdded: affectedStock,
+    } = await db.transaction(async (tx) => {
+      const [ticket] = await tx
+        .insert(transactionTickets)
+        .values({
+          patient_id: data.patientId,
+          store_id:
+            currentUser?.role === "admin"
+              ? Number(data.department!)
+              : currentUser?.affiliation!,
+          user_id: currentUser?.id!,
+          is_dispense: true,
+        })
+        .returning();
+
+      const ticketItems = await tx
+        .insert(transactions)
+        .values(
+          data.drugs.map((d) => ({ ...d, ticket_id: ticket.id, item_id: d.drug_id }))
+        )
+        .returning();
+
+      const stockAdded = await tx
+        .insert(stockDrugs)
+        .values(
+          data.drugs.map((d) => ({
+            drug_id: d.drug_id,
+            qty: d.qty * -1,
+            id: d.stock_id,
+            pharmacy_id:
+              currentUser?.role === "admin"
+                ? Number(data.department!)
+                : currentUser?.affiliation!,
+          }))
+        )
+        .onConflictDoUpdate({
+          target: stockDrugs.id,
+          set: {
+            qty: sql`qty + excluded.qty`,
+          },
+        })
+        .returning();
+
+      return { ticket, ticketItems, stockAdded };
+    });
 
     if (hasNarcotics && insertedTicket.id) {
       const sheetPostResult = await saveNarcoticTicketToGoogleSheet(insertedTicket.id, [
         insertedTicket.timestamp!,
         insertedTicket.patient_id!,
         null,
-        data.drugs[0].item_name,
+        data.drugs[0].drug_name,
         data.drugs[0].qty,
       ]);
 
@@ -157,7 +210,7 @@ export const postTicket = form(
           ticket_id: insertedTicket.id,
           ticket_timestamp: insertedTicket.timestamp!,
           patient_id: insertedTicket.patient_id!,
-          item_name: data.drugs[0].item_name,
+          item_name: data.drugs[0].drug_name,
           qty: insertedItems[0].qty,
         });
 
@@ -293,6 +346,7 @@ export const getTicketForReturn = query(v.number(), async (ticketNumber) => {
       item_unit_price: drugs.price,
       qty: transactions.qty,
       qty_returned: transactions.qty_returned,
+      stock_id: transactions.stock_id,
       is_dispense: transactionTickets.is_dispense,
     })
     .from(transactionTickets)
@@ -324,6 +378,7 @@ export const returnItems = form(
         itemId: v.number(),
         itemUnitPrice: v.number(),
         transactionId: v.number(),
+        stockId: v.optional(v.number()),
         returnedAmount: v.optional(v.number()),
       })
     ),
@@ -366,6 +421,7 @@ export const returnItems = form(
             item_id: item.itemId,
             unit_price: item.itemUnitPrice,
             qty: item.returnedAmount!,
+            stock_id: item.stockId,
           }))
         );
 
@@ -377,6 +433,23 @@ export const returnItems = form(
             })
             .where(eq(transactions.id, item.transactionId));
         }
+
+        await tx
+          .insert(stockDrugs)
+          .values(
+            data.items.map((d) => ({
+              id: d.stockId,
+              pharmacy_id: originalTicket.store_id,
+              drug_id: d.itemId,
+              qty: d.returnedAmount,
+            }))
+          )
+          .onConflictDoUpdate({
+            target: stockDrugs.id,
+            set: {
+              qty: sql`qty + excluded.qty`,
+            },
+          });
 
         return {
           success: true,

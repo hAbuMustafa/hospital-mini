@@ -1,0 +1,179 @@
+<script lang="ts">
+  import { getPharmacyStock } from "./stock.remote";
+  import { formatDate } from "$lib/date/utils";
+  import AddStock from "./AddStock.svelte";
+  import EditStock from "./EditStock.svelte";
+  import EditIcon from "@lucide/svelte/icons/square-pen";
+  import AddIcon from "@lucide/svelte/icons/circle-plus";
+  import AddToTransferIcon from "@lucide/svelte/icons/arrow-big-left-dash";
+  import RemoveFromTransferIcon from "@lucide/svelte/icons/square-x";
+  import { authState } from "$lib/auth-client/auth.svelte";
+  import { SvelteSet } from "svelte/reactivity";
+  import TransferStock from "./TransferStock.svelte";
+  import { toast } from "svelte-sonner";
+
+  const stock = $derived(await getPharmacyStock());
+
+  type StockItemT = Awaited<ReturnType<typeof getPharmacyStock>>[number];
+
+  let selectedItemForAddition: StockItemT = $derived(stock[0]);
+  let selectedItemForEdit: StockItemT = $derived(stock[0]);
+
+  const isAdmin = authState.user?.role === "admin";
+  const isPharmacyManager = isAdmin || authState.user?.role?.includes("-ph-manager");
+
+  let transferItems = $state(new SvelteSet<StockItemT>());
+</script>
+
+<h1>
+  مخزون
+  {#if !isAdmin}
+    {stock?.[0]?.pharmacy_name}
+  {/if}
+</h1>
+
+<table>
+  <thead>
+    <tr>
+      {#if isAdmin}
+        <th>الصيدلية</th>
+      {/if}
+
+      <th>اسم الصنف</th>
+      <th>الرصيد</th>
+      <th>التشغيلة</th>
+      <th>الصلاحية</th>
+      {#if isPharmacyManager}
+        <th>تعديل</th>
+        <th>إضافة</th>
+      {/if}
+      <th>تحويل</th>
+    </tr>
+  </thead>
+  <tbody>
+    {#if stock.length}
+      {#each stock as item, i (i)}
+        <tr class:in-transfer-ticket={transferItems.has(item)}>
+          {#if isAdmin}
+            <td>{item.pharmacy_name}</td>
+          {/if}
+
+          <td>{item.name}</td>
+          <td>
+            {item.qty ?? 0}
+          </td>
+          <td class="mono">{item.batch_number}</td>
+          <td>
+            {#if item.expiry_date}
+              {formatDate(item.expiry_date)}
+            {/if}
+          </td>
+
+          {#if isPharmacyManager}
+            <td>
+              {#if item.qty !== null}
+                <button
+                  type="button"
+                  class="edit btn"
+                  title="تعديل"
+                  command="show-modal"
+                  commandfor="edit-stock"
+                  onclick={() => (selectedItemForEdit = item)}>
+                  <EditIcon size="1rem" />
+                </button>
+              {/if}
+            </td>
+
+            <td>
+              <button
+                type="button"
+                class="add btn"
+                title="إضافة رصيد"
+                command="show-modal"
+                commandfor="add-stock"
+                onclick={() => (selectedItemForAddition = item)}>
+                <AddIcon size="1rem" />
+              </button>
+            </td>
+          {/if}
+          <td>
+            {#if transferItems.has(item)}
+              <button
+                type="button"
+                class="remove btn"
+                title="حذف من طلبية التحويل"
+                onclick={() => {
+                  transferItems.delete(item);
+                }}>
+                <RemoveFromTransferIcon size="1rem" />
+              </button>
+            {:else}
+              {#if item.qty && item.qty > 0}
+                <button
+                  type="button"
+                  class="add btn"
+                  title="إضافة إلى طلبية تحويل"
+                  onclick={() => {
+                    if (transferItems.size) {
+                      const [firstItem] = transferItems;
+                      if (firstItem && firstItem.pharmacy_id !== item.pharmacy_id) {
+                        toast.error(
+                          "يمكن التحويل من رصيد جهة واحدة فقط في الطلبية الواحدة"
+                        );
+                        return;
+                      }
+                    }
+                    transferItems.add(item);
+                  }}>
+                  <AddToTransferIcon size="1rem" />
+                </button>
+              {/if}
+            {/if}
+          </td>
+        </tr>
+      {/each}
+    {:else}
+      <tr>
+        <td colspan="10">لا يوجد مخزون للصيدلية</td>
+      </tr>
+    {/if}
+  </tbody>
+</table>
+
+{#if isPharmacyManager}
+  <EditStock item={selectedItemForEdit} />
+  <AddStock item={selectedItemForAddition} />
+{/if}
+
+{#if stock.length && transferItems.size}
+  <TransferStock bind:items={transferItems} pharmacyId={stock[0].pharmacy_id!} />
+{/if}
+
+<style>
+  th,
+  td {
+    border: var(--main-border);
+    padding: 0.25rem 0.5rem;
+  }
+
+  .in-transfer-ticket {
+    background-color: alpha(from gold / 20%);
+  }
+
+  .btn {
+    height: 1.5rem;
+    margin-inline-start: 0.5rem;
+  }
+
+  .edit.btn {
+    --bg: gold;
+  }
+
+  .add.btn {
+    --bg: green;
+  }
+
+  .remove.btn {
+    --bg: maroon;
+  }
+</style>
