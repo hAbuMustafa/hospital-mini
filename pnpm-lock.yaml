@@ -166,6 +166,9 @@ importers:
 
   .:
     dependencies:
+      '@googleapis/drive':
+        specifier: ^27.1.0
+        version: 27.1.0
       '@googleapis/sheets':
         specifier: ^18.1.2
         version: 18.1.2
@@ -775,6 +778,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@googleapis/drive@27.1.0':
+    resolution: {integrity: sha512-z+CMvbc9vBE/M3C2GtYI4JVUre/BWkr5UM1z/Qtun+NTVWmd8KKM+ZGAOj5Jv8XWjPEwmV438HlX8Kc3pz8qiw==}
+    engines: {node: '>=22.0.0'}
 
   '@googleapis/sheets@18.1.2':
     resolution: {integrity: sha512-Roabm5YjcNKT8GXfIoIC1ne3bdIwu7vuWQUP3zwno9mkPnKlJ20bhk/Kf0RNYxvbQcNgjW9bnJ7l1uVmcVRk2Q==}
@@ -2327,6 +2334,12 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@googleapis/drive@27.1.0':
+    dependencies:
+      googleapis-common: 9.3.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@googleapis/sheets@18.1.2':
     dependencies:
