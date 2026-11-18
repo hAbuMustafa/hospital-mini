@@ -15,7 +15,7 @@ const driveClient = drive({ version: "v3", auth });
 export async function searchDriveFiles(query: string) {
   const listRes = await driveClient.files.list({
     q: `fullText contains '${query}' and trashed = false and mimeType = 'application/pdf'`,
-    fields: "files(id, name, mimeType, webContentLink, parents)",
+    fields: "files(id, name, mimeType, webContentLink, parents, createdTime)",
   });
 
   const files = listRes.data.files;

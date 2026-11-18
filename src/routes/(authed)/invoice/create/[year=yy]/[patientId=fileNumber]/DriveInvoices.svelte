@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatDate } from "$lib/date/utils";
   import type { searchDriveFiles } from "$lib/server/gcp/drive";
   import { getDriveInvoices } from "../../../invoice.remote";
   import Loading from "@lucide/svelte/icons/loader-pinwheel";
@@ -16,7 +17,13 @@
   <ul>
     {#each driveInvoices as invoice, i (i)}
       <li>
-        <a href={invoice.webContentLink} download class="btn">{invoice.name}</a>
+        <a href={invoice.webContentLink} download class="btn"
+          >{invoice.name?.replace(".pdf", "")}</a>
+        {#if invoice.createdTime}
+          <span class="created-at">
+            {formatDate(invoice.createdTime, "YYYY/MM/DD (HH:mm)")}
+          </span>
+        {/if}
       </li>
     {/each}
   </ul>
@@ -69,6 +76,10 @@
   ul {
     list-style: none;
     padding-inline: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 
     a {
       --bg: green;
