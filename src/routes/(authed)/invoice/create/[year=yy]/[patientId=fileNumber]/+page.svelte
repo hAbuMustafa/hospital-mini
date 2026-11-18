@@ -22,6 +22,7 @@
   import Dialog from "$lib/components/Dialog.svelte";
   import { authState } from "$lib/auth-client/auth.svelte";
   import { getDepartments } from "../../../../(admin)/admin.remote";
+  import DriveInvoices from "./DriveInvoices.svelte";
 
   const patientGetter = getPatientWithTransfers(
     [page.params.year, page.params.patientId].join("/")
@@ -83,8 +84,7 @@
                   return false;
                 }
               }
-            }
-          />
+            } />
         </td>
         <td>
           <input
@@ -100,8 +100,7 @@
                   return false;
                 }
               }
-            }
-          />
+            } />
         </td>
         <td>{stay.ward}</td>
         <td class:from={i === from}>{getDate(stay.from)}</td>
@@ -109,7 +108,7 @@
           {#if i === lastTransferIndex}
             {#if !stay.to}
               الآن
-              {:else}
+            {:else}
               {getDate(stay.to)}
             {/if}
           {:else}
@@ -126,9 +125,9 @@
   <span class="to">
     {#if patient.transfers[to].to}
       {getDate(patient.transfers[to].to)}
-{:else}
-الآن
-{/if}
+    {:else}
+      الآن
+    {/if}
   </span>
   {#if patient.transfers[from].from! >= systemFirstDate}
     <button
@@ -136,8 +135,7 @@
       command="show-modal"
       commandfor="period-dispenses"
       class="btn get-period-items"
-      title="معاينة"
-    >
+      title="معاينة">
       🔍
     </button>
 
@@ -145,9 +143,7 @@
       {const dispenses = await getDispenses({
         patientId: patient.id,
         fromDate: patient.transfers[from].from!,
-        toDate:
-           patient.transfers[to].to
-            ??  new Date(),
+        toDate: patient.transfers[to].to ?? new Date(),
       })}
 
       {#if dispenses.dispenses.length}
@@ -163,14 +159,10 @@
         <span>
           لا يوجد منصرف ل{patient.name} في الفترة المحددة: من
           <span class="from"
-            >{formatDate(patient.transfers[from].from!, "YYYY/MM/DD")}</span
-          >
+            >{formatDate(patient.transfers[from].from!, "YYYY/MM/DD")}</span>
           إلى
           <span class="to">
-            {formatDate(
-               patient.transfers[to].to ?? new Date(),
-              "YYYY/MM/DD"
-            )}
+            {formatDate(patient.transfers[to].to ?? new Date(), "YYYY/MM/DD")}
           </span>
         </span>
       {/if}
@@ -217,8 +209,7 @@
     } finally {
       saving = false;
     }
-  })}
->
+  })}>
   {#if authState.user?.role === "admin"}
     <select {...createInvoice.fields.department.as("number")}>
       {#each await getDepartments() as dep, i (dep.id)}
@@ -232,19 +223,16 @@
   <input
     readonly
     step="1"
-    {...createInvoice.fields.fromTransferId.as("hidden", fromTransferId)}
-  />
+    {...createInvoice.fields.fromTransferId.as("hidden", fromTransferId)} />
 
   <input
     readonly
     step="1"
-    {...createInvoice.fields.toTransferId.as("hidden", toTransferId)}
-  />
+    {...createInvoice.fields.toTransferId.as("hidden", toTransferId)} />
 
   {#if systemFirstDate > patient.admission_date && systemFirstDate > patient.transfers[from].from!}
     <label
-      title="هذا الاختيار يظهر فقط في حال كانت الفاتورة تبدأ من فترة تسبق فترة تشغيل المنظومة"
-    >
+      title="هذا الاختيار يظهر فقط في حال كانت الفاتورة تبدأ من فترة تسبق فترة تشغيل المنظومة">
       <input {...createInvoice.fields.keepOpen.as("checkbox", true)} />
       إضافة أصناف للفاتورة
     </label>
@@ -291,8 +279,7 @@
                 type="button"
                 class="btn add"
                 title="إضافة أصناف"
-                onclick={() => goto(`/invoice/patch/${invoice.id}`)}
-              >
+                onclick={() => goto(`/invoice/patch/${invoice.id}`)}>
                 <Add size="1em" />
               </button>
             {/if}
@@ -326,19 +313,16 @@
                   } else {
                     resolve(form.result.newInvoiceId);
                   }
-                })}
-              >
+                })}>
                 <input
                   {...copyInvoice
                     .for(invoice.id)
-                    .fields.invoiceId.as("hidden", invoice.id)}
-                />
+                    .fields.invoiceId.as("hidden", invoice.id)} />
 
                 <button
                   type="submit"
                   class="btn"
-                  title="فاتورة جديدة مفتوحة بنفس الأصناف"
-                >
+                  title="فاتورة جديدة مفتوحة بنفس الأصناف">
                   <Copy size="1em" />
                 </button>
               </form>
@@ -356,8 +340,7 @@
                 title="إقفال الفاتورة وعدم السماح بإضافة أصناف إضافية لها للسماح بطباعتها"
                 onclick={async () => {
                   closeInvoice(invoice.id);
-                }}
-              >
+                }}>
                 <Lock size="1em" />
               </button>
             {/if}
@@ -370,8 +353,7 @@
                 title="إلغاء الفاتورة وعدم احتسابها ضمن تكاليف إقامة المريض ومنع طباعتها"
                 onclick={async () => {
                   cancelInvoice(invoice.id);
-                }}
-              >
+                }}>
                 <Cancel size="1em" />
               </button>
             {:else}
@@ -385,8 +367,7 @@
                 onclick={() => {
                   goto(`/invoice/print/${invoice.id}`);
                 }}
-                title="طباعة الفاتورة"
-              >
+                title="طباعة الفاتورة">
                 <Print size="1em" />
               </button>
             {/if}
@@ -395,6 +376,10 @@
       {/each}
     </tbody>
   </table>
+{/if}
+
+{#if ["admin", "health-economics-employee", "health-economics-pharmacist", "health-economics-manager"].some((r) => r === authState.user?.role)}
+  <DriveInvoices patientId={patient.id} />
 {/if}
 
 <style>

@@ -27,6 +27,7 @@ import {
 } from "drizzle-orm";
 import * as v from "valibot";
 import { getSystemFirstDate } from "../CONSTANTS.remote";
+import { searchDriveFiles } from "$lib/server/gcp/drive";
 
 export const getPatient = query(v.string(), async (patientId) => {
   const [patient] = await db
@@ -508,4 +509,12 @@ export const cancelInvoice = command(v.number(), async (invoiceNumber) => {
     .returning();
 
   void getPatientInvoices(invoice.patient_id).refresh();
+});
+
+export const getDriveInvoices = query(v.string(), async (patientId) => {
+  try {
+    return await searchDriveFiles(patientId);
+  } catch (err) {
+    console.error(err);
+  }
 });
